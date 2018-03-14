@@ -41,16 +41,16 @@ namespace RAM_Test
             Stories = new List<int>();
             List<string> ColumnSections = new List<string>();
 
-            // Set filepaths (New can be any filepath, existing has to be an actual model)
+            // Set filepaths (New can be any filepath, existing has to be an actual model; will give errors is interface has not been released, still working on it)
             filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\new_2.rss";
-            filePathExisting = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\Tutorial_v1506_US_4.rss";
+            filePathExisting = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\Tutorial_v1506_US_3.rss";
             strWorkingDir = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial";
 
             // Initialize Data Access
             RAMDataAcc1 = new RamDataAccess1();
 
             // Set Type (for testing)
-            string Type = "New";
+            string Type = "Existing";
             //string Type = "Existing";
 
             RAMDataAccIDBIO = null;
@@ -81,27 +81,41 @@ namespace RAM_Test
                 int numStories = IStories.GetCount();
                 Stories.Add(numStories);
 
+
+
                 // Get columns on first story
                 IColumns = IStories.GetAt(1).GetColumns();
                 int numColumns = IColumns.GetCount();
 
+                // Find name of every column (to begin)
                 for (int i = 0; i < IColumns.GetCount(); i++)
                 {
 
-                    // Right now this does not actually print the Section Label, just an object
-                    string section = IColumns.GetAt(i).GetProperty("strSectionLabel").ToString();
+                    // Get the name of every column
+                    IColumn IColumn = IColumns.GetAt(i);
+                    string section = IColumn.strSectionLabel;
                     ColumnSections.Add(section);
 
                 }
 
-                //Write output (for testing)
+                //Write output of original database
                 Console.WriteLine(filePathExisting);
                 Stories.ForEach(i => Console.Write("{0}\t", i));
                 ColumnSections.ForEach(i => Console.Write("{0}\t", i));
 
+                // Set every column to a standard section size
+                for (int i = 0; i < IColumns.GetCount(); i++)
+                {
+
+                    // Set every column to a standard size (do not think this is working yet)
+                    IColumn IColumn = IColumns.GetAt(i);
+                    IColumn.strSectionLabel = "C12x24";
+                    
+                }
+
             }
 
-            //Write output (for testing)
+            //Write output of new database
             Console.WriteLine(filePathExisting);
             Stories.ForEach(i => Console.Write("{0}\t", i));
             ColumnSections.ForEach(i => Console.Write("{0}\t", i));
