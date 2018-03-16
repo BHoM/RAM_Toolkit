@@ -22,6 +22,7 @@ namespace RAM_Test
 
             string filePathNew;
             string filePathExisting;
+            string filePathUserfile;
             string strWorkingDir;
             Boolean run;
             int type;
@@ -43,9 +44,12 @@ namespace RAM_Test
 
             // Set filepaths (New can be any filepath, existing has to be an actual model; will give errors is interface has not been released, still working on it)
             filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\new_2.rss";
-            filePathExisting = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\Tutorial_v1506_US_3.rss";
+            filePathExisting = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\Tutorial_v1507_US.rss";
             strWorkingDir = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial";
-
+            
+            // Usr filepath so we can delete .usr at end of function
+            filePathUserfile = filePathExisting.Replace(".rss", ".usr");
+            
             // Initialize Data Access
             RAMDataAcc1 = new RamDataAccess1();
 
@@ -120,8 +124,9 @@ namespace RAM_Test
             Stories.ForEach(i => Console.Write("{0}\t", i));
             ColumnSections.ForEach(i => Console.Write("{0}\t", i));
 
-            // Release main interface
+            // Release main interface and delete user file
             RAMDataAccIDBIO = null;
+            System.IO.File.Delete(filePathUserfile);
 
             int test = 1;
         }
