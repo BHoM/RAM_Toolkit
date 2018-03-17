@@ -24,6 +24,7 @@ namespace RAM_Test
             string filePathExisting;
             string filePathUserfile;
             string strWorkingDir;
+            string filePathEdited;
             Boolean run;
             int type;
             List<int> Stories;
@@ -39,14 +40,18 @@ namespace RAM_Test
             IStory IStory;
             IBeams IBeams;
             IColumns IColumns;
+            IFloorTypes IFloorTypes;
+            IFloorType IFloorType;
+            ILayoutColumns ILayoutColumns;
             Stories = new List<int>();
             List<string> ColumnSections = new List<string>();
 
-            // Set filepaths (New can be any filepath, existing has to be an actual model; will give errors is interface has not been released, still working on it)
+            // Set filepaths (New can be any filepath, existing has to be an actual model; will give errors if interface has not been released, still working on it)
             filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\new_2.rss";
             filePathExisting = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\Tutorial_v1507_US.rss";
             strWorkingDir = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial";
-            
+            filePathEdited = filePathExisting.Replace(".rss", "API.rss");
+
             // Usr filepath so we can delete .usr at end of function
             filePathUserfile = filePathExisting.Replace(".rss", ".usr");
             
@@ -54,7 +59,7 @@ namespace RAM_Test
             RAMDataAcc1 = new RamDataAccess1();
 
             // Set Type (for testing)
-            string Type = "Existing";
+            string Type = "New";
             //string Type = "Existing";
 
             RAMDataAccIDBIO = null;
@@ -70,11 +75,26 @@ namespace RAM_Test
 
                 // Object Model Interface
                 IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+                // Testing element creation
+            
+                IFloorTypes = IModel.GetFloorTypes();
+                IFloorTypes.Add("Type_1");
+                IFloorType = IFloorTypes.GetAt(0);
+                ILayoutColumns = IFloorType.GetLayoutColumns();
+
+                // Once we have the ILayoutColumn we can do iterative creation with list of input points, properties, etc (not working yet, need to create grid system first?)
+                ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.ESteelMat, 0, 0, 2, 2, 8, 0);
+                ILayoutColumn.strSectionLabel = "W14X48";
+                filePathUserfile = filePathNew.Replace(".rss", ".usr");
+
+
             }
 
             // Initialize to interface (FOR EXISTING MODEL)
             if (Type.Equals("Existing")) {
 
+                filePathUserfile = filePathExisting.Replace(".rss", ".usr");
                 RAMDataAccIDBIO.LoadDataBase(filePathExisting);
        
                 // Object Model Interface
@@ -111,10 +131,22 @@ namespace RAM_Test
                 for (int i = 0; i < IColumns.GetCount(); i++)
                 {
 
-                    // Set every column to a standard size (do not think this is working yet)
+                    // Set every column to a standard size (working, need to save database after update)
                     IColumn IColumn = IColumns.GetAt(i);
-                    IColumn.strSectionLabel = "C12x24";
-                    
+                    IColumn.strSectionLabel = "W14X48";
+
+                }
+
+                // Find name of every column (to check updated section names)
+                ColumnSections.Clear();
+                for (int i = 0; i < IColumns.GetCount(); i++)
+                {
+
+                    // Get the name of every column
+                    IColumn IColumn = IColumns.GetAt(i);
+                    string section = IColumn.strSectionLabel;
+                    ColumnSections.Add(section);
+
                 }
 
             }
@@ -123,6 +155,9 @@ namespace RAM_Test
             Console.WriteLine(filePathExisting);
             Stories.ForEach(i => Console.Write("{0}\t", i));
             ColumnSections.ForEach(i => Console.Write("{0}\t", i));
+
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
 
             // Release main interface and delete user file
             RAMDataAccIDBIO = null;
