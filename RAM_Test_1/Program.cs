@@ -44,13 +44,14 @@ namespace RAM_Test
             IFloorTypes IFloorTypes;
             IFloorType IFloorType;
             ILayoutColumns ILayoutColumns;
+            ILayoutBeams ILayoutBeams;
             Stories = new List<int>();
             List<string> ColumnSections = new List<string>();
 
             // Set filepaths (New can be any filepath, existing has to be an actual model; will give errors if interface has not been released, still working on it)
-            filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\new_2.rss";
+            filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\testCreate.rss";
             filePathExisting = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\Tutorial_v1507_US.rss";
-            filePathAdd = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\test.rss";
+            filePathAdd = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\testAdd.rss";
             strWorkingDir = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial";
             filePathEdited = filePathExisting.Replace(".rss", "API.rss");
 
@@ -61,8 +62,8 @@ namespace RAM_Test
             RAMDataAcc1 = new RamDataAccess1();
 
             // Set Type (for testing)
-            //string Type = "Create";
-            string Type = "Add";
+            string Type = "Create";
+            //string Type = "Add";
             //string Type = "Existing";
 
             RAMDataAccIDBIO = null;
@@ -82,13 +83,42 @@ namespace RAM_Test
                 // Testing element creation
             
                 IFloorTypes = IModel.GetFloorTypes();
-                IFloorTypes.Add("Type_1");
+                IFloorTypes.Add("Level 1");
                 IFloorType = IFloorTypes.GetAt(0);
                 ILayoutColumns = IFloorType.GetLayoutColumns();
+                ILayoutBeams = IFloorType.GetLayoutBeams();
 
-                // Once we have the ILayoutColumn we can do iterative creation with list of input points, properties, etc (not working yet, need to create grid system first?)
-                ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.ESteelMat, 0, 0, 2, 2, 8, 0);
+                //Assign floor types to appropriate stories
+                IStories = IModel.GetStories();
+                IStories.Add(IFloorType.lUID, "Level 1", 120);
+
+                // Once we have the ILayoutColumn we can do iterative creation with list of input points, properties, etc
+                // NOTE THAT RAM INTERNAL API UNITS ARE INCHES, EVEN WHEN DISPLAY UNITS ARE FEET
+
+                //Column parameters are, essentially, floor type, material, x loc, y loc, z offset start, z offset end.
+                //From BHoM, this will be translated as a story that calls an appropriate Floor type interface which then calls the appropriate parameters.
+
+                ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0);
                 ILayoutColumn.strSectionLabel = "W14X48";
+                ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 240, 0, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+                ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 0, 240, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+                ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 240, 240, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+
+                //Beam parameters are similar to column parameters. It is accordingly logical to use the adapter to build out each
+                //floor type with these geometries and then apply the floor types to stories according to the input model
+
+                ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 240, 0, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 240, 0, 240, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 240, 0, 0, 240, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+
                 filePathUserfile = filePathNew.Replace(".rss", ".usr");
 
             }
@@ -109,17 +139,34 @@ namespace RAM_Test
                 // Object Model Interface
                 IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-                // Testing element creation
+                // Access floor type interface
 
                 IFloorTypes = IModel.GetFloorTypes();
                 IFloorType = IFloorTypes.GetAt(0);
                 ILayoutColumns = IFloorType.GetLayoutColumns();
+                ILayoutBeams = IFloorType.GetLayoutBeams();
 
-                // Once we have the ILayoutColumn we can do iterative creation with list of input points, properties, etc (not working yet, need to create grid system first?)
-                ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.ESteelMat, 4, 4, 2, 2, 4, 0);
+                // Create columns
+
+                ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0, 0, 0);
                 ILayoutColumn.strSectionLabel = "W14X48";
-                ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.EConcreteMat, 4, 4, 2, 2, 4, 0);
+                ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.EConcreteMat, 240, 0, 0, 0, 0, 0);
                 ILayoutColumn.strSectionLabel = "C12X26";
+                ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.EConcreteMat, 0, 240, 0, 0, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+                ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.EConcreteMat, 240, 240, 0, 0, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+
+                //Create beams
+
+                ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 240, 0, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 240, 0, 240, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 240, 0, 0, 240, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
 
                 filePathUserfile = filePathAdd.Replace(".rss", ".usr");
             }
