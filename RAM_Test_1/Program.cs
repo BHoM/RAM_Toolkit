@@ -23,6 +23,7 @@ namespace RAM_Test
             string filePathNew;
             string filePathExisting;
             string filePathUserfile;
+            string filePathAdd;
             string strWorkingDir;
             string filePathEdited;
             Boolean run;
@@ -49,6 +50,7 @@ namespace RAM_Test
             // Set filepaths (New can be any filepath, existing has to be an actual model; will give errors if interface has not been released, still working on it)
             filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\new_2.rss";
             filePathExisting = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\Tutorial_v1507_US.rss";
+            filePathAdd = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\test.rss";
             strWorkingDir = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial";
             filePathEdited = filePathExisting.Replace(".rss", "API.rss");
 
@@ -59,7 +61,8 @@ namespace RAM_Test
             RAMDataAcc1 = new RamDataAccess1();
 
             // Set Type (for testing)
-            string Type = "New";
+            //string Type = "Create";
+            string Type = "Add";
             //string Type = "Existing";
 
             RAMDataAccIDBIO = null;
@@ -69,7 +72,7 @@ namespace RAM_Test
 
             
             // Initialize to interface (CREATE NEW MODEL)
-            if (Type.Equals("New")) {
+            if (Type.Equals("Create")) {
 
                 RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
 
@@ -88,11 +91,46 @@ namespace RAM_Test
                 ILayoutColumn.strSectionLabel = "W14X48";
                 filePathUserfile = filePathNew.Replace(".rss", ".usr");
 
-
             }
 
-            // Initialize to interface (FOR EXISTING MODEL)
-            if (Type.Equals("Existing")) {
+
+
+
+
+
+
+            // Existing model, initialize model and then add columns
+            if (Type.Equals("Add"))
+            {
+
+                filePathUserfile = filePathAdd.Replace(".rss", ".usr");
+                RAMDataAccIDBIO.LoadDataBase(filePathAdd);
+
+                // Object Model Interface
+                IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+                // Testing element creation
+
+                IFloorTypes = IModel.GetFloorTypes();
+                IFloorType = IFloorTypes.GetAt(0);
+                ILayoutColumns = IFloorType.GetLayoutColumns();
+
+                // Once we have the ILayoutColumn we can do iterative creation with list of input points, properties, etc (not working yet, need to create grid system first?)
+                ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.ESteelMat, 4, 4, 2, 2, 4, 0);
+                ILayoutColumn.strSectionLabel = "W14X48";
+                ILayoutColumn = ILayoutColumns.Add2(EMATERIALTYPES.EConcreteMat, 4, 4, 2, 2, 4, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+
+                filePathUserfile = filePathAdd.Replace(".rss", ".usr");
+            }
+
+
+
+
+
+
+                // Initialize to interface (FOR EXISTING MODEL)
+                if (Type.Equals("Existing")) {
 
                 filePathUserfile = filePathExisting.Replace(".rss", ".usr");
                 RAMDataAccIDBIO.LoadDataBase(filePathExisting);
