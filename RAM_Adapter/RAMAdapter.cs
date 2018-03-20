@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using BH.Adapter;
 using BH.Engine.RAM;
 using RAMDATAACCESSLib;
+using System.IO;
 
 namespace BH.Adapter.RAM
 {
@@ -31,8 +32,10 @@ namespace BH.Adapter.RAM
             IDBIO1 RAMDataAccIDBIO;
             IModel IModel;
 
+            m_RAMApplication = new RamDataAccess1();
+
             // Initialize to interface (CREATE NEW MODEL)
-            if (Type().Equals("Create"))
+            if (!File.Exists(filePath))
             {
                 try
                 {
@@ -49,7 +52,7 @@ namespace BH.Adapter.RAM
                 }
 
              // Initialize to inferface (OF EXISTING MODEL)
-             if (Type().Equals("Existing"))
+             if (File.Exists(filePath))
 
                 try
                 {
@@ -59,7 +62,6 @@ namespace BH.Adapter.RAM
 
                         // Object Model Interface
                         IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
                  }
                  catch
                  {
@@ -69,14 +71,7 @@ namespace BH.Adapter.RAM
             }
         }
 
-        public static string Type()
-        {
-            // Set Type (for testing)
-            //string Type = "Create";
-            string Type = "Existing";
-
-            return Type;
-        }
+      
 
         /***************************************************/
         /**** Private  Fields                           ****/
@@ -87,6 +82,7 @@ namespace BH.Adapter.RAM
         //private SoftwareComLink m_softwareNameCom;
 
         private RamDataAccess1 m_RAMApplication;
+        
 
         /***************************************************/
 
