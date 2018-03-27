@@ -34,8 +34,29 @@ namespace BH.Adapter.RAM
 
             m_RAMApplication = new RamDataAccess1();
 
-            // Initialize to interface (CREATE NEW MODEL)
-            if (!File.Exists(filePath))
+            // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
+            if (filePath == "" && !File.Exists(filePath))
+            {
+                try
+                {
+
+                    string filePathTest = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Grasshopper_Model.rss";
+                    RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+
+                    // Object Model Interface
+                    IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                    RAMDataAccIDBIO.CreateNewDatabase2(filePathTest, EUnits.eUnitsEnglish, "Grasshopper");
+
+                }
+                catch
+                {
+                    Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
+                }
+
+            }
+
+            // Initialize to interface (CREATE NEW MODEL at provided filepath)
+            if (filePath != "" && !File.Exists(filePath))
             {
                 try
                 {
@@ -48,28 +69,30 @@ namespace BH.Adapter.RAM
                 }
                 catch
                 {
-                    Console.WriteLine("Cannot load RAM database, check that a compatible version of RAM is installed");
+                    Console.WriteLine("Cannot create RAM database, check that the provided filepath is valid");
                 }
+            }
 
-             // Initialize to inferface (OF EXISTING MODEL)
-             if (File.Exists(filePath))
-
+            // Initialize to inferface (OF EXISTING MODEL)
+            if (File.Exists(filePath))
+            {
                 try
                 {
-                        string filePathUserfile = filePath.Replace(".rss", ".usr");
-                        RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                        RAMDataAccIDBIO.LoadDataBase(filePath);
+                    string filePathUserfile = filePath.Replace(".rss", ".usr");
+                    RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                    RAMDataAccIDBIO.LoadDataBase(filePath);
 
-                        // Object Model Interface
-                        IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-                 }
-                 catch
-                 {
-                        Console.WriteLine("Cannot load RAM database, check that existing model is closed");
-                 }
+                    // Object Model Interface
+                    IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                }
+                catch
+                {
+                    Console.WriteLine("Cannot load RAM database, check that existing model is closed");
+                }
 
             }
         }
+            
 
       
 
