@@ -8,6 +8,8 @@ using BH.oM.Base;
 using BH.oM.Structural.Elements;
 using BH.oM.Structural.Properties;
 using BH.oM.Common.Materials;
+using RAMDATAACCESSLib;
+using System.IO;
 
 namespace BH.Adapter.RAM
 {
@@ -40,7 +42,57 @@ namespace BH.Adapter.RAM
         private List<Bar> ReadBars(List<string> ids = null)
         {
             //Implement code for reading bars
-            throw new NotImplementedException();
+            
+            
+            // ***Should return list of "Bar", just testing with strings
+
+            //Implement code for reading section properties
+            
+
+            List<string> ColumnSections = new List<string>();
+            List<Bar> bhomBars = new List<Bar>();
+
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            // Get stories
+            IStories IStories = IModel.GetStories();
+            int numStories = IStories.GetCount();
+
+            // Get columns on first story
+
+            for (int i = 0; i < numStories; i++)
+            {
+                IColumns IColumns = IStories.GetAt(i).GetColumns();
+                int numColumns = IColumns.GetCount();
+
+                // Find name of every column (to begin)
+                for (int j = 0; j < IColumns.GetCount(); j++)
+                {
+
+                    // Get the name of every column
+                    IColumn IColumn = IColumns.GetAt(i);
+                    string section = IColumn.strSectionLabel;
+                    ColumnSections.Add(section);
+                }
+
+            }
+
+            for (int i = 0; i < ColumnSections.Count(); i++)
+            {
+                Node startNode = null; 
+                Node endNode = null; 
+                Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = ColumnSections[i] };
+
+                bhomBar.OrientationAngle = 0;
+
+                bhomBars.Add(bhomBar);
+
+            }
+
+
+            return bhomBars;
+
+
         }
 
         /***************************************/
@@ -55,7 +107,9 @@ namespace BH.Adapter.RAM
 
         private List<ISectionProperty> ReadSectionProperties(List<string> ids = null)
         {
-            //Implement code for reading section properties
+
+
+
             throw new NotImplementedException();
         }
 

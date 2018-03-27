@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BH.oM.Structural.Elements;
+using BH.oM.Structural.Properties;
+using RAMDATAACCESSLib;
 
 namespace BH.Engine.RAM
 {
@@ -21,5 +23,6 @@ namespace BH.Engine.RAM
         //}
 
         /***************************************************/
+
     }
 }
