@@ -44,7 +44,7 @@ namespace BH.Adapter.RAM
             {typeof(ISectionProperty), new BHoMObjectNameOrToStringComparer() },
             {typeof(Material), new BHoMObjectNameComparer() },
             {typeof(LinkConstraint), new BHoMObjectNameComparer() },
-            {typeof(Property2D), new BHoMObjectNameComparer() },
+            {typeof(IProperty2D), new BHoMObjectNameComparer() },
         };
 
 
