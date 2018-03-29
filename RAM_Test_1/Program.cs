@@ -47,6 +47,7 @@ namespace RAM_Test
             ILayoutBeams ILayoutBeams;
             Stories = new List<int>();
             List<string> ColumnSections = new List<string>();
+            List<string> ColumnStartX = new List<string>();
 
             // Set filepaths (New can be any filepath, existing has to be an actual model; will give errors if interface has not been released, still working on it)
             filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Tutorial\\testCreate.rss";
@@ -62,7 +63,7 @@ namespace RAM_Test
             RAMDataAcc1 = new RamDataAccess1();
 
             // Set Type (for testing)
-            string Type = "Create";
+            string Type = "Existing";
             //string Type = "Add";
             //string Type = "Existing";
 
@@ -205,6 +206,13 @@ namespace RAM_Test
                     string section = IColumn.strSectionLabel;
                     ColumnSections.Add(section);
 
+                    SCoordinate startPt = new SCoordinate();
+                    SCoordinate endPt = new SCoordinate();
+                    IColumn.GetEndCoordinates(ref startPt, ref endPt);
+                    double x = startPt.dXLoc;
+                    string xStr = x.ToString();
+                    ColumnSections.Add(xStr);
+
                 }
 
                 //Write output of original database
@@ -213,14 +221,14 @@ namespace RAM_Test
                 ColumnSections.ForEach(i => Console.Write("{0}\t", i));
 
                 // Set every column to a standard section size
-                for (int i = 0; i < IColumns.GetCount(); i++)
-                {
+                //for (int i = 0; i < IColumns.GetCount(); i++)
+                //{
 
-                    // Set every column to a standard size (working, need to save database after update)
-                    IColumn IColumn = IColumns.GetAt(i);
-                    IColumn.strSectionLabel = "W14X48";
+                //     Set every column to a standard size (working, need to save database after update)
+                //    IColumn IColumn = IColumns.GetAt(i);
+                //    IColumn.strSectionLabel = "W14X48";
 
-                }
+                //}
 
                 // Find name of every column (to check updated section names)
                 ColumnSections.Clear();
