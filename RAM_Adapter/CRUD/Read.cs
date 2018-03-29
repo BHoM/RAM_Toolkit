@@ -10,6 +10,7 @@ using BH.oM.Structural.Properties;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
 using System.IO;
+using BH.oM.Geometry;
 
 namespace BH.Adapter.RAM
 {
@@ -44,12 +45,13 @@ namespace BH.Adapter.RAM
             //Implement code for reading bars
             
             
-            // ***Should return list of "Bar", just testing with strings
+            // ***Should return list of "Bar", just testing with strings and endpoints
 
             //Implement code for reading section properties
             
-
             List<string> ColumnSections = new List<string>();
+            List<Node> startNodes = new List<Node>();
+            List<Node> endNodes = new List<Node>();
             List<Bar> bhomBars = new List<Bar>();
 
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
@@ -58,30 +60,40 @@ namespace BH.Adapter.RAM
             IStories IStories = IModel.GetStories();
             int numStories = IStories.GetCount();
 
-            // Get columns on first story
+            // Get columns on each story
 
             for (int i = 0; i < numStories; i++)
             {
                 IColumns IColumns = IStories.GetAt(i).GetColumns();
                 int numColumns = IColumns.GetCount();
 
-                // Find name of every column (to begin)
+                // Find props of every column
                 for (int j = 0; j < IColumns.GetCount(); j++)
                 {
 
                     // Get the name of every column
-                    IColumn IColumn = IColumns.GetAt(i);
+                    IColumn IColumn = IColumns.GetAt(j);
                     string section = IColumn.strSectionLabel;
                     ColumnSections.Add(section);
+                    // Get the start and end pts of every column
+                    SCoordinate startPt = new SCoordinate();
+                    SCoordinate endPt = new SCoordinate();
+                    IColumn.GetEndCoordinates(ref startPt, ref endPt);
+                    Node startNode = new Node();
+                    Node endNode = new Node();
+                    startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
+                    endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
+                    startNodes.Add(startNode);
+                    endNodes.Add(endNode);
                 }
 
             }
 
             for (int i = 0; i < ColumnSections.Count(); i++)
             {
-                Node startNode = null; 
-                Node endNode = null; 
-                Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = ColumnSections[i] };
+                //Node startNode = null; 
+                //Node endNode = null; 
+                Bar bhomBar = new Bar { StartNode = startNodes[i], EndNode = endNodes[i], Name = ColumnSections[i] };
 
                 bhomBar.OrientationAngle = 0;
 

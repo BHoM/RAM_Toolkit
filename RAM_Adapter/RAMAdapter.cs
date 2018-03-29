@@ -47,6 +47,9 @@ namespace BH.Adapter.RAM
                     IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
                     RAMDataAccIDBIO.CreateNewDatabase2(filePathTest, EUnits.eUnitsEnglish, "Grasshopper");
 
+                    // Delete usr file
+                    System.IO.File.Delete(filePathTest.Replace(".rss",".usr"));
+
                 }
                 catch
                 {
@@ -66,6 +69,9 @@ namespace BH.Adapter.RAM
                     IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
                     RAMDataAccIDBIO.CreateNewDatabase2(filePath, EUnits.eUnitsEnglish, "Grasshopper");
 
+                    // Delete usr file
+                    System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
+
                 }
                 catch
                 {
@@ -78,12 +84,14 @@ namespace BH.Adapter.RAM
             {
                 try
                 {
-                    string filePathUserfile = filePath.Replace(".rss", ".usr");
                     RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                     RAMDataAccIDBIO.LoadDataBase(filePath);
 
                     // Object Model Interface
                     IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+                    // Delete usr file
+                    System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
                 }
                 catch
                 {
