@@ -162,8 +162,8 @@ namespace BH.Adapter.RAM
             //Read Vertical Braces ---------------------------------
 
             List<string> VBraceSections = new List<string>();
-            List<Node> startNodesVBrace = new List<Node>();
-            List<Node> endNodesVBrace = new List<Node>();
+            List<Node> startNodesVBraces = new List<Node>();
+            List<Node> endNodesVBraces = new List<Node>();
  
 
             // Get Vertical Braces on each story
@@ -188,8 +188,8 @@ namespace BH.Adapter.RAM
                     Node endNode = new Node();
                     startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
                     endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
-                    startNodes.Add(startNode);
-                    endNodes.Add(endNode);
+                    startNodesVBraces.Add(startNode);
+                    endNodesVBraces.Add(endNode);
                 }
 
             }
@@ -198,7 +198,7 @@ namespace BH.Adapter.RAM
             {
                 //Node startNode = null; 
                 //Node endNode = null; 
-                Bar bhomBar = new Bar { StartNode = startNodes[i], EndNode = endNodes[i], Name = VBraceSections[i] };
+                Bar bhomBar = new Bar { StartNode = startNodesVBraces[i], EndNode = endNodesVBraces[i], Name = VBraceSections[i] };
 
                 bhomBar.OrientationAngle = 0;
 
