@@ -52,12 +52,14 @@ namespace BH.Engine.RAM
 
             string section = IBeam.strSectionLabel;
 
-            //// Get Steel beam results **STILL IN PROGRESS
-            //ISteelBeamDesignResult Result = IBeam.GetSteelDesignResult();
-            //DAArray ppalNumStuds = Result.GetNumStudsInSegments();
-            //int numStudSegments = new int();
-            //ppalNumStuds.GetSize(ref numStudSegments);
-            //double Camber = IBeam.dCamber;
+            // Get Steel beam results **STILL IN PROGRESS
+            ISteelBeamDesignResult Result = IBeam.GetSteelDesignResult();
+            DAArray ppalNumStuds = Result.GetNumStudsInSegments();
+            int numStudSegments = new int();
+            ppalNumStuds.GetSize(ref numStudSegments);
+            double Camber = IBeam.dCamber;
+            double DCI = Result.dDesignCapacityInteraction;
+            double CDI = Result.dCriticalDeflectionInteraction;
 
             // Get the start and end pts of every beam
             double StartSupportX = new double();
@@ -80,25 +82,24 @@ namespace BH.Engine.RAM
 
             bhomBar.OrientationAngle = 0;
 
-            //// Add studs to custom Data  *STILL IN PROGRESS, gives "specific cast is not valid" error through Grasshopper when turned on
-            //for (int i = 0; i < numStudSegments; i++)
-            //{
-            //    var pvrtItem = new object();
-            //    string numStuds = ppalNumStuds.GetAt(i, pvrtItem).ToString();
+            // Add studs to custom Data  *STILL IN PROGRESS, gives 0 for example file
+            for (int i = 0; i < numStudSegments; i++)
+            {
+                //var pvrtItem = new object();
+                var pvrtItem = new object();
+                ppalNumStuds.GetAt(i, ref pvrtItem);
+                bhomBar.CustomData["Studs" + i.ToString()] = pvrtItem;
+            }
 
-            //    //Check to make sure studs are set
-            //    if ( (bool) pvrtItem)
-            //    {
-            //        bhomBar.CustomData["Studs" + i.ToString()] = numStuds;
-            //    }
-            //}
+            // Add camber to Custom Data
+            if (Camber > Double.MinValue)
+            {
+                bhomBar.CustomData["Camber"] = Camber;
+                //bhomBar.CustomData.Add("Camber", Camber);
+            }
 
-            //// Add camber to Custom Data
-            //if (Camber > Double.MinValue)
-            //{
-            //    bhomBar.CustomData["Camber"] = Camber;
-            //    //bhomBar.CustomData.Add("Camber", Camber);
-            //}
+            bhomBar.CustomData["Design Capacity Interaction"] = DCI;
+            bhomBar.CustomData["Critical Deflection Interaction"] = CDI;
 
             //bhomBar.CustomData["Test1"] = "Object1";
             //bhomBar.CustomData.Add("Test1", "Object1_2");
