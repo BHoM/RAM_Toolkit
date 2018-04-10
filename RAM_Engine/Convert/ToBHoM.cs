@@ -4,6 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BH.oM.Structural.Elements;
+using BH.oM.Geometry;
+using BH.oM.Structural.Loads;
+using BH.Engine.Structure;
 using BH.oM.Structural.Properties;
 using RAMDATAACCESSLib;
 
@@ -95,16 +98,10 @@ namespace BH.Engine.RAM
             if (Camber > Double.MinValue)
             {
                 bhomBar.CustomData["Camber"] = Camber;
-                //bhomBar.CustomData.Add("Camber", Camber);
             }
 
             bhomBar.CustomData["Design Capacity Interaction"] = DCI;
             bhomBar.CustomData["Critical Deflection Interaction"] = CDI;
-
-            //bhomBar.CustomData["Test1"] = "Object1";
-            //bhomBar.CustomData.Add("Test1", "Object1_2");
-            //bhomBar.CustomData["Test2"] = "Object2";
-            //bhomBar.CustomData.Add("Test2", "Object2_2");
 
             return bhomBar;
         }
@@ -165,20 +162,36 @@ namespace BH.Engine.RAM
         public static PanelPlanar ToBHoMObject(IWall IWall)
         {
 
+            //Extract properties
             List<string> CustomProps = new List<string>();
             double thickness = IWall.dThickness;
             EFRAMETYPE type = IWall.eFramingType;
             EMATERIALTYPES material = IWall.eMaterial;
 
-            // Get coordinates from ILayout Beam
-            PanelPlanar bhomPanel = new PanelPlanar();
-
+            //Find corner points of wall in RAM model
             SCoordinate TopstartPt = new SCoordinate();
             SCoordinate TopendPt = new SCoordinate();
             SCoordinate BottomstartPt = new SCoordinate();
             SCoordinate BottomendPt = new SCoordinate();
 
             IWall.GetEndCoordinates(ref TopstartPt, ref TopendPt, ref BottomstartPt, ref BottomendPt);
+
+            // Create list of points
+            List<Point> corners = new List<Point>();
+            corners.Add(new Point { X = TopstartPt.dXLoc, Y = TopstartPt.dYLoc, Z = TopstartPt.dZLoc });
+            corners.Add(new Point { X = TopendPt.dXLoc, Y = TopendPt.dYLoc, Z = TopendPt.dZLoc });
+            corners.Add(new Point { X = BottomendPt.dXLoc, Y = BottomendPt.dXLoc, Z = BottomendPt.dZLoc });
+            corners.Add(new Point { X = BottomstartPt.dXLoc, Y = BottomstartPt.dYLoc, Z = BottomstartPt.dZLoc });
+         
+            // Create outline from corner points
+            Polyline outline = new Polyline();
+            outline.ControlPoints = corners;
+            List<Polyline> outlines = new List<Polyline>();
+            outlines.Add(outline);
+
+            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+
+            PanelPlanar bhomPanel = bhomPanels[0];
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
@@ -187,6 +200,59 @@ namespace BH.Engine.RAM
             bhomPanel.Name = thickness.ToString() + " " + material.ToString();
 
             return bhomPanel;
+        }
+
+        public static Node ToBHoMObject(INode INode)
+        {
+
+            // Get the location of the node
+            SCoordinate Location = new SCoordinate();
+            Location = INode.sLocation;
+           
+            Node Node = new Node();
+           
+            Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
+            IDisplacements IDisplacements = INode.GetDisplacements();
+            // IMemberForces IMemberForces = INode.GetReactions();
+           
+
+            for (int i = 0; i < IDisplacements.GetCount(); i++)
+            {
+                IDisplacement IDisplacement = IDisplacements.GetAt(i);
+
+                double x = IDisplacement.dDispX;
+                double y = IDisplacement.dDispY;
+                double z = IDisplacement.dDispZ;
+                double thetax = IDisplacement.dThetaX;
+                double thetay = IDisplacement.dThetaY;
+                double thetaz = IDisplacement.dThetaZ;
+
+                Node.CustomData["dX"] = x;
+                Node.CustomData["dY"] = y;
+                Node.CustomData["dZ"] = z;
+                Node.CustomData["dthetaX"] = thetax;
+                Node.CustomData["dthetaY"] = thetay;
+                Node.CustomData["dthetaZ"] = thetaz;
+
+            }
+
+            //for (int i = 0; i < IMemberForces.GetCount(); i++)
+            //{
+            //    IMemberForce IMemberForce = IMemberForces.GetAt(i);
+            //    IMemberForce.ToString();
+            //    Node.CustomData["Reaction" + i.ToString()] = IMemberForce.ToString();
+            //}
+
+            return Node;
+        }
+
+        public static Loadcase ToBHoMObject(ILoadCase ILoadCase)
+        {
+
+            Loadcase Loadcase = new Loadcase();
+            Loadcase.Name = ILoadCase.strTypeLabel;
+
+            return Loadcase;
         }
 
 

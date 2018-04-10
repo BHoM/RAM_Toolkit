@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BH.oM.Base;
 using BH.oM.Structural.Elements;
 using BH.oM.Structural.Properties;
+using BH.oM.Structural.Loads;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
 using System.IO;
@@ -31,8 +32,11 @@ namespace BH.Adapter.RAM
                 return ReadSectionProperties(ids as dynamic);
             else if (type == typeof(Material))
                 return ReadMaterials(ids as dynamic);
-            //else if (type == typeof(PanelPlanar))
-            //    return ReadPanels(ids as dynamic);
+            else if (type == typeof(PanelPlanar))
+                return ReadPanels(ids as dynamic);
+            if (type == typeof(Loadcase))
+                return ReadLoadCase();
+
 
             return null;
         }
@@ -124,7 +128,22 @@ namespace BH.Adapter.RAM
         private List<Node> ReadNodes(List<string> ids = null)
         {
             //Implement code for reading nodes
-            throw new NotImplementedException();
+            List<Node> bhomNodes = new List<Node>();
+
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            INodes INodes = IModel.GetFrameAnalysisNodes();
+            int numNodes = INodes.GetCount();
+
+            for (int i = 0; i < numNodes; i++)
+            {
+                //Get Nodes
+                INode INode = INodes.GetAt(i);
+                Node bhomNode = BH.Engine.RAM.Convert.ToBHoMObject(INode);
+                bhomNodes.Add(bhomNode);
+            }
+
+                return bhomNodes;
         }
 
         /***************************************/
@@ -146,41 +165,62 @@ namespace BH.Adapter.RAM
 
         }
 
+        private List<Loadcase> ReadLoadCase(List<string> ids = null)
+        {
+            //Implement code for reading loadcases
+            List<Loadcase> bhomLoadCases = new List<Loadcase>();
+
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            ILoadCases ILoadCases = IModel.GetLoadCases(EAnalysisResultType.DefaultResultType);
+
+            for (int i = 0; i < ILoadCases.GetCount(); i++)
+            {
+                //Get Loadcases
+                ILoadCase LoadCase = ILoadCases.GetAt(i);
+                Loadcase bhomLoadcase = BH.Engine.RAM.Convert.ToBHoMObject(LoadCase);
+                bhomLoadCases.Add(bhomLoadcase);
+            }
+
+
+            return bhomLoadCases;
+
+        }
+
         /***************************************************/
 
-        //// Read panels method; will need to figure out how to convert geometry (RAM provides four corner points); does not seem to be working properly, crashes Rhino when walls are present
-        //private List<PanelPlanar> ReadPanels(List<string> ids = null)
-        //{
-        //    //Implement code for reading panels
-        //    List<PanelPlanar> bhomPanels = new List<PanelPlanar>();
+        // Read panels method; will need to figure out how to convert geometry (RAM provides four corner points); does not seem to be working properly, crashes Rhino when walls are present
+        private List<PanelPlanar> ReadPanels(List<string> ids = null)
+        {
+            //Implement code for reading panels
+            List<PanelPlanar> bhomPanels = new List<PanelPlanar>();
 
-        //    IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-        //    // Get stories
-        //    IStories IStories = IModel.GetStories();
-        //    int numStories = IStories.GetCount();
+            // Get stories
+            IStories IStories = IModel.GetStories();
+            int numStories = IStories.GetCount();
 
-        //    // Get all elements on each story
-        //    for (int i = 0; i < numStories; i++)
-        //    {
+            // Get all elements on each story
+            for (int i = 0; i < numStories; i++)
+            {
 
-        //        //Get walls
-        //        IWalls IWalls = IStories.GetAt(i).GetWalls();
-        //        int numWalls = IWalls.GetCount();
+                //Get walls
+                IWalls IWalls = IStories.GetAt(i).GetWalls();
+                int numWalls = IWalls.GetCount();
 
-        //        return bhomPanels;
+                return bhomPanels;
 
-        //        // Convert Walls
-        //        for (int j = 0; j < numWalls; j++)
-        //        {
-        //            IWall IWall = IWalls.GetAt(j);
-        //            PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
-        //            bhomPanels.Add(Panel);
-        //        }
+                // Convert Walls
+                for (int j = 0; j < numWalls; j++)
+                {
+                    IWall IWall = IWalls.GetAt(j);
+                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
+                    bhomPanels.Add(Panel);
+                }
 
-        //    }
+            }
 
-        //    return bhomPanels;
-        //}
+            return bhomPanels;
+        }
     }
 }
