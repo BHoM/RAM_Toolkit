@@ -65,23 +65,14 @@ namespace BH.Engine.RAM
             double CDI = Result.dCriticalDeflectionInteraction;
             int studCount = 0;
 
-            // Get the start and end pts of every beam
-            double StartSupportX = new double();
-            double StartSupportY = new double();
-            double StartSupportZOffset = new double();
-            double EndSupportX = new double();
-            double EndSupportY = new double();
-            double EndSupportZOffset = new double();
-            double StoryZ = dElevation;
-
-
-
-            // Get coordinates from ILayout Beam
-            ILayoutBeam.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
+            // Get coordinates from IBeam
+            SCoordinate startPt = new SCoordinate();
+            SCoordinate endPt = new SCoordinate();
+            IBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
             Node startNode = new Node();
             Node endNode = new Node();
-            startNode.Position = new BH.oM.Geometry.Point() { X = StartSupportX, Y = StartSupportY, Z = StoryZ + StartSupportZOffset };
-            endNode.Position = new BH.oM.Geometry.Point() { X = EndSupportX, Y = EndSupportY, Z = StoryZ + EndSupportZOffset };
+            startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
+            endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
 
