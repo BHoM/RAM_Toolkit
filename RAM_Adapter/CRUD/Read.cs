@@ -208,8 +208,6 @@ namespace BH.Adapter.RAM
                 IWalls IWalls = IStories.GetAt(i).GetWalls();
                 int numWalls = IWalls.GetCount();
 
-                return bhomPanels;
-
                 // Convert Walls
                 for (int j = 0; j < numWalls; j++)
                 {
