@@ -22,7 +22,7 @@ namespace BH.Engine.RAM
         //Example:
         //public static Node ToBHoM(this RAMNode node)
         //{
-        //    //Insert code for convertion
+        //    //Insert code for conversion
         //}
 
         /***************************************************/
@@ -63,6 +63,7 @@ namespace BH.Engine.RAM
             double Camber = IBeam.dCamber;
             double DCI = Result.dDesignCapacityInteraction;
             double CDI = Result.dCriticalDeflectionInteraction;
+            int studCount = 0;
 
             // Get the start and end pts of every beam
             double StartSupportX = new double();
@@ -72,7 +73,8 @@ namespace BH.Engine.RAM
             double EndSupportY = new double();
             double EndSupportZOffset = new double();
             double StoryZ = dElevation;
-         
+
+
 
             // Get coordinates from ILayout Beam
             ILayoutBeam.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
@@ -85,13 +87,15 @@ namespace BH.Engine.RAM
 
             bhomBar.OrientationAngle = 0;
 
-            // Add studs to custom Data  *STILL IN PROGRESS, gives 0 for example file
+            //Add studs to custom Data by total stud count only
             for (int i = 0; i < numStudSegments; i++)
             {
-                //var pvrtItem = new object();
-                var pvrtItem = new object();
-                ppalNumStuds.GetAt(i, ref pvrtItem);
-                bhomBar.CustomData["Studs" + i.ToString()] = pvrtItem;
+                var segStudCount = new object();
+                ppalNumStuds.GetAt(i, ref segStudCount);
+                string segStudStr = segStudCount.ToString();
+                int segStudNum = System.Convert.ToInt16(segStudStr);
+                studCount += segStudNum;
+                bhomBar.CustomData["Studs"] = studCount;
             }
 
             // Add camber to Custom Data
@@ -201,6 +205,36 @@ namespace BH.Engine.RAM
 
             return bhomPanel;
         }
+
+        //TODO - Create Convert Method for Floors
+
+        //public static PanelPlanar ToBHoMObject(IDeck IDeck)
+        //{
+
+        //    //Extract properties
+        //    EDeckType type = IDeck.eDeckPropType;
+
+        //    //Find polylines of deck in RAM Model
+        //    IDeck.GetPoints
+
+        //    // Create outline from corner points
+        //    Polyline outline = new Polyline();
+        //    outline.ControlPoints = corners;
+        //    List<Polyline> outlines = new List<Polyline>();
+        //    outlines.Add(outline);
+
+        //    List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+
+        //    PanelPlanar bhomPanel = bhomPanels[0];
+
+        //    HashSet<String> tag = new HashSet<string>();
+        //    tag.Add("Floor");
+
+        //    bhomPanel.Tags = tag;
+        //    bhomPanel.Name = type.ToString();
+
+        //    return bhomPanel;
+        //}
 
         public static Node ToBHoMObject(INode INode)
         {
