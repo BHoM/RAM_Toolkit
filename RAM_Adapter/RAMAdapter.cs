@@ -32,6 +32,7 @@ namespace BH.Adapter.RAM
             IDBIO1 RAMDataAccIDBIO;
             IModel IModel;
 
+            m_RAMApplication = null;
             m_RAMApplication = new RamDataAccess1();
 
             // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
@@ -82,22 +83,16 @@ namespace BH.Adapter.RAM
             // Initialize to inferface (OF EXISTING MODEL)
             if (File.Exists(filePath))
             {
-                try
-                {
-                    RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                    RAMDataAccIDBIO.LoadDataBase(filePath);
+               RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+               double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper");
+               if (loadOutput != 0)
+                  throw new ArgumentException("Cannot access RAM database. Please open the file in RAM, close RAM, and try again.");
 
-                    // Object Model Interface
-                    IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+               // Object Model Interface
+               IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-                    // Delete usr file
-                    System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
-                }
-                catch
-                {
-                    Console.WriteLine("Cannot load RAM database, check that existing model is closed");
-                }
-
+               // Delete usr file
+               System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
             }
         }
             
