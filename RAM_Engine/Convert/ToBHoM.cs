@@ -27,6 +27,24 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
+        public static Polyline ToPolyline(IPoints IPoints)
+        {
+            List<Point> controlPts = new List<Point>();
+            SCoordinate SCoordPt = new SCoordinate();
+
+            for (int i = 0; i < IPoints.GetCount(); i++)
+            {
+                //Get Polyline Pts
+                IPoint IPoint = IPoints.GetAt(i);
+                IPoint.GetCoordinate(ref SCoordPt);
+                Point controlPt = new BH.oM.Geometry.Point() { X = SCoordPt.dXLoc, Y = SCoordPt.dYLoc, Z = SCoordPt.dZLoc };
+                controlPts.Add(controlPt);
+            }
+            Polyline polyline = new Polyline();
+            polyline.ControlPoints = controlPts;
+            return polyline;
+        }
+
         public static Bar ToBHoMObject(IColumn IColumn)
         {
 
@@ -50,6 +68,7 @@ namespace BH.Engine.RAM
             return  bhomBar;
         }
 
+ 
         public static Bar ToBHoMObject(IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
         {
 
@@ -73,6 +92,12 @@ namespace BH.Engine.RAM
             Node endNode = new Node();
             startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
             endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
+
+            //Assign section property per bar
+
+            //get RAM bar section props
+            //call RAM to bhom section convert method
+            //assign bhom section to bars
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
 
@@ -197,35 +222,35 @@ namespace BH.Engine.RAM
             return bhomPanel;
         }
 
-        //TODO - Create Convert Method for Floors
+        public static PanelPlanar ToBHoMObject(IDeck IDeck, int IStoryUID)
+        {
+            //Extract properties
+            EDeckType type = IDeck.eDeckPropType;
 
-        //public static PanelPlanar ToBHoMObject(IDeck IDeck)
-        //{
+            //Find polylines of deck in RAM Model
 
-        //    //Extract properties
-        //    EDeckType type = IDeck.eDeckPropType;
+            //get count of deck polygons
+            IDeck.GetNumFinalPolygons(IStoryUID);
 
-        //    //Find polylines of deck in RAM Model
-        //    IDeck.GetPoints
+            //Initial only gets first outline poly
+            IPoints pplPoints = IDeck.GetFinalPolygon(IStoryUID, 0);
+            Polyline outline = ToPolyline(pplPoints);
 
-        //    // Create outline from corner points
-        //    Polyline outline = new Polyline();
-        //    outline.ControlPoints = corners;
-        //    List<Polyline> outlines = new List<Polyline>();
-        //    outlines.Add(outline);
+            //Create panel per outline polylines
+            List<Polyline> outlines = new List<Polyline>();
+            outlines.Add(outline);
+            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
 
-        //    List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+            PanelPlanar bhomPanel = bhomPanels[0];
 
-        //    PanelPlanar bhomPanel = bhomPanels[0];
+            HashSet<String> tag = new HashSet<string>();
+            tag.Add("Floor");
 
-        //    HashSet<String> tag = new HashSet<string>();
-        //    tag.Add("Floor");
+            bhomPanel.Tags = tag;
+            bhomPanel.Name = type.ToString();
 
-        //    bhomPanel.Tags = tag;
-        //    bhomPanel.Name = type.ToString();
-
-        //    return bhomPanel;
-        //}
+            return bhomPanel;
+        }
 
         public static Node ToBHoMObject(INode INode)
         {
