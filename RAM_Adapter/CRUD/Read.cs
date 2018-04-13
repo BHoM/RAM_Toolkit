@@ -204,15 +204,32 @@ namespace BH.Adapter.RAM
             for (int i = 0; i < numStories; i++)
             {
 
-                //Get walls
-                IWalls IWalls = IStories.GetAt(i).GetWalls();
-                int numWalls = IWalls.GetCount();
+                ////Get Walls
+                //IWalls IWalls = IStories.GetAt(i).GetWalls();
+                //int numWalls = IWalls.GetCount();
 
-                // Convert Walls
-                for (int j = 0; j < numWalls; j++)
+                //// Convert Walls
+                //for (int j = 0; j < numWalls; j++)
+                //{
+                //    IWall IWall = IWalls.GetAt(j);
+                //    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
+                //    bhomPanels.Add(Panel);
+                //}
+
+                //Get Floors
+                IStory IStory = IStories.GetAt(i);
+                IFloorType IFloorType = IStory.GetFloorType();
+                IDecks IDecks = IFloorType.GetDecks();
+                int IStoryUID = IStory.lUID;
+
+                int numDecks = IDecks.GetCount();
+
+
+                // Convert Floors
+                for (int j = 0; j < numDecks; j++)
                 {
-                    IWall IWall = IWalls.GetAt(j);
-                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
+                    IDeck IDeck = IDecks.GetAt(j);
+                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IStoryUID);
                     bhomPanels.Add(Panel);
                 }
 
