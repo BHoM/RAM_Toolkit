@@ -151,9 +151,13 @@ namespace BH.Adapter.RAM
         private List<ISectionProperty> ReadSectionProperties(List<string> ids = null)
         {
 
+            List<ISectionProperty> ISectionProperties = new List<ISectionProperty>();
 
+            ISectionProperties.Add(null);
 
-            throw new NotImplementedException();
+            return ISectionProperties;
+
+            //throw new NotImplementedException();
         }
 
         /***************************************/
@@ -161,7 +165,14 @@ namespace BH.Adapter.RAM
         private List<Material> ReadMaterials(List<string> ids = null)
         {
             //Implement code for reading materials
-            throw new NotImplementedException();
+
+            List<Material> Materials = new List<Material>();
+
+            Materials.Add(null);
+
+            return Materials;
+
+            //throw new NotImplementedException();
 
         }
 
