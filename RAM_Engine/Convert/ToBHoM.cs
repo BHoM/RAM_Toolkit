@@ -178,7 +178,98 @@ namespace BH.Engine.RAM
             return bhomBar;
         }
 
+        public static PanelPlanar ToBHoMObject(IWallPanel IWallPanel)
+        {
 
+            //Find corner points of IWallPanel in RAM model
+            SCoordinate startPt = IWallPanel.sCoordinateStart;
+            SCoordinate endPt = IWallPanel.sCoordinateEnd;
+
+            IWalls IWalls = IWallPanel.GetWalls();
+            double maxZ = 0;
+            double minZ = 10000000;
+
+            //Go through all walls that are part of the panel; find extreme top and bottom
+            for (int i = 0; i < IWalls.GetCount(); i++)
+            {
+                IWall IWall = IWalls.GetAt(i);
+
+                SCoordinate TopstartPt = new SCoordinate();
+                SCoordinate TopendPt = new SCoordinate();
+                SCoordinate BottomstartPt = new SCoordinate();
+                SCoordinate BottomendPt = new SCoordinate();
+
+                IWall.GetEndCoordinates(ref TopstartPt, ref TopendPt, ref BottomstartPt, ref BottomendPt);
+                
+                if (TopendPt.dZLoc > maxZ) { maxZ = TopendPt.dZLoc;  }
+                if (BottomendPt.dZLoc < minZ) { minZ = BottomendPt.dZLoc; }
+            } 
+            
+            // Create list of points
+            List<Point> corners = new List<Point>();
+            corners.Add(new Point { X = startPt.dXLoc, Y = startPt.dYLoc, Z = minZ });
+            corners.Add(new Point { X = endPt.dXLoc, Y = endPt.dYLoc, Z = minZ });
+            corners.Add(new Point { X = endPt.dXLoc, Y = endPt.dYLoc, Z = maxZ });
+            corners.Add(new Point { X = startPt.dXLoc, Y = startPt.dYLoc, Z = maxZ });
+            corners.Add(new Point { X = startPt.dXLoc, Y = startPt.dYLoc, Z = minZ });
+
+            // Create outline from corner points
+            Polyline outline = new Polyline();
+            outline.ControlPoints = corners;
+            List<Polyline> outlines = new List<Polyline>();
+            outlines.Add(outline);
+
+            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+
+            PanelPlanar bhomPanel = bhomPanels[0];
+
+            HashSet<String> tag = new HashSet<string>();
+            tag.Add("WallPanel");
+
+            bhomPanel.Tags = tag;
+
+            return bhomPanel;
+        }
+
+
+        public static PanelPlanar ToBHoMObject(IDeck IDeck, int IStoryUID)
+        {
+            //Extract properties
+            EDeckType type = IDeck.eDeckPropType;
+
+            //Find polylines of deck in RAM Model
+
+            //get count of deck polygons
+            IDeck.GetNumFinalPolygons(IStoryUID);
+
+            //Initial only gets first outline poly
+            IPoints pplPoints = IDeck.GetFinalPolygon(IStoryUID, 0);
+
+            //Re-add first point to close Polygon
+            IPoint first = pplPoints.GetAt(0);
+            SCoordinate firstCoord = new SCoordinate();
+            first.GetCoordinate(ref firstCoord);
+            pplPoints.Add(firstCoord);
+
+            Polyline outline = ToPolyline(pplPoints);
+
+            //Create panel per outline polylines
+            List<Polyline> outlines = new List<Polyline>();
+            outlines.Add(outline);
+            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+
+            PanelPlanar bhomPanel = bhomPanels[0];
+
+            HashSet<String> tag = new HashSet<string>();
+            tag.Add("Floor");
+
+            bhomPanel.Tags = tag;
+            bhomPanel.Name = type.ToString();
+
+            return bhomPanel;
+        }
+
+        // Currently obsolete, use IWallPanel method instead; keeping for potential future use
         public static PanelPlanar ToBHoMObject(IWall IWall)
         {
 
@@ -202,7 +293,8 @@ namespace BH.Engine.RAM
             corners.Add(new Point { X = TopendPt.dXLoc, Y = TopendPt.dYLoc, Z = TopendPt.dZLoc });
             corners.Add(new Point { X = BottomendPt.dXLoc, Y = BottomendPt.dXLoc, Z = BottomendPt.dZLoc });
             corners.Add(new Point { X = BottomstartPt.dXLoc, Y = BottomstartPt.dYLoc, Z = BottomstartPt.dZLoc });
-         
+            corners.Add(new Point { X = TopstartPt.dXLoc, Y = TopstartPt.dYLoc, Z = TopstartPt.dZLoc });
+
             // Create outline from corner points
             Polyline outline = new Polyline();
             outline.ControlPoints = corners;
@@ -218,36 +310,6 @@ namespace BH.Engine.RAM
 
             bhomPanel.Tags = tag;
             bhomPanel.Name = thickness.ToString() + " " + material.ToString();
-
-            return bhomPanel;
-        }
-
-        public static PanelPlanar ToBHoMObject(IDeck IDeck, int IStoryUID)
-        {
-            //Extract properties
-            EDeckType type = IDeck.eDeckPropType;
-
-            //Find polylines of deck in RAM Model
-
-            //get count of deck polygons
-            IDeck.GetNumFinalPolygons(IStoryUID);
-
-            //Initial only gets first outline poly
-            IPoints pplPoints = IDeck.GetFinalPolygon(IStoryUID, 0);
-            Polyline outline = ToPolyline(pplPoints);
-
-            //Create panel per outline polylines
-            List<Polyline> outlines = new List<Polyline>();
-            outlines.Add(outline);
-            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
-
-            PanelPlanar bhomPanel = bhomPanels[0];
-
-            HashSet<String> tag = new HashSet<string>();
-            tag.Add("Floor");
-
-            bhomPanel.Tags = tag;
-            bhomPanel.Name = type.ToString();
 
             return bhomPanel;
         }
