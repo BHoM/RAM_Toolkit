@@ -4,6 +4,8 @@ using RAMDATAACCESSLib;
 using RAMDataBaseAccess;
 using BH.oM.Base;
 using BH.oM.Structural.Elements;
+using BH.Engine.Structure;
+using BH.oM.Geometry;
 
 namespace RAM_Test
 {
@@ -40,11 +42,11 @@ namespace RAM_Test
             IModel IModel;
             ISteelCriteria ISteelCriteria;
             IModelData1 IModelData1;
-            IStory IStory;
+            //IStory IStory;
             IBeams IBeams;
             IColumns IColumns;
-            IFloorTypes IFloorTypes;
-            IFloorType IFloorType;
+            //IFloorTypes IFloorTypes;
+            //IFloorType IFloorType;
             ILayoutColumns ILayoutColumns;
             ILayoutBeams ILayoutBeams;
             Stories = new List<int>();
@@ -85,62 +87,122 @@ namespace RAM_Test
 
             // Object Model Interface
 
-            
             IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            
+            // Get stories
+            IStories = IModel.GetStories();
+            int numStories = IStories.GetCount();
 
-            INodes INodes = IModel.GetFrameAnalysisNodes();
-            int numNodes = INodes.GetCount();
-            List<INode> INodesList = new List<INode>();
 
-
-            for (int i = 0; i < numNodes; i++)
+            // Get all elements on each story
+            for (int i = 0; i < numStories; i++)
             {
-                //Get Nodes
-                INode INode = INodes.GetAt(i);
-                INodesList.Add(INode);
 
-                // Get the location of the node
-                SCoordinate Location = new SCoordinate();
-                Location = INode.sLocation;
+                ////Get Walls
+                //IWalls IWalls = IStories.GetAt(i).GetWalls();
+                //int numWalls = IWalls.GetCount();
 
-                BH.oM.Structural.Elements.Node Node = new Node();
+                //// Convert Walls
+                //for (int j = 0; j < numWalls; j++)
+                //{
+                //    IWall IWall = IWalls.GetAt(j);
+                //    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
+                //    bhomPanels.Add(Panel);
+                //}
 
-                Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
-                IDisplacements IDisplacements = INode.GetDisplacements();
-                IMemberForces IMemberForces = INode.GetReactions();
+                //Get Floors
+                IStory IStory = IStories.GetAt(i);
+                IFloorType IFloorType = IStory.GetFloorType();
+                IDecks IDecks = IFloorType.GetDecks();
+                int IStoryUID = IStory.lUID;
+
+                int numDecks = IDecks.GetCount();
 
 
-
-
-                for (int j = 0; j < IDisplacements.GetCount(); j++)
+                // Convert Floors
+                for (int j = 0; j < numDecks; j++)
                 {
-                    IDisplacement IDisplacement = IDisplacements.GetAt(j);
+                    IDeck IDeck = IDecks.GetAt(j);
 
-                    double x = IDisplacement.dDispX;
-                    double y = IDisplacement.dDispY;
-                    double z = IDisplacement.dDispZ;
-                    double thetax = IDisplacement.dThetaX;
-                    double thetay = IDisplacement.dThetaY;
-                    double thetaz = IDisplacement.dThetaZ;
+                    //Extract properties
+                    EDeckType type1 = IDeck.eDeckPropType;
 
-                    Node.CustomData["dX"] = x;
-                    Node.CustomData["dY"] = y;
-                    Node.CustomData["dZ"] = z;
-                    Node.CustomData["dthetaX"] = thetax;
-                    Node.CustomData["dthetaY"] = thetay;
-                    Node.CustomData["dthetaZ"] = thetaz;
+                    //Find polylines of deck in RAM Model
+
+                    //get count of deck polygons
+                    IDeck.GetNumFinalPolygons(IStoryUID);
+
+                    //Initial only gets first outline poly
+                    IPoints pplPoints = IDeck.GetFinalPolygon(IStoryUID, 0);
+                    IPoint first = pplPoints.GetAt(0);
+                    SCoordinate firstCoord = new SCoordinate();
+                    first.GetCoordinate(ref firstCoord);
+                    pplPoints.Add(firstCoord);
+                    Polyline outline = BH.Engine.RAM.Convert.ToPolyline(pplPoints);
+
+                    //Create panel per outline polylines
+                    List<Polyline> outlines = new List<Polyline>();
+                    outlines.Add(outline);
+                    List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+
+
 
                 }
 
-                //for (int j = 0; j < IMemberForces.GetCount(); j++)
-                //{
-                //    IMemberForce IMemberForce = IMemberForces.GetAt(j);
-                //    IMemberForce.ToString();
-                //    Node.CustomData["Reaction" + i.ToString()] = IMemberForce.ToString();
-                //    Console.Write(IMemberForce.ToString());
-                //}
+            ////Testing getting NODES
 
-            }
+            //INodes INodes = IModel.GetFrameAnalysisNodes();
+            //int numNodes = INodes.GetCount();
+            //List<INode> INodesList = new List<INode>();
+
+            //for (int i = 0; i < numNodes; i++)
+            //{
+            //    //Get Nodes
+            //    INode INode = INodes.GetAt(i);
+            //    INodesList.Add(INode);
+
+            //    // Get the location of the node
+            //    SCoordinate Location = new SCoordinate();
+            //    Location = INode.sLocation;
+
+            //    BH.oM.Structural.Elements.Node Node = new Node();
+
+            //    Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
+            //    IDisplacements IDisplacements = INode.GetDisplacements();
+            //   // IMemberForces IMemberForces = INode.GetReactions();
+
+
+
+
+            //    for (int j = 0; j < IDisplacements.GetCount(); j++)
+            //    {
+            //        IDisplacement IDisplacement = IDisplacements.GetAt(j);
+
+            //        double x = IDisplacement.dDispX;
+            //        double y = IDisplacement.dDispY;
+            //        double z = IDisplacement.dDispZ;
+            //        double thetax = IDisplacement.dThetaX;
+            //        double thetay = IDisplacement.dThetaY;
+            //        double thetaz = IDisplacement.dThetaZ;
+
+            //        Node.CustomData["dX"] = x;
+            //        Node.CustomData["dY"] = y;
+            //        Node.CustomData["dZ"] = z;
+            //        Node.CustomData["dthetaX"] = thetax;
+            //        Node.CustomData["dthetaY"] = thetay;
+            //        Node.CustomData["dthetaZ"] = thetaz;
+
+            //    }
+
+            //for (int j = 0; j < IMemberForces.GetCount(); j++)
+            //{
+            //    IMemberForce IMemberForce = IMemberForces.GetAt(j);
+            //    IMemberForce.ToString();
+            //    Node.CustomData["Reaction" + i.ToString()] = IMemberForce.ToString();
+            //    Console.Write(IMemberForce.ToString());
+            //}
+
+        }
             int test1 = 1;
 
 

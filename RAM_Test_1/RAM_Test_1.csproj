@@ -39,6 +39,12 @@
       <HintPath>..\..\..\..\..\..\Program Files\Bentley\Engineering\RAM Structural System\Prog\Interop.RAMDATAACCESSLib.dll</HintPath>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </Reference>
+    <Reference Include="RAM_Engine">
+      <HintPath>..\Build\RAM_Engine.dll</HintPath>
+    </Reference>
+    <Reference Include="Structure_Engine">
+      <HintPath>..\..\BHoM_Engine\Build\Structure_Engine.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
