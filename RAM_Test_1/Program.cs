@@ -42,11 +42,11 @@ namespace RAM_Test
             IModel IModel;
             ISteelCriteria ISteelCriteria;
             IModelData1 IModelData1;
-            //IStory IStory;
+            IStory IStory;
             IBeams IBeams;
             IColumns IColumns;
-            //IFloorTypes IFloorTypes;
-            //IFloorType IFloorType;
+            IFloorTypes IFloorTypes;
+            IFloorType IFloorType;
             ILayoutColumns ILayoutColumns;
             ILayoutBeams ILayoutBeams;
             Stories = new List<int>();
@@ -69,7 +69,7 @@ namespace RAM_Test
            
 
             // Set Type (for testing)
-            string Type = "Existing";
+            string Type = "Create";
             //string Type = "Add";
             //string Type = "Existing";
 
@@ -82,72 +82,19 @@ namespace RAM_Test
             string filePathExisting2 = "O:\\0040157 Minneapolis Civic Center\\F04 Structures\\04 Calculations\\DD\\07_Gravity Design\\Local Models -By Floor\\10_Level 10\\0040157_20180201_MCOB Steel framing LVL 10 Penthouse Roof.rss";
 
             RAMDataAccIDBIO = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            RAMDataAccIDBIO.LoadDataBase(filePathExisting);
+            
+            
+            //RAMDataAccIDBIO.LoadDataBase(filePathExisting);
            
 
-            // Object Model Interface
+            //// Object Model Interface
 
-            IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            //IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
             
-            // Get stories
-            IStories = IModel.GetStories();
-            int numStories = IStories.GetCount();
+            //// Get stories
+            //IStories = IModel.GetStories();
+            //int numStories = IStories.GetCount();
 
-
-            // Get all elements on each story
-            for (int i = 0; i < numStories; i++)
-            {
-
-                ////Get Walls
-                //IWalls IWalls = IStories.GetAt(i).GetWalls();
-                //int numWalls = IWalls.GetCount();
-
-                //// Convert Walls
-                //for (int j = 0; j < numWalls; j++)
-                //{
-                //    IWall IWall = IWalls.GetAt(j);
-                //    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
-                //    bhomPanels.Add(Panel);
-                //}
-
-                //Get Floors
-                IStory IStory = IStories.GetAt(i);
-                IFloorType IFloorType = IStory.GetFloorType();
-                IDecks IDecks = IFloorType.GetDecks();
-                int IStoryUID = IStory.lUID;
-
-                int numDecks = IDecks.GetCount();
-
-
-                // Convert Floors
-                for (int j = 0; j < numDecks; j++)
-                {
-                    IDeck IDeck = IDecks.GetAt(j);
-
-                    //Extract properties
-                    EDeckType type1 = IDeck.eDeckPropType;
-
-                    //Find polylines of deck in RAM Model
-
-                    //get count of deck polygons
-                    IDeck.GetNumFinalPolygons(IStoryUID);
-
-                    //Initial only gets first outline poly
-                    IPoints pplPoints = IDeck.GetFinalPolygon(IStoryUID, 0);
-                    IPoint first = pplPoints.GetAt(0);
-                    SCoordinate firstCoord = new SCoordinate();
-                    first.GetCoordinate(ref firstCoord);
-                    pplPoints.Add(firstCoord);
-                    Polyline outline = BH.Engine.RAM.Convert.ToPolyline(pplPoints);
-
-                    //Create panel per outline polylines
-                    List<Polyline> outlines = new List<Polyline>();
-                    outlines.Add(outline);
-                    List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
-
-
-
-                }
 
             ////Testing getting NODES
 
@@ -202,7 +149,7 @@ namespace RAM_Test
             //    Console.Write(IMemberForce.ToString());
             //}
 
-        }
+        
             int test1 = 1;
 
 
@@ -212,56 +159,57 @@ namespace RAM_Test
 
 
 
-            //    // Initialize to interface (CREATE NEW MODEL)
-            //    if (Type.Equals("Create")) {
+            // Initialize to interface (CREATE NEW MODEL)
+            if (Type.Equals("Create"))
+            {
 
-            //        RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
+                RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
 
-            //        // Object Model Interface
-            //        IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                // Object Model Interface
+                IModel = RAMDataAcc1.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            //        // Testing element creation
+                // Testing element creation
 
-            //        IFloorTypes = IModel.GetFloorTypes();
-            //        IFloorTypes.Add("Level 1");
-            //        IFloorType = IFloorTypes.GetAt(0);
-            //        ILayoutColumns = IFloorType.GetLayoutColumns();
-            //        ILayoutBeams = IFloorType.GetLayoutBeams();
+                IFloorTypes = IModel.GetFloorTypes();
+                IFloorTypes.Add("Level 1");
+                IFloorType = IFloorTypes.GetAt(0);
+                ILayoutColumns = IFloorType.GetLayoutColumns();
+                ILayoutBeams = IFloorType.GetLayoutBeams();
 
-            //        //Assign floor types to appropriate stories
-            //        IStories = IModel.GetStories();
-            //        IStories.Add(IFloorType.lUID, "Level 1", 120);
+                //Assign floor types to appropriate stories
+                IStories = IModel.GetStories();
+                IStories.Add(IFloorType.lUID, "Level 1", 120);
 
-            //        // Once we have the ILayoutColumn we can do iterative creation with list of input points, properties, etc
-            //        // NOTE THAT RAM INTERNAL API UNITS ARE INCHES, EVEN WHEN DISPLAY UNITS ARE FEET
+                // Once we have the ILayoutColumn we can do iterative creation with list of input points, properties, etc
+                // NOTE THAT RAM INTERNAL API UNITS ARE INCHES, EVEN WHEN DISPLAY UNITS ARE FEET
 
-            //        //Column parameters are, essentially, floor type, material, x loc, y loc, z offset start, z offset end.
-            //        //From BHoM, this will be translated as a story that calls an appropriate Floor type interface which then calls the appropriate parameters.
+                //Column parameters are, essentially, floor type, material, x loc, y loc, z offset start, z offset end.
+                //From BHoM, this will be translated as a story that calls an appropriate Floor type interface which then calls the appropriate parameters.
 
-            //        ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0);
-            //        ILayoutColumn.strSectionLabel = "W14X48";
-            //        ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 240, 0, 0, 0);
-            //        ILayoutColumn.strSectionLabel = "C12X26";
-            //        ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 0, 240, 0, 0);
-            //        ILayoutColumn.strSectionLabel = "C12X26";
-            //        ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 240, 240, 0, 0);
-            //        ILayoutColumn.strSectionLabel = "C12X26";
+                ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0);
+                ILayoutColumn.strSectionLabel = "W14X48";
+                ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 240, 0, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+                ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 0, 240, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
+                ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.EConcreteMat, 240, 240, 0, 0);
+                ILayoutColumn.strSectionLabel = "C12X26";
 
-            //        //Beam parameters are similar to column parameters. It is accordingly logical to use the adapter to build out each
-            //        //floor type with these geometries and then apply the floor types to stories according to the input model
+                //Beam parameters are similar to column parameters. It is accordingly logical to use the adapter to build out each
+                //floor type with these geometries and then apply the floor types to stories according to the input model
 
-            //        ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 240, 0, 0);
-            //        ILayoutBeam.strSectionLabel = "W14X48";
-            //        ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 240, 0, 240, 240, 0);
-            //        ILayoutBeam.strSectionLabel = "W14X48";
-            //        ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 240, 0, 0, 240, 240, 0);
-            //        ILayoutBeam.strSectionLabel = "W14X48";
-            //        ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0, 240, 0);
-            //        ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 240, 0, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 240, 0, 240, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 240, 0, 0, 240, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
+                ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, 0, 0, 0, 0, 240, 0);
+                ILayoutBeam.strSectionLabel = "W14X48";
 
-            //        filePathUserfile = filePathNew.Replace(".rss", ".usr");
+                filePathUserfile = filePathNew.Replace(".rss", ".usr");
 
-            //    }
+            }
 
 
 

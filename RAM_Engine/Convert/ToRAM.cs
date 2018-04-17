@@ -4,6 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BH.oM.Structural.Elements;
+using BH.oM.Geometry;
+using BH.oM.Structural.Loads;
+using BH.Engine.Structure;
+using BH.oM.Structural.Properties;
+using RAMDATAACCESSLib;
 
 namespace BH.Engine.RAM
 {
@@ -21,5 +26,35 @@ namespace BH.Engine.RAM
         //}
 
         /***************************************************/
+
+        //public static IBeam ToRAM(Bar bar)
+        //{
+        //    IBeam IBeam;
+       
+
+
+        //    return IBeam;
+        //}
+
+        public static ILayoutBeam ToRAM(Bar bar, ILayoutBeams ILayoutBeams)
+        {
+            ILayoutBeam ILayoutBeam = ILayoutBeams.GetAt(0);
+
+            double xStart = bar.StartNode.Position.X;
+            double yStart = bar.StartNode.Position.Y;
+            double xEnd = bar.EndNode.Position.X;
+            double yEnd = bar.EndNode.Position.Y;
+
+            //Set support coordinates and name
+            //CAUTION: different from actual end points and cantilevers hardcoded
+            ILayoutBeam.SetLayoutCoordinates(xStart, yStart, 0, xEnd, yEnd, 0, 0, 0);
+            ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+
+            return ILayoutBeam;
+        }
+
+
+
+
     }
 }
