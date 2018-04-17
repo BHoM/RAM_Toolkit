@@ -196,7 +196,6 @@ namespace BH.Adapter.RAM
 
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-
             //Code for accessing IWallPanels, which need to go through the IWallDesignGroups interface that is accessed directly through IModel
             IWallDesignGroups IWallDesignGroups = IModel.GetWallDesignGroups();
 

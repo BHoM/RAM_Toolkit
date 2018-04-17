@@ -325,7 +325,7 @@ namespace BH.Engine.RAM
            
             Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
             IDisplacements IDisplacements = INode.GetDisplacements();
-            // IMemberForces IMemberForces = INode.GetReactions();
+            IMemberForces IMemberForces = INode.GetReactions();
            
 
             for (int i = 0; i < IDisplacements.GetCount(); i++)
@@ -348,12 +348,29 @@ namespace BH.Engine.RAM
 
             }
 
-            //for (int i = 0; i < IMemberForces.GetCount(); i++)
-            //{
-            //    IMemberForce IMemberForce = IMemberForces.GetAt(i);
-            //    IMemberForce.ToString();
-            //    Node.CustomData["Reaction" + i.ToString()] = IMemberForce.ToString();
-            //}
+            // Collect all member forces at node, tracked by index; should these be combined?
+            for (int i = 0; i < IMemberForces.GetCount(); i++)
+            {
+                IMemberForce IMemberForce = IMemberForces.GetAt(i);
+                double axial = IMemberForce.dAxial;
+                double loc = IMemberForce.dLocation;
+                double momMaj= IMemberForce.dMomentMajor;
+                double momMin = IMemberForce.dMomentMinor;
+                double shearMaj = IMemberForce.dShearMajor;
+                double shearMin = IMemberForce.dShearMinor;
+                double torsion = IMemberForce.dTorsion;
+                string loadcaseID = IMemberForce.lLoadCaseID.ToString();
+
+                //Set by member number--is there a way to do this in nested lists instead?
+                Node.CustomData.Add("Axial" + i.ToString(), axial);
+                Node.CustomData.Add("Location" + i.ToString(), loc);
+                Node.CustomData.Add("Moment Major" + i.ToString(), momMaj);
+                Node.CustomData.Add("Moment Minor" + i.ToString(), momMin);
+                Node.CustomData.Add("Shear Major" + i.ToString(), shearMaj);
+                Node.CustomData.Add("Shear Minor" + i.ToString(), shearMin);
+                Node.CustomData.Add("Torsion" + i.ToString(), torsion);
+                Node.CustomData.Add("Loadcase_ID" + i.ToString(), loadcaseID);
+            }
 
             return Node;
         }
