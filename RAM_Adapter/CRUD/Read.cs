@@ -12,6 +12,7 @@ using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
+using BH.Engine;
 
 
 namespace BH.Adapter.RAM
@@ -153,7 +154,13 @@ namespace BH.Adapter.RAM
 
             List<ISectionProperty> ISectionProperties = new List<ISectionProperty>();
 
-            ISectionProperties.Add(null);
+            Material defaultbhomMat = new Material();
+
+            ISectionProperty sec2b = new ExplicitSection();
+            //sec2b.Material = BH.Engine.Common.Create.Material("otherSteel", MaterialType.Steel, 210000, 0.3, 0.00012, 78500);
+            sec2b.Name = "Section 2b";
+
+            ISectionProperties.Add(sec2b);
 
             return ISectionProperties;
 
@@ -168,7 +175,13 @@ namespace BH.Adapter.RAM
 
             List<Material> Materials = new List<Material>();
 
-            Materials.Add(null);
+            //Material steel = BMaterialType.Steel, 210000, 0.3, 0.00012, 78500);
+
+            Material steel = new Material();
+            steel.Name = "default";
+            steel.Type = MaterialType.Steel;
+
+            Materials.Add(steel);
 
             return Materials;
 
