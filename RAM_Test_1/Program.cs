@@ -331,17 +331,17 @@ namespace RAM_Test
 
             //    }
 
-            //    //Write output of new database
-            //    Console.WriteLine(filePathExisting);
-            //    Stories.ForEach(i => Console.Write("{0}\t", i));
-            //    ColumnSections.ForEach(i => Console.Write("{0}\t", i));
+            //Write output of new database
+            Console.WriteLine(filePathExisting);
+            Stories.ForEach(i => Console.Write("{0}\t", i));
+            ColumnSections.ForEach(i => Console.Write("{0}\t", i));
 
-            //    //Save file
-            //    RAMDataAccIDBIO.SaveDatabase();
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
 
-            //    // Release main interface and delete user file
-            //    RAMDataAccIDBIO = null;
-            //    System.IO.File.Delete(filePathUserfile);
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+            System.IO.File.Delete(filePathUserfile);
 
             //    int test = 1;
             //}

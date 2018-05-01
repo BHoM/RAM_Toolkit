@@ -44,10 +44,19 @@ namespace BH.Adapter.RAM
         /**** Private methods                           ****/
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<Bar> bars)
+        private bool CreateCollection(IEnumerable<Bar> bhomBars)
         {
             //Code for creating a collection of bars in the software
-         
+
+            List<Bar> bars = bhomBars.ToList();
+
+            // Register Floor types
+            IFloorTypes IFloorTypes;
+            IFloorType IFloorType;
+            IStories IStories;
+            ILayoutColumns ILayoutColumns;
+            ILayoutBeams ILayoutBeams;
+
             //Split nodes into beams and colummns
             List<Bar> columns = new List<Bar>();
             List<Bar> beams = new List<Bar>();
@@ -74,34 +83,45 @@ namespace BH.Adapter.RAM
             levelHeights.Sort();
             List<double> levelHeightsUnique = levelHeights.Distinct().ToList();
 
+
             //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-          
+
 
             //Create floor type at each level
-            IFloorTypes IFloorTypes = IModel.GetFloorTypes();
-            IFloorType IFloorType;
-            IStories IStories;
-
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
 
-                string LevelName = "Level_" + levelHeightsUnique[i].ToString();
-                string StoryName = "Story_" + i.ToString();
+                string LevelName = "Level " + levelHeightsUnique[i].ToString();
+                string StoryName = "Story " + i.ToString();
 
+                IFloorTypes = IModel.GetFloorTypes();
                 IFloorTypes.Add(LevelName);
                 IFloorType = IFloorTypes.GetAt(i);
+
+                ILayoutColumns = IFloorType.GetLayoutColumns();
+                ILayoutBeams = IFloorType.GetLayoutBeams();
+
                 IStories = IModel.GetStories();
-                IStories.Add(i, StoryName, levelHeightsUnique[i]);
+
+                // Find floor heights from z-elevations
+                double height;
+                if (i == 0) { height = levelHeightsUnique[i];  }
+                else { height = levelHeightsUnique[i] - levelHeightsUnique[i - 1];  }
+
+                IStories.Add(IFloorType.lUID, StoryName, height*12);
 
             }
 
             // Cycle through floortypes, access appropriate story, place beams on those stories
-            for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
+
+                IFloorTypes = IModel.GetFloorTypes();
                 IFloorType = IFloorTypes.GetAt(i);
-                ILayoutBeams ILayoutBeams = IFloorType.GetLayoutBeams();
-                ILayoutColumns ILayoutColumns = IFloorType.GetLayoutColumns();
+                ILayoutBeams = IFloorType.GetLayoutBeams();
+                ILayoutColumns = IFloorType.GetLayoutColumns();
 
                 //Cycle through bars; if z of bar = the floor height, add it
                 for (int j = 0; j < beams.Count(); j++)
@@ -109,15 +129,16 @@ namespace BH.Adapter.RAM
                     //If bar is on level, add it during that iteration of the loop 
                     Bar bar = beams[j];
 
-                    double xStart = bar.StartNode.Position.X;
-                    double yStart = bar.StartNode.Position.Y;
-                    double xEnd = bar.EndNode.Position.X;
-                    double yEnd = bar.EndNode.Position.Y;
+                    double xStart = bar.StartNode.Position.X*12;
+                    double yStart = bar.StartNode.Position.Y*12;
+                    double xEnd = bar.EndNode.Position.X*12;
+                    double yEnd = bar.EndNode.Position.Y*12;
 
                     if (Math.Round(bar.StartNode.Position.Z) == levelHeightsUnique[i])
                     {
                         ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd, 0);
-                        ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+                        //ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+                        ILayoutBeam.strSectionLabel = "W14x48"; // for debugging, checking scale
                     }
                 }
 
@@ -127,12 +148,12 @@ namespace BH.Adapter.RAM
                     //If bar is on level, add it during that iteration of the loop 
                     Bar bar = columns[j];
 
-                    double xStart = bar.StartNode.Position.X;
-                    double yStart = bar.StartNode.Position.Y;
-                    double zStart = bar.StartNode.Position.Z;
-                    double xEnd = bar.EndNode.Position.X;
-                    double yEnd = bar.EndNode.Position.Y;
-                    double zEnd = bar.EndNode.Position.Z;
+                    double xStart = bar.StartNode.Position.X*12;
+                    double yStart = bar.StartNode.Position.Y*12;
+                    double zStart = bar.StartNode.Position.Z*12;
+                    double xEnd = bar.EndNode.Position.X*12;
+                    double yEnd = bar.EndNode.Position.Y*12;
+                    double zEnd = bar.EndNode.Position.Z*12;
 
 
                     if (bar.StartNode.Position.Z == levelHeights[i])
@@ -140,15 +161,21 @@ namespace BH.Adapter.RAM
                         if (zStart <= zEnd)
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.SectionProperty.Name;
-                        } else
+                            ILayoutColumn.strSectionLabel = "W14x48"; // for debugging, checking scale
+                        }
+                        else
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xEnd, yEnd, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.SectionProperty.Name;
+                            ILayoutColumn.strSectionLabel = "W14x48"; // for debugging, checking scale
                         }
                     }
                 }
+
             }
+
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
             //foreach (Bar bar in bars)
             //{
@@ -160,6 +187,14 @@ namespace BH.Adapter.RAM
             //    object endNodeId = bar.EndNode.CustomData[AdapterId];
             //    object SecPropId = bar.SectionProperty.CustomData[AdapterId];
             //}
+
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
+
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+            //System.IO.File.Delete(filePathUserfile);
+
 
             return true;
         }
