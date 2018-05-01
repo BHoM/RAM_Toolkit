@@ -31,7 +31,12 @@ namespace BH.Adapter.RAM
                 success = CreateCollection(objects as IEnumerable<Bar>);
             }
 
-            //// Commented out to just read Bar for Testing
+            if (objects.First() is PanelPlanar)
+            {
+                success = CreateCollection(objects as IEnumerable<PanelPlanar>);
+            }
+
+            // Commented out to just read Bar for Testing (UNCOMMENT TO REPLACE ABOVE ONCE MORE OBJECTS ARE ADDED)
             //success = CreateCollection(objects as dynamic);
 
             //UpdateViews()             //If there exists a command for updating the views is the software call it now:
@@ -244,9 +249,108 @@ namespace BH.Adapter.RAM
                 object materialId = material.CustomData[AdapterId];
             }
 
-            throw new NotImplementedException();
+            return true;
+
+            //throw new NotImplementedException()   //turn off for debugging;
         }
 
+        private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
+        {
+            //Code for creating a collection of floors (and/or walls?) in the software
+
+            List<PanelPlanar> panels = bhomPanels.ToList();
+
+            // Register Floor types
+            IFloorTypes IFloorTypes;
+            IFloorType IFloorType;
+            IStories IStories;
+            IStory IStory;
+
+            //Split nodes into beams and colummns
+            List<PanelPlanar> WallPanels = new List<PanelPlanar>();
+            List<PanelPlanar> floors = new List<PanelPlanar>();
+            List<double> panelHeights = new List<double>();
+            List<double> levelHeights = new List<double>();
+
+            // Find all level heights present
+            foreach (PanelPlanar panel in panels)
+            {
+                if (panel.Tags.Contains("WallPanel"))
+                {
+                    WallPanels.Add(panel);
+                }
+                else
+                {
+                    floors.Add(panel);
+                }
+            }
+
+            //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            IFloorTypes = IModel.GetFloorTypes();
+            IStories = IModel.GetStories();
+
+
+            // Cycle through floortypes, access appropriate story, place beams on those stories
+            for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            {
+
+                IFloorType = IFloorTypes.GetAt(i);
+                IStory = IStories.GetAt(i);
+
+                IDecks IDecks = IFloorType.GetDecks();
+                IDeck IDeck;
+
+                //Cycle through bars; if z of bar = the floor height, add it
+                for (int j = 0; j < floors.Count(); j++)
+                {
+                    //If bar is on level, add it during that iteration of the loop 
+                    PanelPlanar floor = floors[j];
+
+                    List<SCoordinate> corners = new List<SCoordinate>();
+
+                    Polyline outline = BH.Engine.Structure.Query.Outline(floor);
+
+                    // Get list of coordinates
+                    foreach (Point point in outline.ControlPoints)
+                    {
+                        SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
+                        corners.Add(corner);
+                    }
+
+                    //Add back first point to end
+                    corners.Add(corners[0]);
+
+                    // If on level, add deck to IDecks for that level
+                    if (Math.Round(corners[0].dZLoc) == IStory.dFlrHeight || Math.Round(corners[0].dZLoc) == IStory.dElevation)
+                    {
+
+                        IDeck = IDecks.Add(0, outline.ControlPoints.Count() + 1);
+                        IPoints IPoints = IDeck.GetPoints();
+
+                        for (int k = 0; k < corners.Count; k++)
+                        {
+                            IPoints.Add(corners[k]);
+                        }
+
+                        IDeck.SetPoints(IPoints);
+
+                    }
+                }         
+
+            }
+
+                        //Save file
+            RAMDataAccIDBIO.SaveDatabase();
+
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+            //System.IO.File.Delete(filePathUserfile);
+
+            return true;
+        }
 
         /***************************************************/
     }

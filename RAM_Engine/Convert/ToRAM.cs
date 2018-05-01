@@ -53,6 +53,15 @@ namespace BH.Engine.RAM
             return ILayoutBeam;
         }
 
+        public static SCoordinate ToRAM(Point point)
+        {
+            SCoordinate Point = new SCoordinate();
+            Point.dXLoc = point.X;
+            Point.dYLoc = point.Y;
+            Point.dZLoc = point.Z;
+
+            return Point;
+        }
 
 
 
