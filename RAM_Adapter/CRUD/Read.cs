@@ -31,6 +31,8 @@ namespace BH.Adapter.RAM
                 return ReadBars(ids as dynamic);
             else if (type == typeof(ISectionProperty) || type.GetInterfaces().Contains(typeof(ISectionProperty)))
                 return ReadSectionProperties(ids as dynamic);
+            else if (type == typeof(IProperty2D) || type.GetInterfaces().Contains(typeof(IProperty2D)))
+                return ReadSectionProperties2D(ids as dynamic);
             else if (type == typeof(Material))
                 return ReadMaterials(ids as dynamic);
             else if (type == typeof(PanelPlanar))
@@ -165,6 +167,23 @@ namespace BH.Adapter.RAM
             return ISectionProperties;
 
             //throw new NotImplementedException();
+        }
+
+        /***************************************/
+
+        private List<IProperty2D> ReadSectionProperties2D(List<string> ids = null)
+        {
+
+            List<IProperty2D> IProperty2Ds = new List<IProperty2D>();
+
+            IProperty2D defsec = new ConstantThickness();
+            //sec2b.Material = BH.Engine.Common.Create.Material("otherSteel", MaterialType.Steel, 210000, 0.3, 0.00012, 78500);
+            defsec.Name = "Section 2d";
+
+            IProperty2Ds.Add(defsec);
+
+            return IProperty2Ds;
+
         }
 
         /***************************************/
