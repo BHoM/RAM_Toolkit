@@ -77,12 +77,17 @@ namespace BH.Engine.RAM
             // Get Steel beam results **STILL IN PROGRESS
             ISteelBeamDesignResult Result = IBeam.GetSteelDesignResult();
             DAArray ppalNumStuds = Result.GetNumStudsInSegments();
+
             int numStudSegments = new int();
             ppalNumStuds.GetSize(ref numStudSegments);
             double Camber = IBeam.dCamber;
             double DCI = Result.dDesignCapacityInteraction;
             double CDI = Result.dCriticalDeflectionInteraction;
             int studCount = 0;
+
+            IAnalyticalResult AnalyticalResult = IBeam.GetAnalyticalResult();
+            COMBO_MATERIAL_TYPE Steel_Grav = COMBO_MATERIAL_TYPE.GRAV_STEEL;
+            IMemberForces IMemberForces = AnalyticalResult.GetMaximumComboReactions(Steel_Grav);
 
             // Get coordinates from IBeam
             SCoordinate startPt = new SCoordinate();
@@ -122,6 +127,36 @@ namespace BH.Engine.RAM
 
             bhomBar.CustomData["Design Capacity Interaction"] = DCI;
             bhomBar.CustomData["Critical Deflection Interaction"] = CDI;
+
+            // Add reactions to custom data
+            if (IMemberForces != null)
+            {
+                IMemberForce Force1 = IMemberForces.GetAt(0);
+                IMemberForce Force2 = IMemberForces.GetAt(1);
+
+                double Axial1 = Force1.dAxial;
+                double MomentMaj1 = Force1.dMomentMajor;
+                double ShearMinor1 = Force1.dShearMinor;
+
+                double Axial2 = Force2.dAxial;
+                double MomentMaj2 = Force2.dMomentMajor;
+                double ShearMinor2 = Force2.dShearMinor;
+
+                bhomBar.CustomData.Add("Reac1 Axial", Axial1);
+                bhomBar.CustomData.Add("Reac1 Moment", MomentMaj1);
+                bhomBar.CustomData.Add("Reac1 Shear", ShearMinor1);
+                bhomBar.CustomData.Add("Reac2 Axial", Axial2);
+                bhomBar.CustomData.Add("Reac2 Moment", MomentMaj2);
+                bhomBar.CustomData.Add("Reac2 Shear", ShearMinor2);
+            } else
+            {
+                bhomBar.CustomData.Add("Reac1 Axial", null);
+                bhomBar.CustomData.Add("Reac1 Moment", null);
+                bhomBar.CustomData.Add("Reac1 Shear", null);
+                bhomBar.CustomData.Add("Reac2 Axial", null);
+                bhomBar.CustomData.Add("Reac2 Moment", null);
+                bhomBar.CustomData.Add("Reac2 Shear", null);
+            }
 
             return bhomBar;
         }
