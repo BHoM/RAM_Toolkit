@@ -12,6 +12,7 @@ using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
+using BH.Engine.Geometry;
 
 
 namespace BH.Adapter.RAM
@@ -270,7 +271,7 @@ namespace BH.Adapter.RAM
             List<PanelPlanar> WallPanels = new List<PanelPlanar>();
             List<PanelPlanar> floors = new List<PanelPlanar>();
             List<double> panelHeights = new List<double>();
-            List<double> levelHeights = new List<double>();
+
 
             // Find all level heights present
             foreach (PanelPlanar panel in panels)
@@ -306,15 +307,47 @@ namespace BH.Adapter.RAM
                 //Cycle through bars; if z of bar = the floor height, add it
                 for (int j = 0; j < floors.Count(); j++)
                 {
-                    //If bar is on level, add it during that iteration of the loop 
+  
                     PanelPlanar floor = floors[j];
-
+                    
+                    // Find outline of planar panel
                     List<SCoordinate> corners = new List<SCoordinate>();
+                    //Polyline outline = BH.Engine.Structure.Query.Outline(floor);
+                    
+                    List<Edge> edges = floor.ExternalEdges;
 
-                    Polyline outline = BH.Engine.Structure.Query.Outline(floor);
+                    /////////////// Method 1 to get points
+                    //List<Point> ctrlPoints = edges.Select(e => (e.Curve as Line).Start)..ToList();
+
+                    /////////////// Method 2 to get points
+                    //List<ICurve> ICurveSegs = new List<ICurve>();
+                    //IEnumerable<List<ICurve>> segments = edges.Select(e => (e.Curve as PolyCurve).Curves.ToList<ICurve>());
+                    //List<Point> ctrlPoints2 = new List<Point>();
+
+                    //foreach (List<ICurve> segment in segments)
+                    //{
+                    //    for (int l = 0; l < segments.Count(); l++)
+                    //    {
+                    //        ICurveSegs.Add(segment[l]);
+                    //    }
+                    //}
+
+                    //for (int l = 0; l < segments.Count(); l++)
+                    //{
+                    //    Line bhomLine = ICurveSegs[l] as Line;
+                    //    ctrlPoints2.Add(bhomLine.Start);       
+                    //}
+
+                    ////////////// Method 3
+                    List <ICurve> segments2 = BH.Engine.Structure.Query.AllEdgeCurves(floor);
+                    List<Point> ctrlPoints3 = new List<Point>();                    
+                    PolyCurve bhomCurve = new PolyCurve { Curves = segments2.ToList() };
+
+                    ctrlPoints3 = BH.Engine.Geometry.Query.ControlPoints(bhomCurve);
+
 
                     // Get list of coordinates
-                    foreach (Point point in outline.ControlPoints)
+                    foreach (Point point in ctrlPoints3)
                     {
                         SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
                         corners.Add(corner);
@@ -327,7 +360,7 @@ namespace BH.Adapter.RAM
                     if (Math.Round(corners[0].dZLoc) == IStory.dFlrHeight || Math.Round(corners[0].dZLoc) == IStory.dElevation)
                     {
 
-                        IDeck = IDecks.Add(0, outline.ControlPoints.Count() + 1);
+                        IDeck = IDecks.Add(0, ctrlPoints3.Count + 1);
                         IPoints IPoints = IDeck.GetPoints();
 
                         for (int k = 0; k < corners.Count; k++)
