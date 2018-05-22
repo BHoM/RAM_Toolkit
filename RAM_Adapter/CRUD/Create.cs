@@ -162,17 +162,16 @@ namespace BH.Adapter.RAM
                     double yEnd = bar.EndNode.Position.Y * 12;
                     double zEnd = bar.EndNode.Position.Z * 12;
 
-
                     if (bar.StartNode.Position.Z == levelHeights[i])
                     {
                         if (zStart <= zEnd)
                         {
-                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, 0);
+                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xStart, yStart, 0, 0);
                             ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
                         }
                         else
                         {
-                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xEnd, yEnd, 0, 0);
+                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
                             ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
                         }
                     }
