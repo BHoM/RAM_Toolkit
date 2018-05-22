@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using BH.oM.Structural.Elements;
 using BH.oM.Geometry;
+using BH.oM.Common;
 using BH.oM.Structural.Loads;
 using BH.Engine.Structure;
 using BH.oM.Structural.Properties;
@@ -63,6 +64,16 @@ namespace BH.Engine.RAM
             return Point;
         }
 
+        public static EMATERIALTYPES ToRAM(BH.oM.Common.Materials.Material material)
+        {
+            EMATERIALTYPES Material = new EMATERIALTYPES();
+            
+            if (material.Type == BH.oM.Common.Materials.MaterialType.Concrete) { Material = EMATERIALTYPES.EConcreteMat; }
+            else if (material.Type == BH.oM.Common.Materials.MaterialType.Steel) { Material = EMATERIALTYPES.ESteelMat; }
+            else { Material = EMATERIALTYPES.ESteelMat; }
+
+            return Material;
+        }
 
 
     }
