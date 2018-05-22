@@ -32,12 +32,13 @@ namespace BH.Adapter.RAM
                 success = CreateCollection(objects as IEnumerable<Bar>);
             }
 
-            if (objects.First() is PanelPlanar)
-            {
-                success = CreateCollection(objects as IEnumerable<PanelPlanar>);
-            }
+            //if (objects.First() is PanelPlanar)
+            //{
+            //    success = CreateCollection(objects as IEnumerable<PanelPlanar>);
+            //}
 
-            // Commented out to just read Bar for Testing (UNCOMMENT TO REPLACE ABOVE ONCE MORE OBJECTS ARE ADDED)
+
+            //// Commented out to just read Bar for Testing
             //success = CreateCollection(objects as dynamic);
 
             //UpdateViews()             //If there exists a command for updating the views is the software call it now:
@@ -50,10 +51,19 @@ namespace BH.Adapter.RAM
         /**** Private methods                           ****/
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<Bar> bars)
+        private bool CreateCollection(IEnumerable<Bar> bhomBars)
         {
             //Code for creating a collection of bars in the software
-         
+
+            List<Bar> bars = bhomBars.ToList();
+
+            // Register Floor types
+            IFloorTypes IFloorTypes;
+            IFloorType IFloorType;
+            IStories IStories;
+            ILayoutColumns ILayoutColumns;
+            ILayoutBeams ILayoutBeams;
+
             //Split nodes into beams and colummns
             List<Bar> columns = new List<Bar>();
             List<Bar> beams = new List<Bar>();
@@ -69,45 +79,56 @@ namespace BH.Adapter.RAM
                 }
                 else
                 {
-                beams.Add(bar);
-                double z = bar.StartNode.Position.Z;
-                double zRounded = Math.Round(z);
-                beamHeights.Add(z);
-                levelHeights.Add(zRounded);
+                    beams.Add(bar);
+                    double z = bar.StartNode.Position.Z;
+                    double zRounded = Math.Round(z);
+                    beamHeights.Add(z);
+                    levelHeights.Add(zRounded);
                 }
             }
 
             levelHeights.Sort();
             List<double> levelHeightsUnique = levelHeights.Distinct().ToList();
 
+
             //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-          
+
 
             //Create floor type at each level
-            IFloorTypes IFloorTypes = IModel.GetFloorTypes();
-            IFloorType IFloorType;
-            IStories IStories;
-
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
 
-                string LevelName = "Level_" + levelHeightsUnique[i].ToString();
-                string StoryName = "Story_" + i.ToString();
+                string LevelName = "Level " + levelHeightsUnique[i].ToString();
+                string StoryName = "Story " + i.ToString();
 
+                IFloorTypes = IModel.GetFloorTypes();
                 IFloorTypes.Add(LevelName);
                 IFloorType = IFloorTypes.GetAt(i);
+
+                ILayoutColumns = IFloorType.GetLayoutColumns();
+                ILayoutBeams = IFloorType.GetLayoutBeams();
+
                 IStories = IModel.GetStories();
-                IStories.Add(i, StoryName, levelHeightsUnique[i]);
+
+                // Find floor heights from z-elevations
+                double height;
+                if (i == 0) { height = levelHeightsUnique[i]; }
+                else { height = levelHeightsUnique[i] - levelHeightsUnique[i - 1]; }
+
+                IStories.Add(IFloorType.lUID, StoryName, height * 12);
 
             }
 
             // Cycle through floortypes, access appropriate story, place beams on those stories
-            for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
+
+                IFloorTypes = IModel.GetFloorTypes();
                 IFloorType = IFloorTypes.GetAt(i);
-                ILayoutBeams ILayoutBeams = IFloorType.GetLayoutBeams();
-                ILayoutColumns ILayoutColumns = IFloorType.GetLayoutColumns();
+                ILayoutBeams = IFloorType.GetLayoutBeams();
+                ILayoutColumns = IFloorType.GetLayoutColumns();
 
                 //Cycle through bars; if z of bar = the floor height, add it
                 for (int j = 0; j < beams.Count(); j++)
@@ -115,15 +136,16 @@ namespace BH.Adapter.RAM
                     //If bar is on level, add it during that iteration of the loop 
                     Bar bar = beams[j];
 
-                    double xStart = bar.StartNode.Position.X;
-                    double yStart = bar.StartNode.Position.Y;
-                    double xEnd = bar.EndNode.Position.X;
-                    double yEnd = bar.EndNode.Position.Y;
+                    double xStart = bar.StartNode.Position.X * 12;
+                    double yStart = bar.StartNode.Position.Y * 12;
+                    double xEnd = bar.EndNode.Position.X * 12;
+                    double yEnd = bar.EndNode.Position.Y * 12;
 
                     if (Math.Round(bar.StartNode.Position.Z) == levelHeightsUnique[i])
                     {
                         ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd, 0);
-                        ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+                        //ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+                        ILayoutBeam.strSectionLabel = "W14x48"; // for debugging, checking scale
                     }
                 }
 
@@ -133,12 +155,12 @@ namespace BH.Adapter.RAM
                     //If bar is on level, add it during that iteration of the loop 
                     Bar bar = columns[j];
 
-                    double xStart = bar.StartNode.Position.X;
-                    double yStart = bar.StartNode.Position.Y;
-                    double zStart = bar.StartNode.Position.Z;
-                    double xEnd = bar.EndNode.Position.X;
-                    double yEnd = bar.EndNode.Position.Y;
-                    double zEnd = bar.EndNode.Position.Z;
+                    double xStart = bar.StartNode.Position.X * 12;
+                    double yStart = bar.StartNode.Position.Y * 12;
+                    double zStart = bar.StartNode.Position.Z * 12;
+                    double xEnd = bar.EndNode.Position.X * 12;
+                    double yEnd = bar.EndNode.Position.Y * 12;
+                    double zEnd = bar.EndNode.Position.Z * 12;
 
 
                     if (bar.StartNode.Position.Z == levelHeights[i])
@@ -146,15 +168,21 @@ namespace BH.Adapter.RAM
                         if (zStart <= zEnd)
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.SectionProperty.Name;
-                        } else
+                            ILayoutColumn.strSectionLabel = "W14x48"; // for debugging, checking scale
+                        }
+                        else
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xEnd, yEnd, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.SectionProperty.Name;
+                            ILayoutColumn.strSectionLabel = "W14x48"; // for debugging, checking scale
                         }
                     }
                 }
+
             }
+
+
+            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
             //foreach (Bar bar in bars)
             //{
@@ -167,6 +195,12 @@ namespace BH.Adapter.RAM
             //    object SecPropId = bar.SectionProperty.CustomData[AdapterId];
             //}
 
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
+
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+            //System.IO.File.Delete(filePathUserfile);
             return true;
         }
 
@@ -215,140 +249,174 @@ namespace BH.Adapter.RAM
                 object materialId = material.CustomData[AdapterId];
             }
 
-            return true;
-
-            //throw new NotImplementedException()   //turn off for debugging;
+            throw new NotImplementedException();
         }
 
-        private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
+        /***************************************************/
+
+        private bool CreateCollection(IEnumerable<IProperty2D> IProperty2Ds)
         {
-            //Code for creating a collection of floors (and/or walls?) in the software
-
-            List<PanelPlanar> panels = bhomPanels.ToList();
-
-            // Register Floor types
-            IFloorTypes IFloorTypes;
-            IFloorType IFloorType;
-            IStories IStories;
-            IStory IStory;
-
-            //Split nodes into beams and colummns
-            List<PanelPlanar> WallPanels = new List<PanelPlanar>();
-            List<PanelPlanar> floors = new List<PanelPlanar>();
-            List<double> panelHeights = new List<double>();
-
-
-            // Find all level heights present
-            foreach (PanelPlanar panel in panels)
-            {
-                if (panel.Tags.Contains("WallPanel"))
-                {
-                    WallPanels.Add(panel);
-                }
-                else
-                {
-                    floors.Add(panel);
-                }
-            }
+            //Code for creating a collection of deck properties in the software (DEFAULT FOR NOW)
 
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            IFloorTypes = IModel.GetFloorTypes();
-            IStories = IModel.GetStories();
+            //Get composite deck properties
+            ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
 
-
-            // Cycle through floortypes, access appropriate story, place beams on those stories
-            for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            foreach (IProperty2D iProp in IProperty2Ds)
             {
+                //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
+                string deckName = iProp.Name;
+                double thickness = 6;
+                double studLength = 4;
 
-                IFloorType = IFloorTypes.GetAt(i);
-                IStory = IStories.GetAt(i);
+                ICompDeckProps.Add(deckName, thickness, studLength);
 
-                IDecks IDecks = IFloorType.GetDecks();
-                IDeck IDeck;
-
-                //Cycle through bars; if z of bar = the floor height, add it
-                for (int j = 0; j < floors.Count(); j++)
-                {
-  
-                    PanelPlanar floor = floors[j];
-                    
-                    // Find outline of planar panel
-                    List<SCoordinate> corners = new List<SCoordinate>();
-                    //Polyline outline = BH.Engine.Structure.Query.Outline(floor);
-                    
-                    List<Edge> edges = floor.ExternalEdges;
-
-                    /////////////// Method 1 to get points
-                    //List<Point> ctrlPoints = edges.Select(e => (e.Curve as Line).Start)..ToList();
-
-                    /////////////// Method 2 to get points
-                    //List<ICurve> ICurveSegs = new List<ICurve>();
-                    //IEnumerable<List<ICurve>> segments = edges.Select(e => (e.Curve as PolyCurve).Curves.ToList<ICurve>());
-                    //List<Point> ctrlPoints2 = new List<Point>();
-
-                    //foreach (List<ICurve> segment in segments)
-                    //{
-                    //    for (int l = 0; l < segments.Count(); l++)
-                    //    {
-                    //        ICurveSegs.Add(segment[l]);
-                    //    }
-                    //}
-
-                    //for (int l = 0; l < segments.Count(); l++)
-                    //{
-                    //    Line bhomLine = ICurveSegs[l] as Line;
-                    //    ctrlPoints2.Add(bhomLine.Start);       
-                    //}
-
-                    ////////////// Method 3
-                    List <ICurve> segments2 = BH.Engine.Structure.Query.AllEdgeCurves(floor);
-                    List<Point> ctrlPoints3 = new List<Point>();                    
-                    PolyCurve bhomCurve = new PolyCurve { Curves = segments2.ToList() };
-
-                    ctrlPoints3 = BH.Engine.Geometry.Query.ControlPoints(bhomCurve);
-
-
-                    // Get list of coordinates
-                    foreach (Point point in ctrlPoints3)
-                    {
-                        SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
-                        corners.Add(corner);
-                    }
-
-                    //Add back first point to end
-                    corners.Add(corners[0]);
-
-                    // If on level, add deck to IDecks for that level
-                    if (Math.Round(corners[0].dZLoc) == IStory.dFlrHeight || Math.Round(corners[0].dZLoc) == IStory.dElevation)
-                    {
-
-                        IDeck = IDecks.Add(0, ctrlPoints3.Count + 1);
-                        IPoints IPoints = IDeck.GetPoints();
-
-                        for (int k = 0; k < corners.Count; k++)
-                        {
-                            IPoints.Add(corners[k]);
-                        }
-
-                        IDeck.SetPoints(IPoints);
-
-                    }
-                }         
-
+                object iPropId = iProp.CustomData[AdapterId];
             }
-
-                        //Save file
-            RAMDataAccIDBIO.SaveDatabase();
-
-            // Release main interface and delete user file
-            RAMDataAccIDBIO = null;
-            //System.IO.File.Delete(filePathUserfile);
 
             return true;
         }
+
+
+        private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
+        {
+            throw new NotImplementedException();
+        }
+
+        //// Create Panel Method -- Commented because it is not yet working
+        //private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
+        //{
+        //    //Code for creating a collection of floors (and/or walls?) in the software
+
+        //    List<PanelPlanar> panels = bhomPanels.ToList();
+
+        //    // Register Floor types
+        //    IFloorTypes IFloorTypes;
+        //    IFloorType IFloorType;
+        //    IStories IStories;
+        //    IStory IStory;
+
+        //    //Split nodes into beams and colummns
+        //    List<PanelPlanar> WallPanels = new List<PanelPlanar>();
+        //    List<PanelPlanar> floors = new List<PanelPlanar>();
+        //    List<double> panelHeights = new List<double>();
+
+
+        //    // Find all level heights present
+        //    foreach (PanelPlanar panel in panels)
+        //    {
+        //        if (panel.Tags.Contains("WallPanel"))
+        //        {
+        //            WallPanels.Add(panel);
+        //        }
+        //        else
+        //        {
+        //            floors.Add(panel);
+        //        }
+        //    }
+
+        //    //Access model
+        //    IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+        //    IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+        //    IFloorTypes = IModel.GetFloorTypes();
+        //    IStories = IModel.GetStories();
+
+
+        //    // Cycle through floortypes, access appropriate story, place beams on those stories
+        //    for (int i = 0; i < IFloorTypes.GetCount(); i++)
+        //    {
+
+        //        IFloorType = IFloorTypes.GetAt(i);
+        //        IStory = IStories.GetAt(i);
+
+        //        IDecks IDecks = IFloorType.GetDecks();
+        //        IDeck IDeck;
+
+        //        //Cycle through bars; if z of bar = the floor height, add it
+        //        for (int j = 0; j < floors.Count(); j++)
+        //        {
+
+        //            PanelPlanar floor = floors[j];
+
+        //            // Find outline of planar panel
+        //            List<SCoordinate> corners = new List<SCoordinate>();
+        //            //Polyline outline = BH.Engine.Structure.Query.Outline(floor);
+
+        //            List<Edge> edges = floor.ExternalEdges;
+
+        //            /////////////// Method 1 to get points
+        //            //List<Point> ctrlPoints = edges.Select(e => (e.Curve as Line).Start)..ToList();
+
+        //            /////////////// Method 2 to get points
+        //            //List<ICurve> ICurveSegs = new List<ICurve>();
+        //            //IEnumerable<List<ICurve>> segments = edges.Select(e => (e.Curve as PolyCurve).Curves.ToList<ICurve>());
+        //            //List<Point> ctrlPoints2 = new List<Point>();
+
+        //            //foreach (List<ICurve> segment in segments)
+        //            //{
+        //            //    for (int l = 0; l < segments.Count(); l++)
+        //            //    {
+        //            //        ICurveSegs.Add(segment[l]);
+        //            //    }
+        //            //}
+
+        //            //for (int l = 0; l < segments.Count(); l++)
+        //            //{
+        //            //    Line bhomLine = ICurveSegs[l] as Line;
+        //            //    ctrlPoints2.Add(bhomLine.Start);       
+        //            //}
+
+        //            ////////////// Method 3
+        //            List<ICurve> segments2 = BH.Engine.Structure.Query.AllEdgeCurves(floor);
+        //            List<Point> ctrlPoints3 = new List<Point>();
+        //            PolyCurve bhomCurve = new PolyCurve { Curves = segments2.ToList() };
+
+        //            ctrlPoints3 = BH.Engine.Geometry.Query.ControlPoints(bhomCurve);
+
+
+        //            // Get list of coordinates
+        //            foreach (Point point in ctrlPoints3)
+        //            {
+        //                SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
+        //                corners.Add(corner);
+        //            }
+
+        //            //Add back first point to end
+        //            corners.Add(corners[0]);
+
+        //            // If on level, add deck to IDecks for that level
+        //            if (Math.Round(corners[0].dZLoc) == IStory.dFlrHeight || Math.Round(corners[0].dZLoc) == IStory.dElevation)
+        //            {
+
+        //                IDeck = IDecks.Add(0, ctrlPoints3.Count + 1);
+        //                IPoints IPoints = IDeck.GetPoints();
+
+        //                for (int k = 0; k < corners.Count; k++)
+        //                {
+        //                    IPoints.Add(corners[k]);
+        //                }
+
+        //                IDeck.SetPoints(IPoints);
+
+        //            }
+        //        }
+
+        //    }
+
+        //    //Save file
+        //    RAMDataAccIDBIO.SaveDatabase();
+
+        //    // Release main interface and delete user file
+        //    RAMDataAccIDBIO = null;
+        //    //System.IO.File.Delete(filePathUserfile);
+
+        //    return true;
+        //}
+
 
         /***************************************************/
     }
