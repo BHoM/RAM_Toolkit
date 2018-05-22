@@ -145,7 +145,7 @@ namespace BH.Adapter.RAM
                     {
                         ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd, 0);
                         //ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
-                        ILayoutBeam.strSectionLabel = "W14x48"; // for debugging, checking scale
+                        ILayoutBeam.strSectionLabel = bar.Name; // for debugging, checking scale
                     }
                 }
 
@@ -168,12 +168,12 @@ namespace BH.Adapter.RAM
                         if (zStart <= zEnd)
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, 0);
-                            ILayoutColumn.strSectionLabel = "W14x48"; // for debugging, checking scale
+                            ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
                         }
                         else
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(EMATERIALTYPES.ESteelMat, xEnd, yEnd, 0, 0);
-                            ILayoutColumn.strSectionLabel = "W14x48"; // for debugging, checking scale
+                            ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
                         }
                     }
                 }
