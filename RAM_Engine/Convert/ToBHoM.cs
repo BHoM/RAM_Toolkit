@@ -66,7 +66,7 @@ namespace BH.Engine.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData["IUID"] = IColumn.lUID;
+            bhomBar.CustomData["lUID"] = IColumn.lUID;
 
             return  bhomBar;
         }
@@ -112,7 +112,7 @@ namespace BH.Engine.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData["IUID"] = IBeam.lUID;
+            bhomBar.CustomData["lUID"] = IBeam.lUID;
 
             //Add studs to custom Data by total stud count only
             for (int i = 0; i < numStudSegments; i++)
@@ -188,7 +188,7 @@ namespace BH.Engine.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData["IUID"] = IVerticalBrace.lUID;
+            bhomBar.CustomData["lUID"] = IVerticalBrace.lUID;
 
             return bhomBar;
         }
@@ -220,7 +220,7 @@ namespace BH.Engine.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData["IUID"] = IHorizBrace.lUID;
+            bhomBar.CustomData["lUID"] = IHorizBrace.lUID;
 
             return bhomBar;
         }
@@ -387,7 +387,7 @@ namespace BH.Engine.RAM
                 double thetaz = IDisplacement.dThetaZ;
 
                 // Unique RAM ID
-                Node.CustomData["IUID"] = INode.lUniqueID;
+                Node.CustomData["lUID"] = INode.lUniqueID;
 
                 Node.CustomData["dX"] = x;
                 Node.CustomData["dY"] = y;

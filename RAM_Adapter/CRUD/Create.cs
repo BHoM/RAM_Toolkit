@@ -104,10 +104,9 @@ namespace BH.Adapter.RAM
                 string StoryName = "Story " + i.ToString();
 
                 IFloorTypes = IModel.GetFloorTypes();
-
                 IFloorTypes.Add(LevelName);
                 IFloorType = IFloorTypes.GetAt(i);
-
+        
                 ILayoutColumns = IFloorType.GetLayoutColumns();
                 ILayoutBeams = IFloorType.GetLayoutBeams();
 
