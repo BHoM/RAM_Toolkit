@@ -38,7 +38,7 @@ namespace BH.Adapter.RAM
             else if (type == typeof(IProperty2D))
                 return ReadIProperty2Ds(ids as dynamic);
             if (type == typeof(Loadcase))
-                return ReadLoadCase();
+                return ReadLoadCase(ids as dynamic);
 
 
             return null;
@@ -219,7 +219,7 @@ namespace BH.Adapter.RAM
             List<Loadcase> bhomLoadCases = new List<Loadcase>();
 
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            ILoadCases ILoadCases = IModel.GetLoadCases(EAnalysisResultType.DefaultResultType);
+            ILoadCases ILoadCases = IModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
 
             for (int i = 0; i < ILoadCases.GetCount(); i++)
             {

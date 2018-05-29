@@ -415,6 +415,8 @@ namespace BH.Engine.RAM
 
             Loadcase Loadcase = new Loadcase();
             Loadcase.Name = ILoadCase.strTypeLabel;
+            string LoadType = ILoadCase.eLoadType.ToString();
+            Loadcase.CustomData.Add("Type", LoadType);
 
             return Loadcase;
         }
