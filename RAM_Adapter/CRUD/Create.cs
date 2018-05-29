@@ -27,10 +27,10 @@ namespace BH.Adapter.RAM
         {
             bool success = true;        //boolean returning if the creation was successfull or not
 
-            if (objects.First() is Bar)
-            {
-                success = CreateCollection(objects as IEnumerable<Bar>);
-            }
+            //if (objects.First() is Bar)
+            //{
+            //    success = CreateCollection(objects as IEnumerable<Bar>);
+            //}
 
             //if (objects.First() is PanelPlanar)
             //{
@@ -38,8 +38,8 @@ namespace BH.Adapter.RAM
             //}
 
 
-            //// Commented out to just read Bar for Testing
-            //success = CreateCollection(objects as dynamic);
+            // Commented out to just read Bar for Testing
+            success = CreateCollection(objects as dynamic);
 
             //UpdateViews()             //If there exists a command for updating the views is the software call it now:
 
@@ -90,11 +90,11 @@ namespace BH.Adapter.RAM
             levelHeights.Sort();
             List<double> levelHeightsUnique = levelHeights.Distinct().ToList();
 
-
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
+            
 
             //Create floor type at each level
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
@@ -104,6 +104,7 @@ namespace BH.Adapter.RAM
                 string StoryName = "Story " + i.ToString();
 
                 IFloorTypes = IModel.GetFloorTypes();
+
                 IFloorTypes.Add(LevelName);
                 IFloorType = IFloorTypes.GetAt(i);
 
@@ -224,16 +225,8 @@ namespace BH.Adapter.RAM
         {
             //Code for creating a collection of section properties in the software
 
-            foreach (ISectionProperty sectionProperty in sectionProperties)
-            {
-                //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
-                object secPropId = sectionProperty.CustomData[AdapterId];
-                //If also the default implmentation for the DependencyTypes is used,
-                //one can from here get the id's of the subobjects by calling (cast into applicable type used by the software): 
-                object materialId = sectionProperty.Material.CustomData[AdapterId];
-            }
 
-            throw new NotImplementedException();
+            return true;
         }
 
         /***************************************************/
@@ -242,39 +235,34 @@ namespace BH.Adapter.RAM
         {
             //Code for creating a collection of materials in the software
 
-            foreach (Material material in materials)
-            {
-                //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
-                object materialId = material.CustomData[AdapterId];
-            }
 
-            throw new NotImplementedException();
+           return true;
         }
 
         /***************************************************/
 
         private bool CreateCollection(IEnumerable<IProperty2D> IProperty2Ds)
         {
-            //Code for creating a collection of deck properties in the software (DEFAULT FOR NOW)
+            ////Code for creating a collection of deck properties in the software (DEFAULT FOR NOW)
 
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            ////Access model
+            //IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            //IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            //Get composite deck properties
-            ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
+            ////Get composite deck properties
+            //ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
 
-            foreach (IProperty2D iProp in IProperty2Ds)
-            {
-                //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
-                string deckName = iProp.Name;
-                double thickness = 6;
-                double studLength = 4;
+            //foreach (IProperty2D iProp in IProperty2Ds)
+            //{
+            //    //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
+            //    string deckName = iProp.Name;
+            //    double thickness = 6;
+            //    double studLength = 4;
 
-                ICompDeckProps.Add(deckName, thickness, studLength);
+            //    ICompDeckProps.Add(deckName, thickness, studLength);
 
-                object iPropId = iProp.CustomData[AdapterId];
-            }
+            //    object iPropId = iProp.CustomData[AdapterId];
+            //}
 
             return true;
         }

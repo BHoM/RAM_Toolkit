@@ -65,6 +65,9 @@ namespace BH.Engine.RAM
 
             bhomBar.OrientationAngle = 0;
 
+            // Unique RAM ID
+            bhomBar.CustomData["IUID"] = IColumn.lUID;
+
             return  bhomBar;
         }
 
@@ -107,6 +110,9 @@ namespace BH.Engine.RAM
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
 
             bhomBar.OrientationAngle = 0;
+
+            // Unique RAM ID
+            bhomBar.CustomData["IUID"] = IBeam.lUID;
 
             //Add studs to custom Data by total stud count only
             for (int i = 0; i < numStudSegments; i++)
@@ -181,6 +187,9 @@ namespace BH.Engine.RAM
 
             bhomBar.OrientationAngle = 0;
 
+            // Unique RAM ID
+            bhomBar.CustomData["IUID"] = IVerticalBrace.lUID;
+
             return bhomBar;
         }
 
@@ -189,7 +198,7 @@ namespace BH.Engine.RAM
 
             string section = IHorizBrace.strSectionLabel;
 
-            // Get the start and end pts of every beam
+            // Get the start and end pts of every brace
             double StartSupportX = new double();
             double StartSupportY = new double();
             double StartSupportZOffset = new double();
@@ -199,7 +208,7 @@ namespace BH.Engine.RAM
             double StoryZ = dElevation;
 
 
-            // Get coordinates from ILayout Beam
+            // Get coordinates from ILayout Brace
             ILayoutHorizBrace.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
             Node startNode = new Node();
             Node endNode = new Node();
@@ -209,6 +218,9 @@ namespace BH.Engine.RAM
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
 
             bhomBar.OrientationAngle = 0;
+
+            // Unique RAM ID
+            bhomBar.CustomData["IUID"] = IHorizBrace.lUID;
 
             return bhomBar;
         }
@@ -373,6 +385,9 @@ namespace BH.Engine.RAM
                 double thetax = IDisplacement.dThetaX;
                 double thetay = IDisplacement.dThetaY;
                 double thetaz = IDisplacement.dThetaZ;
+
+                // Unique RAM ID
+                Node.CustomData["IUID"] = INode.lUniqueID;
 
                 Node.CustomData["dX"] = x;
                 Node.CustomData["dY"] = y;
