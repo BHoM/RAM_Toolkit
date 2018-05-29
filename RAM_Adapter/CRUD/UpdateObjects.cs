@@ -41,70 +41,46 @@ namespace BH.Adapter.RAM
         protected bool Update(IEnumerable<Bar> bars)
         {
 
-            //Split nodes into beams and colummns
-            List<Bar> columns = new List<Bar>();
-            List<Bar> beams = new List<Bar>();
-            List<double> beamHeights = new List<double>();
-            List<double> levelHeights = new List<double>();
-
-            // Find all level heights present
-            foreach (Bar bar in bars)
-            {
-                if (BH.Engine.Structure.Query.IsVertical(bar))
-                {
-                    columns.Add(bar);
-                }
-                else
-                {
-                    beams.Add(bar);
-                    double z = bar.StartNode.Position.Z;
-                    double zRounded = Math.Round(z);
-                    beamHeights.Add(z);
-                    levelHeights.Add(zRounded);
-                }
-            }
-
-            levelHeights.Sort();
-
             //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            //Create floor type at each level
-            IFloorTypes IFloorTypes = IModel.GetFloorTypes();
-
-            for (int i = 0; i < levelHeights.Count(); i++)
+            foreach (Bar bar in bars)
             {
-                IFloorTypes.Add("Level_" + levelHeights[i].ToString());
-                IStories IStories = IModel.GetStories();
-                IStories.Add(i, "Level " + i.ToString(), levelHeights[i]);
-            }
+                //Extract ID
+                int ID = System.Convert.ToInt32(bar.CustomData["lUID"]);
 
-            // Cycle through floortypes, access appropriate story, place beams on those stories
-            for (int i = 0; i < IFloorTypes.GetCount(); i++)
-            {
-                IFloorType IFloorType = IFloorTypes.GetAt(i);
-                ILayoutBeams ILayoutBeams = IFloorType.GetLayoutBeams();
-
-                //Cycle through bars; if z of bar = the floor height, add it
-                for (int j = 0; j < beams.Count(); j++)
+                if (BH.Engine.Structure.Query.IsVertical(bar))
                 {
-                    //If bar is on level, add it during that iteration of the loop 
-                    Bar bar = beams[j];
+                    IColumn IColumn = IModel.GetColumn(ID);
+                    ILayoutColumn ILayoutColumn = IModel.GetLayoutColumn(ID);
 
+                    // Move column
                     double xStart = bar.StartNode.Position.X;
                     double yStart = bar.StartNode.Position.Y;
+                    double zStart = bar.StartNode.Position.Z;
                     double xEnd = bar.EndNode.Position.X;
                     double yEnd = bar.EndNode.Position.Y;
+                    double zEnd = bar.EndNode.Position.Z;
 
-                    if (bar.StartNode.Position.Z == levelHeights[i])
-                    {
-                        ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd, 0);
-                        ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
-                    }
+                    // Need level rather than offset for setting (still in progress)
+                    ILayoutColumn.SetLayoutCoordinates2(xStart, yStart, zStart, xEnd, yEnd, zEnd);
+                    
+                    // Change section property of column
+                    IColumn.strSectionLabel = bar.Name;
+
                 }
+                else {
+                    IBeam IBeam = IModel.GetBeam(ID);
+                    ILayoutBeam ILayoutBeam = IModel.GetLayoutBeam(ID);
+
+                    // Change section property of column
+                    IBeam.strSectionLabel = bar.Name;
+
+                }
+                       
 
             }
-
 
 
             return true;
