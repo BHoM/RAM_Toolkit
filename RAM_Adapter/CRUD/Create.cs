@@ -241,7 +241,9 @@ namespace BH.Adapter.RAM
         /***************************************************/
 
         private bool CreateCollection(IEnumerable<IProperty2D> IProperty2Ds)
-        {
+        {           
+            //TODO: DECK PROPERTY FUNCTIONALITY
+            
             ////Code for creating a collection of deck properties in the software (DEFAULT FOR NOW)
 
             ////Access model
@@ -271,6 +273,7 @@ namespace BH.Adapter.RAM
         {
             throw new NotImplementedException();
         }
+        //TODO: TEST METHOD AND RESOLVE FREEZING WHEN OPENING RAM
 
         //// Create Panel Method -- Commented because it is not yet working
         //private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
@@ -285,13 +288,13 @@ namespace BH.Adapter.RAM
         //    IStories IStories;
         //    IStory IStory;
 
-        //    //Split nodes into beams and colummns
+        //    //Create wall and floor lists with individual heights
         //    List<PanelPlanar> WallPanels = new List<PanelPlanar>();
         //    List<PanelPlanar> floors = new List<PanelPlanar>();
         //    List<double> panelHeights = new List<double>();
 
 
-        //    // Find all level heights present
+        //    // Split walls and floors
         //    foreach (PanelPlanar panel in panels)
         //    {
         //        if (panel.Tags.Contains("WallPanel"))
@@ -312,7 +315,7 @@ namespace BH.Adapter.RAM
         //    IStories = IModel.GetStories();
 
 
-        //    // Cycle through floortypes, access appropriate story, place beams on those stories
+        //    // Cycle through floortypes, access appropriate story, place panels on those stories
         //    for (int i = 0; i < IFloorTypes.GetCount(); i++)
         //    {
 
@@ -322,7 +325,7 @@ namespace BH.Adapter.RAM
         //        IDecks IDecks = IFloorType.GetDecks();
         //        IDeck IDeck;
 
-        //        //Cycle through bars; if z of bar = the floor height, add it
+        //        //Cycle through floors; if z of bar = the floor height, add it
         //        for (int j = 0; j < floors.Count(); j++)
         //        {
 
