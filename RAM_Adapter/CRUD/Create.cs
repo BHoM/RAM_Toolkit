@@ -94,12 +94,26 @@ namespace BH.Adapter.RAM
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            
+            //Delete Model FloorTypes and Stories Names
+            List<string> FloorTypeNames = new List<string>();
+            List<string> StoryNames = new List<string>();
+            string FloorTypeName;
+            IFloorTypes = IModel.GetFloorTypes();
+            IStories = IModel.GetStories(); 
+
+            for (int i = 0; i < IStories.GetCount(); i++)
+            {
+                IStories.Delete(IStories.GetAt(i));
+            }
+            for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            {
+                IFloorTypes.Delete(IFloorTypes.GetAt(i);
+            }
+
 
             //Create floor type at each level
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
-
                 string LevelName = "Level " + levelHeightsUnique[i].ToString();
                 string StoryName = "Story " + i.ToString();
 
