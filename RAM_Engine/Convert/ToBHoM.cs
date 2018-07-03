@@ -84,8 +84,9 @@ namespace BH.Engine.RAM
             int numStudSegments = new int();
             ppalNumStuds.GetSize(ref numStudSegments);
             double Camber = IBeam.dCamber;
-            double DCI = Result.dDesignCapacityInteraction;
-            double CDI = Result.dCriticalDeflectionInteraction;
+            //Commented out for v14 api testing
+            //double DCI = Result.dDesignCapacityInteraction;
+            //double CDI = Result.dCriticalDeflectionInteraction;
             int studCount = 0;
 
             IAnalyticalResult AnalyticalResult = IBeam.GetAnalyticalResult();
@@ -131,8 +132,9 @@ namespace BH.Engine.RAM
                 bhomBar.CustomData["Camber"] = Camber;
             }
 
-            bhomBar.CustomData["Design Capacity Interaction"] = DCI;
-            bhomBar.CustomData["Critical Deflection Interaction"] = CDI;
+            //Commented out for v14 api testing
+            //bhomBar.CustomData["Design Capacity Interaction"] = DCI;
+            //bhomBar.CustomData["Critical Deflection Interaction"] = CDI;
 
             //// Add reactions to custom data //NOTE: Commented out because it seems to be interfering with "push" (when updating?), sometimes affecting exploding of custom data
             //if (IMemberForces != null)
@@ -371,32 +373,34 @@ namespace BH.Engine.RAM
             Node Node = new Node();
            
             Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
-            IDisplacements IDisplacements = INode.GetDisplacements();
+            
+            //Commented out for v14 api testing
+            //IDisplacements IDisplacements = INode.GetDisplacements();
             IMemberForces IMemberForces = INode.GetReactions();
            
 
-            for (int i = 0; i < IDisplacements.GetCount(); i++)
-            {
-                IDisplacement IDisplacement = IDisplacements.GetAt(i);
+            //for (int i = 0; i < IDisplacements.GetCount(); i++)
+            //{
+            //    IDisplacement IDisplacement = IDisplacements.GetAt(i);
 
-                double x = IDisplacement.dDispX;
-                double y = IDisplacement.dDispY;
-                double z = IDisplacement.dDispZ;
-                double thetax = IDisplacement.dThetaX;
-                double thetay = IDisplacement.dThetaY;
-                double thetaz = IDisplacement.dThetaZ;
+            //    double x = IDisplacement.dDispX;
+            //    double y = IDisplacement.dDispY;
+            //    double z = IDisplacement.dDispZ;
+            //    double thetax = IDisplacement.dThetaX;
+            //    double thetay = IDisplacement.dThetaY;
+            //    double thetaz = IDisplacement.dThetaZ;
 
-                // Unique RAM ID
-                Node.CustomData["lUID"] = INode.lUniqueID;
+            //    // Unique RAM ID
+            //    Node.CustomData["lUID"] = INode.lUniqueID;
 
-                Node.CustomData["dX"] = x;
-                Node.CustomData["dY"] = y;
-                Node.CustomData["dZ"] = z;
-                Node.CustomData["dthetaX"] = thetax;
-                Node.CustomData["dthetaY"] = thetay;
-                Node.CustomData["dthetaZ"] = thetaz;
+            //    Node.CustomData["dX"] = x;
+            //    Node.CustomData["dY"] = y;
+            //    Node.CustomData["dZ"] = z;
+            //    Node.CustomData["dthetaX"] = thetax;
+            //    Node.CustomData["dthetaY"] = thetay;
+            //    Node.CustomData["dthetaZ"] = thetaz;
 
-            }
+            //}
 
             // Collect all member forces at node, tracked by index; should these be combined?
             for (int i = 0; i < IMemberForces.GetCount(); i++)
@@ -404,7 +408,7 @@ namespace BH.Engine.RAM
                 IMemberForce IMemberForce = IMemberForces.GetAt(i);
                 double axial = IMemberForce.dAxial;
                 double loc = IMemberForce.dLocation;
-                double momMaj= IMemberForce.dMomentMajor;
+                double momMaj = IMemberForce.dMomentMajor;
                 double momMin = IMemberForce.dMomentMinor;
                 double shearMaj = IMemberForce.dShearMajor;
                 double shearMin = IMemberForce.dShearMinor;

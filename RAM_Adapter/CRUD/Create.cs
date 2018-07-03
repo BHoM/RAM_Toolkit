@@ -103,11 +103,11 @@ namespace BH.Adapter.RAM
 
             for (int i = 0; i < IStories.GetCount(); i++)
             {
-                IStories.Delete(IStories.GetAt(i));
+                IStories.Delete(IStories.GetAt(i).lUID);
             }
             for (int i = 0; i < IFloorTypes.GetCount(); i++)
             {
-                IFloorTypes.Delete(IFloorTypes.GetAt(i);
+                IFloorTypes.Delete(IFloorTypes.GetAt(i).lUID);
             }
 
 
