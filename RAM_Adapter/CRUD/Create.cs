@@ -27,19 +27,31 @@ namespace BH.Adapter.RAM
         {
             bool success = true;        //boolean returning if the creation was successfull or not
 
-            //if (objects.First() is Bar)
-            //{
-            //    success = CreateCollection(objects as IEnumerable<Bar>);
-            //}
+            //Test if push is going into an empty model
+            //This is a requirement for RAM Push to work reliably
+            
+            //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            double storyCount = IModel.GetStories().GetCount();
+            double floorCount = IModel.GetFloorTypes().GetCount();
 
-            //if (objects.First() is PanelPlanar)
-            //{
-            //    success = CreateCollection(objects as IEnumerable<PanelPlanar>);
-            //}
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
 
+            // Release main interface
+            RAMDataAccIDBIO = null;
 
-            // Commented out to just read Bar for Testing
-            success = CreateCollection(objects as dynamic);
+            if (storyCount == 0 && floorCount == 0)
+            {
+                success = CreateCollection(objects as dynamic);
+            }
+
+            else
+            {
+                throw new Exception("RAM Model must not contain Stories and Floor Types. Set Path to a RAM file without these and try again.");
+                success = false;
+            }
 
             //UpdateViews()             //If there exists a command for updating the views is the software call it now:
 
@@ -94,24 +106,36 @@ namespace BH.Adapter.RAM
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
+            //Logic for deleting stories and then adding new
+            //Phased out for new
+            
             //Delete Model FloorTypes and Stories Names
-            List<string> FloorTypeNames = new List<string>();
-            List<string> StoryNames = new List<string>();
-            string FloorTypeName;
-            IFloorTypes = IModel.GetFloorTypes();
-            IStories = IModel.GetStories(); 
-
-            for (int i = 0; i < IStories.GetCount(); i++)
-            {
-                IStories.Delete(IStories.GetAt(i).lUID);
-            }
-            for (int i = 0; i < IFloorTypes.GetCount(); i++)
-            {
-                IFloorTypes.Delete(IFloorTypes.GetAt(i).lUID);
-            }
+            //List<string> FloorTypeNames = new List<string>();
+            //List<string> StoryNames = new List<string>();
+            //string FloorTypeName;
+            //int StoryID;
+            //int FloorID;
+            //IFloorTypes = IModel.GetFloorTypes();
+            //IStories = IModel.GetStories();
 
 
-            //Create floor type at each level
+            //double storyCount = IStories.GetCount();
+
+            //for (int i = 0; i < storyCount; i++)
+            //{
+            //    StoryID = IStories.GetAt(i).lUID;
+            //    IStories.Delete(StoryID);
+            //}
+            //double floorCount = IFloorTypes.GetCount();
+
+            //for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            //{
+            //    FloorID = IFloorTypes.GetAt(i).lUID;
+            //    IFloorTypes.Delete(FloorID);
+            //}
+
+
+            //Create floor type at graseach level
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
                 string LevelName = "Level " + levelHeightsUnique[i].ToString();
@@ -131,7 +155,7 @@ namespace BH.Adapter.RAM
                 if (i == 0) { height = levelHeightsUnique[i]; }
                 else { height = levelHeightsUnique[i] - levelHeightsUnique[i - 1]; }
 
-                IStories.Add(IFloorType.lUID, StoryName, height * 12);
+                IStories.Add(IFloorType.lUID, StoryName, height);
 
             }
 
@@ -150,10 +174,10 @@ namespace BH.Adapter.RAM
                     //If bar is on level, add it during that iteration of the loop 
                     Bar bar = beams[j];
 
-                    double xStart = bar.StartNode.Position.X * 12;
-                    double yStart = bar.StartNode.Position.Y * 12;
-                    double xEnd = bar.EndNode.Position.X * 12;
-                    double yEnd = bar.EndNode.Position.Y * 12;
+                    double xStart = bar.StartNode.Position.X;
+                    double yStart = bar.StartNode.Position.Y;
+                    double xEnd = bar.EndNode.Position.X;
+                    double yEnd = bar.EndNode.Position.Y;
 
                     if (Math.Round(bar.StartNode.Position.Z) == levelHeightsUnique[i])
                     {
@@ -169,12 +193,12 @@ namespace BH.Adapter.RAM
                     //If bar is on level, add it during that iteration of the loop 
                     Bar bar = columns[j];
 
-                    double xStart = bar.StartNode.Position.X * 12;
-                    double yStart = bar.StartNode.Position.Y * 12;
-                    double zStart = bar.StartNode.Position.Z * 12;
-                    double xEnd = bar.EndNode.Position.X * 12;
-                    double yEnd = bar.EndNode.Position.Y * 12;
-                    double zEnd = bar.EndNode.Position.Z * 12;
+                    double xStart = bar.StartNode.Position.X;
+                    double yStart = bar.StartNode.Position.Y;
+                    double zStart = bar.StartNode.Position.Z;
+                    double xEnd = bar.EndNode.Position.X;
+                    double yEnd = bar.EndNode.Position.Y;
+                    double zEnd = bar.EndNode.Position.Z;
 
                     if (bar.StartNode.Position.Z == levelHeights[i])
                     {
