@@ -84,11 +84,20 @@ namespace BH.Adapter.RAM
             // Find all level heights present
             foreach (Bar bar in bars)
             {
-                //if bar.StartNode.Position.Z > bar.EndNode.Position.Z
-                //{
-                //    Node LowNode = EndNode.Position.Z
-                //}
-                if (BH.Engine.Structure.Query.IsVertical(bar))
+                if (bar.StartNode.Position.Z > bar.EndNode.Position.Z)
+                {
+                    Node LowNode = bar.EndNode;
+                    Node HighNode = bar.StartNode;
+                    bar.StartNode = LowNode;
+                    bar.EndNode = HighNode;
+                }
+
+                double rise = bar.EndNode.Position.Z - bar.StartNode.Position.Z;
+                double length = Engine.Structure.Query.Length(bar);
+                double barRise = ((bar.EndNode.Position.Z - bar.StartNode.Position.Z) / Engine.Structure.Query.Length(bar));
+
+                //if altitude>45 degrees create as column
+                if (barRise>0.7071)
                 {
                     columns.Add(bar);
                     double zStart = bar.StartNode.Position.Z;
@@ -225,8 +234,18 @@ namespace BH.Adapter.RAM
                     {
                         IFloorType = IFloorTypes.GetAt(i+1);
                         ILayoutColumns = IFloorType.GetLayoutColumns();
-                        ILayoutColumn ILayoutColumn = ILayoutColumns.Add(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xStart, yStart, 0, 0);
-                        ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
+
+                        if (BH.Engine.Structure.Query.IsVertical(bar))
+                        {
+                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xStart, yStart, 0, 0);
+                            ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
+                        }
+                        else
+                        {
+                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, xStart, yStart, 0, 0);
+                            ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
+                        }
+
                     }
                 }
 
