@@ -50,7 +50,6 @@ namespace BH.Adapter.RAM
             else
             {
                 throw new Exception("RAM Model must not contain Stories and Floor Types. Set Path to a RAM file without these and try again.");
-                success = false;
             }
 
             //UpdateViews()             //If there exists a command for updating the views is the software call it now:
@@ -85,29 +84,46 @@ namespace BH.Adapter.RAM
             // Find all level heights present
             foreach (Bar bar in bars)
             {
+                //if bar.StartNode.Position.Z > bar.EndNode.Position.Z
+                //{
+                //    Node LowNode = EndNode.Position.Z
+                //}
                 if (BH.Engine.Structure.Query.IsVertical(bar))
                 {
                     columns.Add(bar);
+                    double zStart = bar.StartNode.Position.Z;
+                    double zEnd = bar.EndNode.Position.Z;
+                    beamHeights.Add(zStart);
+                    beamHeights.Add(zEnd);
+                    levelHeights.Add(Math.Round(zStart));
+                    levelHeights.Add(Math.Round(zEnd));
                 }
                 else
                 {
                     beams.Add(bar);
                     double z = bar.StartNode.Position.Z;
-                    double zRounded = Math.Round(z);
                     beamHeights.Add(z);
-                    levelHeights.Add(zRounded);
+                    levelHeights.Add(Math.Round(z));
                 }
             }
 
             levelHeights.Sort();
+            
             List<double> levelHeightsUnique = levelHeights.Distinct().ToList();
+
+            //RAM requires positive levels. Added logic allows for throwing negative level exception.
+
+            if (levelHeightsUnique[0] < 0)
+            {
+                throw new Exception("Base level can not be negative for RAM. Please move model origin point to set base level at 0 or greater.");
+            }
 
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             //Logic for deleting stories and then adding new
-            //Phased out for new
+            //Phased out for now
             
             //Delete Model FloorTypes and Stories Names
             //List<string> FloorTypeNames = new List<string>();
@@ -135,7 +151,7 @@ namespace BH.Adapter.RAM
             //}
 
 
-            //Create floor type at graseach level
+            //Create floor type at each level
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
                 string LevelName = "Level " + levelHeightsUnique[i].ToString();
@@ -159,6 +175,8 @@ namespace BH.Adapter.RAM
 
             }
 
+
+
             // Cycle through floortypes, access appropriate story, place beams on those stories
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
@@ -171,17 +189,20 @@ namespace BH.Adapter.RAM
                 //Cycle through bars; if z of bar = the floor height, add it
                 for (int j = 0; j < beams.Count(); j++)
                 {
-                    //If bar is on level, add it during that iteration of the loop 
+                    
                     Bar bar = beams[j];
 
                     double xStart = bar.StartNode.Position.X;
                     double yStart = bar.StartNode.Position.Y;
                     double xEnd = bar.EndNode.Position.X;
                     double yEnd = bar.EndNode.Position.Y;
+                    double zStart = Math.Round(bar.StartNode.Position.Z);
+                    double zEnd = Math.Round(bar.EndNode.Position.Z);
 
-                    if (Math.Round(bar.StartNode.Position.Z) == levelHeightsUnique[i])
+                    //If bar is on level, add it during that iteration of the loop 
+                    if (zStart == levelHeightsUnique[i])
                     {
-                        ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd, 0);
+                        ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd,5);
                         //ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
                         ILayoutBeam.strSectionLabel = bar.Name; // for debugging, checking scale
                     }
@@ -195,23 +216,17 @@ namespace BH.Adapter.RAM
 
                     double xStart = bar.StartNode.Position.X;
                     double yStart = bar.StartNode.Position.Y;
-                    double zStart = bar.StartNode.Position.Z;
+                    double zStart = Math.Round(bar.StartNode.Position.Z);
                     double xEnd = bar.EndNode.Position.X;
                     double yEnd = bar.EndNode.Position.Y;
-                    double zEnd = bar.EndNode.Position.Z;
+                    double zEnd = Math.Round(bar.EndNode.Position.Z);
 
-                    if (bar.StartNode.Position.Z == levelHeights[i])
+                    if (zStart == levelHeightsUnique[i])
                     {
-                        if (zStart <= zEnd)
-                        {
-                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xStart, yStart, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
-                        }
-                        else
-                        {
-                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
-                        }
+                        IFloorType = IFloorTypes.GetAt(i+1);
+                        ILayoutColumns = IFloorType.GetLayoutColumns();
+                        ILayoutColumn ILayoutColumn = ILayoutColumns.Add(BH.Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xStart, yStart, 0, 0);
+                        ILayoutColumn.strSectionLabel = bar.Name; // for debugging, checking scale
                     }
                 }
 
