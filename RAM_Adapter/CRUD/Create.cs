@@ -212,7 +212,7 @@ namespace BH.Adapter.RAM
                     if (zStart == levelHeightsUnique[i])
                     {
                         ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd,5);
-                        ILayoutBeam.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
+                        ILayoutBeam.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
                     }
                 }
 
@@ -237,15 +237,14 @@ namespace BH.Adapter.RAM
                         if (Engine.Structure.Query.IsVertical(bar))
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
-                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
+                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
                         }
                         else
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, xStart, yStart, 0, 0);
-                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
+                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
                         }
                         
-                        string labelCheck = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
                     }
                 }
 
