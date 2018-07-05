@@ -85,11 +85,25 @@ namespace BH.Adapter.RAM
             {
                RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper");
-               if (loadOutput != 0)
-                  throw new ArgumentException("Cannot access RAM database. Please open the file in RAM, close RAM, and try again.");
+                if (loadOutput == 25673)
+                {
+                    throw new ArgumentException("Cannot access RAM database. Please open the file in RAM, close RAM, and try again.");
+                }
+                else if (loadOutput == 25657)
+                {
+                    throw new ArgumentException("RAM Version installed does not match version of file.");
+                }
+                else if (loadOutput == 25674)
+                {
+                    throw new ArgumentException(".rss and .ram file exist for same model.");
+                }
+                else if (loadOutput == 301)
+                {
+                    throw new ArgumentException("Failed to read .ram file.");
+                }
 
-               // Object Model Interface
-               IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                // Object Model Interface
+                IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
                // Delete usr file
                System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
