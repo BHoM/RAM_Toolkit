@@ -64,17 +64,22 @@ namespace BH.Engine.RAM
             return Point;
         }
 
-        public static EMATERIALTYPES ToRAM(BH.oM.Common.Materials.Material material)
+        public static EMATERIALTYPES ToRAM(oM.Common.Materials.Material material)
         {
             EMATERIALTYPES Material = new EMATERIALTYPES();
             
-            if (material.Type == BH.oM.Common.Materials.MaterialType.Concrete) { Material = EMATERIALTYPES.EConcreteMat; }
-            else if (material.Type == BH.oM.Common.Materials.MaterialType.Steel) { Material = EMATERIALTYPES.ESteelMat; }
+            if (material.Type == oM.Common.Materials.MaterialType.Concrete) { Material = EMATERIALTYPES.EConcreteMat; }
+            else if (material.Type == oM.Common.Materials.MaterialType.Steel) { Material = EMATERIALTYPES.ESteelMat; }
             else { Material = EMATERIALTYPES.ESteelMat; }
 
             return Material;
         }
 
+        public static string ToRAM(string BHoMSectionName)
+        {
+            string RAMSecName = BHoMSectionName;
+            return RAMSecName;
+        }
 
     }
 }
