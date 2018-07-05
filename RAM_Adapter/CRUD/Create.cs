@@ -104,15 +104,15 @@ namespace BH.Adapter.RAM
                     double zEnd = bar.EndNode.Position.Z;
                     beamHeights.Add(zStart);
                     beamHeights.Add(zEnd);
-                    levelHeights.Add(zStart);
-                    levelHeights.Add(zEnd);
+                    levelHeights.Add(Math.Round(zStart,2));
+                    levelHeights.Add(Math.Round(zEnd,2));
                 }
                 else
                 {
                     beams.Add(bar);
                     double z = bar.StartNode.Position.Z;
                     beamHeights.Add(z);
-                    levelHeights.Add(z);
+                    levelHeights.Add(Math.Round(z,2));
                 }
             }
 
@@ -205,15 +205,14 @@ namespace BH.Adapter.RAM
                     double yStart = bar.StartNode.Position.Y;
                     double xEnd = bar.EndNode.Position.X;
                     double yEnd = bar.EndNode.Position.Y;
-                    double zStart = bar.StartNode.Position.Z;
-                    double zEnd = bar.EndNode.Position.Z;
+                    double zStart = Math.Round(bar.StartNode.Position.Z,2);
+                    double zEnd = Math.Round(bar.EndNode.Position.Z,2);
 
                     //If bar is on level, add it during that iteration of the loop 
                     if (zStart == levelHeightsUnique[i])
                     {
                         ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd,5);
-                        ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
-                        
+                        ILayoutBeam.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
                     }
                 }
 
@@ -225,10 +224,10 @@ namespace BH.Adapter.RAM
 
                     double xStart = bar.StartNode.Position.X;
                     double yStart = bar.StartNode.Position.Y;
-                    double zStart = bar.StartNode.Position.Z;
+                    double zStart = Math.Round(bar.StartNode.Position.Z,2);
                     double xEnd = bar.EndNode.Position.X;
                     double yEnd = bar.EndNode.Position.Y;
-                    double zEnd = bar.EndNode.Position.Z;
+                    double zEnd = Math.Round(bar.EndNode.Position.Z,2);
 
                     if (zStart == levelHeightsUnique[i])
                     {
@@ -238,14 +237,15 @@ namespace BH.Adapter.RAM
                         if (Engine.Structure.Query.IsVertical(bar))
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.SectionProperty.Name;
+                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
                         }
                         else
                         {
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, xStart, yStart, 0, 0);
-                            ILayoutColumn.strSectionLabel = bar.SectionProperty.Name;
+                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
                         }
-
+                        
+                        string labelCheck = Engine.RAM.Convert.ToRAM(bar.SectionProperty.SectionProfile.Name);
                     }
                 }
 
