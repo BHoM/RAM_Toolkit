@@ -281,11 +281,41 @@ namespace BH.Engine.RAM
         }
 
 
-        public static PanelPlanar ToBHoMObject(IDeck IDeck, int IStoryUID)
+        public static PanelPlanar ToBHoMObject(IDeck IDeck, IModel IModel, int IStoryUID)
         {
-            //Extract properties
+            //Get all floor props
+            ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
+            INonCompDeckProps INonCompDeckProps = IModel.GetNonCompDeckProps();
+            IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
+
+            //Get panel props
             EDeckType type = IDeck.eDeckPropType;
 
+            IProperty2D bh2DProp = null;
+            ConstantThickness deck2DProp = new ConstantThickness();
+            double deckThickness = 0;
+            string deckLabel = "";
+            int deckID = IDeck.lPropID;
+            if (type == EDeckType.eDeckType_Composite)
+            {
+                ICompDeckProp DeckProp = ICompDeckProps.Get(deckID);
+                deckThickness = DeckProp.dThickAboveFlutes;
+                deckLabel = DeckProp.strLabel + deckThickness.ToString();
+            }
+            else if (type == EDeckType.eDeckType_Concrete)
+            {
+                IConcSlabProp DeckProp = IConcSlabProps.Get(deckID);
+                deckThickness = DeckProp.dThickness;
+                deckLabel = DeckProp.strLabel;
+            }
+            else if (type == EDeckType.eDeckType_NonComposite)
+            {
+                INonCompDeckProp DeckProp = INonCompDeckProps.Get(deckID);
+                deckThickness = DeckProp.dEffectiveThickness;
+                deckLabel = DeckProp.strLabel;
+            }
+
+            
             //Find polylines of deck in RAM Model
 
             //get count of deck polygons
@@ -307,13 +337,17 @@ namespace BH.Engine.RAM
             outlines.Add(outline);
             List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
 
-            PanelPlanar bhomPanel = bhomPanels[0];
+            PanelPlanar bhomPanel = bhomPanels[0];     
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Floor");
-
+            
             bhomPanel.Tags = tag;
             bhomPanel.Name = type.ToString();
+
+            deck2DProp.Name = deckLabel;
+            deck2DProp.Thickness = deckThickness;
+            bhomPanel.Property = deck2DProp;
 
             return bhomPanel;
         }

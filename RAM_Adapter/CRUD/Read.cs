@@ -295,11 +295,12 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j < numDecks; j++)
                 {
                     IDeck IDeck = IDecks.GetAt(j);
-                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IStoryUID);
+                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
                     bhomPanels.Add(Panel);
+
                 }
 
-            }
+        }
 
             return bhomPanels;
         }
