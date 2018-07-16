@@ -49,11 +49,14 @@ namespace BH.Adapter.RAM
                     RAMDataAccIDBIO.CreateNewDatabase2(filePathTest, EUnits.eUnitsEnglish, "Grasshopper");
 
                     // Delete usr file
-                    System.IO.File.Delete(filePathTest.Replace(".rss",".usr"));
+                    File.Delete(filePathTest.Replace(".rss",".usr"));
 
                 }
                 catch
                 {
+                    // Delete usr file
+                    File.Delete(filePathTest.Replace(".rss", ".usr"));
+
                     Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
                 }
 
