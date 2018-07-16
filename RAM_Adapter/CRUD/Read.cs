@@ -296,8 +296,7 @@ namespace BH.Adapter.RAM
                 {
                     IDeck IDeck = IDecks.GetAt(j);
                     PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
-                    bhomPanels.Add(Panel);
-
+                    bhomPanels.Add(Panel);                
                 }
 
         }
