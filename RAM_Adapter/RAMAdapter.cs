@@ -38,10 +38,9 @@ namespace BH.Adapter.RAM
             // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
             if (filePath == "" && !File.Exists(filePath))
             {
+                string filePathTest = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Grasshopper_Model.rss";
                 try
                 {
-
-                    string filePathTest = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Grasshopper_Model.rss";
                     RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
 
                     // Object Model Interface
@@ -54,9 +53,6 @@ namespace BH.Adapter.RAM
                 }
                 catch
                 {
-                    // Delete usr file
-                    File.Delete(filePathTest.Replace(".rss", ".usr"));
-
                     Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
                 }
 
@@ -95,6 +91,8 @@ namespace BH.Adapter.RAM
                 else if (loadOutput == 25657)
                 {
                     throw new ArgumentException("RAM Version installed does not match version of file.");
+                    // Delete usr file
+                    File.Delete(filePath.Replace(".rss", ".usr"));
                 }
                 else if (loadOutput == 25674)
                 {
