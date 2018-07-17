@@ -319,9 +319,9 @@ namespace BH.Engine.RAM
             //Find polylines of deck in RAM Model
 
             //get count of deck polygons
-            IDeck.GetNumFinalPolygons(IStoryUID);
+            double deckPolyCount = IDeck.GetNumFinalPolygons(IStoryUID);
 
-            //Initial only gets first outline poly
+            //Initial only gets first outline poly for exterior edge, rest for openings
             IPoints pplPoints = IDeck.GetFinalPolygon(IStoryUID, 0);
 
             //Re-add first point to close Polygon
@@ -330,14 +330,46 @@ namespace BH.Engine.RAM
             first.GetCoordinate(ref firstCoord);
             pplPoints.Add(firstCoord);
 
+            //Create outline polyline
             Polyline outline = ToPolyline(pplPoints);
+
+            //Create opening outlines
+            List<ICurve> openingPLs = new List<ICurve>();
+
+            for (int i = 1; i < deckPolyCount; i++)
+            {
+                IPoints openingPts = IDeck.GetFinalPolygon(IStoryUID, i);
+
+                //Re-add first point to close Polygon
+                IPoint firstOPt = openingPts.GetAt(0);
+                SCoordinate firstOCoord = new SCoordinate();
+                firstOPt.GetCoordinate(ref firstOCoord);
+                openingPts.Add(firstOCoord);
+
+                ICurve openingOutline = ToPolyline(openingPts);
+
+                //Create openings per outline polylines
+                openingPLs.Add(openingOutline);
+            }
 
             //Create panel per outline polylines
             List<Polyline> outlines = new List<Polyline>();
             outlines.Add(outline);
             List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+            //Create openings per openings polylines
+            int numOpenings = openingPLs.Count();
 
-            PanelPlanar bhomPanel = bhomPanels[0];     
+            //Create openings
+            List<Opening> bhomOpenings = new List<Opening>();
+            for (int i = 0; i < numOpenings; i++)
+            {
+                Opening bhomOpening = Create.Opening(openingPLs[i]);
+                bhomOpenings.Add(bhomOpening);
+            }
+
+            //Create panel and add attributes
+            PanelPlanar bhomPanel = bhomPanels[0];
+            bhomPanel.Openings = bhomOpenings;
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Floor");
@@ -352,7 +384,7 @@ namespace BH.Engine.RAM
             return bhomPanel;
         }
 
-        // Currently obsolete, use IWallPanel method instead; keeping for potential future use
+        //Currently obsolete, use IWallPanel method instead; keeping for potential future use
         public static PanelPlanar ToBHoMObject(IWall IWall)
         {
 
