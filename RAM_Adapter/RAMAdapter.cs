@@ -90,9 +90,9 @@ namespace BH.Adapter.RAM
                 }
                 else if (loadOutput == 25657)
                 {
-                    throw new ArgumentException("RAM Version installed does not match version of file.");
                     // Delete usr file
                     File.Delete(filePath.Replace(".rss", ".usr"));
+                    throw new ArgumentException("RAM Version installed does not match version of file.");
                 }
                 else if (loadOutput == 25674)
                 {
