@@ -67,6 +67,9 @@ namespace BH.Engine.RAM
 
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IColumn.lUID;
+            bhomBar.CustomData["ElementType"] = "Column";
+            bhomBar.CustomData["FrameNumber"] = IColumn.lLabel;
+            bhomBar.Tags.Add("Column");
 
             return  bhomBar;
         }
@@ -114,6 +117,9 @@ namespace BH.Engine.RAM
 
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IBeam.lUID;
+            bhomBar.CustomData["ElementType"] = "Beam";
+            bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
+            bhomBar.Tags.Add("Beam");
 
             //Add studs to custom Data by total stud count only
             for (int i = 0; i < numStudSegments; i++)
@@ -191,6 +197,9 @@ namespace BH.Engine.RAM
 
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IVerticalBrace.lUID;
+            bhomBar.CustomData["ElementType"] = "VerticalBrace";
+            bhomBar.CustomData["FrameNumber"] = IVerticalBrace.lLabel;
+            bhomBar.Tags.Add("VerticalBrace");
 
             return bhomBar;
         }
@@ -223,6 +232,9 @@ namespace BH.Engine.RAM
 
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IHorizBrace.lUID;
+            bhomBar.CustomData["ElementType"] = "HorizontalBrace";
+            bhomBar.CustomData["FrameNumber"] = IHorizBrace.lLabel;
+            bhomBar.Tags.Add("HorizontalBrace");
 
             return bhomBar;
         }
