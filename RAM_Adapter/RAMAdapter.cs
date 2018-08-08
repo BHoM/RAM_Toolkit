@@ -38,7 +38,7 @@ namespace BH.Adapter.RAM
             // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
             if (filePath == "" && !File.Exists(filePath))
             {
-                string filePathTest = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Grasshopper_Model.rss";
+                string filePathTest = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
                 try
                 {
                     RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
