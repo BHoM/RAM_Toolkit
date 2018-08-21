@@ -92,8 +92,14 @@ namespace BH.Adapter.RAM
                     string filePathWorkingDir2 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Working\\";
                     string filePathTempRAMFile = filePathWorkingDir + fileNameRAM;
                     string filePathTempRAMFile2 = filePathWorkingDir2 + fileNameRAM;
-                    File.Delete(filePathTempRAMFile);
-                    File.Delete(filePathTempRAMFile2);
+                    if (File.Exists(filePathTempRAMFile))
+                    {
+                        File.Delete(filePathTempRAMFile);
+                    }
+                    if (File.Exists(filePathTempRAMFile2))
+                    {
+                        File.Delete(filePathTempRAMFile2);
+                    }
 
                     RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                     double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper");
