@@ -84,6 +84,17 @@ namespace BH.Adapter.RAM
                 // Initialize to inferface (OF EXISTING MODEL)
                 if (File.Exists(filePath))
                 {
+                    //Delete .ram file in working directory if it exists
+                    string fileName = Path.GetFileName(filePath);
+                    string fileNameRAM = fileName.Replace(".rss", ".ram");
+                    //Two possible working dirs depending on install
+                    string filePathWorkingDir = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Working\\";
+                    string filePathWorkingDir2 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Working\\";
+                    string filePathTempRAMFile = filePathWorkingDir + fileNameRAM;
+                    string filePathTempRAMFile2 = filePathWorkingDir2 + fileNameRAM;
+                    File.Delete(filePathTempRAMFile);
+                    File.Delete(filePathTempRAMFile2);
+
                     RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                     double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper");
                     if (loadOutput == 25673)
