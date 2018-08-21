@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using RAMDATAACCESSLib;
 using RAMDataBaseAccess;
 using BH.oM.Base;
-using BH.oM.Structural.Elements;
+using BH.oM.Structure.Elements;
 using BH.Engine.Structure;
 using BH.oM.Geometry;
 
@@ -112,7 +112,7 @@ namespace RAM_Test
             //    SCoordinate Location = new SCoordinate();
             //    Location = INode.sLocation;
 
-            //    BH.oM.Structural.Elements.Node Node = new Node();
+            //    BH.oM.Structure.Elements.Node Node = new Node();
 
             //    Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
             //    IDisplacements IDisplacements = INode.GetDisplacements();
