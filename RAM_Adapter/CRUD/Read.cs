@@ -54,7 +54,6 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading bars
             List<Bar> bhomBars = new List<Bar>();
-
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             // Get stories
@@ -241,46 +240,47 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading panels
             List<PanelPlanar> bhomPanels = new List<PanelPlanar>();
-
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            //Code for accessing IWallPanels, which need to go through the IWallDesignGroups interface that is accessed directly through IModel
-            IWallDesignGroups IWallDesignGroups = IModel.GetWallDesignGroups();
-
-            for (int i = 0; i < IWallDesignGroups.GetCount(); i++)
-            {
-                IWallDesignGroup IWallDesignGroup = IWallDesignGroups.GetAt(i);
-                IWallPanels IWallPanels = IWallDesignGroup.GetWallPanels();
-
-                for (int j = 0; j < IWallPanels.GetCount(); j++)
-                {
-                    IWallPanel IWallPanel = IWallPanels.GetAt(j);
-
-                    //CAUTION: Will assume all walls are the same height, cannot handle variable-height walls as written
-                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWallPanel);
-                    bhomPanels.Add(Panel);
-                }
-            }
-
-            // Get stories
+            //Get stories
             IStories IStories = IModel.GetStories();
             int numStories = IStories.GetCount();
+
+            ////Code for accessing IWallPanels, which need to go through the IWallDesignGroups interface that is accessed directly through IModel
+            ////THIS CODE DOES NOT RELEASE THE DATABASE .db.sdk FILE AFTER RUNNING, RESULTING IN CRASHING
+            //IWallDesignGroups IWallDesignGroups = IModel.GetWallDesignGroups();
+
+            //for (int i = 0; i < IWallDesignGroups.GetCount(); i++)
+            //{
+            //    IWallDesignGroup IWallDesignGroup = IWallDesignGroups.GetAt(i);
+            //    IWallPanels IWallPanels = IWallDesignGroup.GetWallPanels();
+
+            //    for (int j = 0; j < IWallPanels.GetCount(); j++)
+            //    {
+            //        IWallPanel IWallPanel = IWallPanels.GetAt(j);
+
+            //    //CAUTION: Will assume all walls are the same height, cannot handle variable-height walls as written
+            //        PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWallPanel);
+            //        bhomPanels.Add(Panel);
+            //    }
+            //}
 
             // Get all elements on each story
             for (int i = 0; i < numStories; i++)
             {
 
-                ////Get Walls (from IWALL DIRECTLY--SINCE IWALL CAN BE NON-PLANAR, THIS DOES NOT RETURN CORRECT RESULTS)
-                //IWalls IWalls = IStories.GetAt(i).GetWalls();
-                //int numWalls = IWalls.GetCount();
+                //WIP
+                //Get Walls (from IWALL DIRECTLY--SINCE IWALL CAN BE NON-PLANAR, THIS DOES NOT RETURN CORRECT RESULTS)
+                IWalls IWalls = IStories.GetAt(i).GetWalls();
+                int numWalls = IWalls.GetCount();
 
-                //// Convert Walls
-                //for (int j = 0; j < numWalls; j++)
-                //{
-                //    IWall IWall = IWalls.GetAt(j);
-                //    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
-                //    bhomPanels.Add(Panel);
-                //}
+                // Convert Walls
+                for (int j = 0; j < numWalls; j++)
+                {
+                    IWall IWall = IWalls.GetAt(j);
+                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
+                    bhomPanels.Add(Panel);
+                }
 
                 //Get Floors
                 IStory IStory = IStories.GetAt(i);
@@ -296,11 +296,10 @@ namespace BH.Adapter.RAM
                 {
                     IDeck IDeck = IDecks.GetAt(j);
                     PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
-                    bhomPanels.Add(Panel);                
+                    bhomPanels.Add(Panel);
                 }
 
-        }
-
+            }
             return bhomPanels;
         }
     }

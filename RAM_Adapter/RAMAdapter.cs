@@ -20,6 +20,7 @@ namespace BH.Adapter.RAM
         //Add any applicable constructors here, such as linking to a specific file or anything else as well as linking to that file through the (if existing) com link via the API
         public RAMAdapter(string filePath = "", bool Active = false)
         {
+
             if (Active)
             {
                 AdapterId = BH.Engine.RAM.Convert.AdapterId;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
@@ -31,26 +32,25 @@ namespace BH.Adapter.RAM
                 Config.UseAdapterId = false;        //Tag objects with a software specific id in the CustomData. Requires the NextIndex method to be overridden and implemented
 
 
-                IDBIO1 RAMDataAccIDBIO;
-                IModel IModel;
-
                 m_RAMApplication = null;
                 m_RAMApplication = new RamDataAccess1();
+                IDBIO1 RAMDataAccIDBIO;
+                IModel IModel;
 
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
                 if (filePath == "" && !File.Exists(filePath))
                 {
-                    string filePathTest = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
+                    string filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
                     try
                     {
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
 
                         // Object Model Interface
                         IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-                        RAMDataAccIDBIO.CreateNewDatabase2(filePathTest, EUnits.eUnitsEnglish, "Grasshopper");
+                        RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
 
                         // Delete usr file
-                        File.Delete(filePathTest.Replace(".rss", ".usr"));
+                        File.Delete(filePathNew.Replace(".rss", ".usr"));
 
                     }
                     catch
@@ -143,7 +143,7 @@ namespace BH.Adapter.RAM
         //private SoftwareComLink m_softwareNameCom;
 
         private RamDataAccess1 m_RAMApplication;
-        
+
 
         /***************************************************/
 
