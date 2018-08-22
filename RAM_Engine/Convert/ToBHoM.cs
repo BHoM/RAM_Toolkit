@@ -413,7 +413,7 @@ namespace BH.Engine.RAM
             List<Point> corners = new List<Point>();
             corners.Add(new Point { X = TopstartPt.dXLoc, Y = TopstartPt.dYLoc, Z = TopstartPt.dZLoc });
             corners.Add(new Point { X = TopendPt.dXLoc, Y = TopendPt.dYLoc, Z = TopendPt.dZLoc });
-            corners.Add(new Point { X = BottomendPt.dXLoc, Y = BottomendPt.dXLoc, Z = BottomendPt.dZLoc });
+            corners.Add(new Point { X = BottomendPt.dXLoc, Y = BottomendPt.dYLoc, Z = BottomendPt.dZLoc });
             corners.Add(new Point { X = BottomstartPt.dXLoc, Y = BottomstartPt.dYLoc, Z = BottomstartPt.dZLoc });
             corners.Add(new Point { X = TopstartPt.dXLoc, Y = TopstartPt.dYLoc, Z = TopstartPt.dZLoc });
 
