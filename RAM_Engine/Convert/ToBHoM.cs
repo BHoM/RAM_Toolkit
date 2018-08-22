@@ -86,9 +86,8 @@ namespace BH.Engine.RAM
             int numStudSegments = new int();
             ppalNumStuds.GetSize(ref numStudSegments);
             double Camber = IBeam.dCamber;
-            //Commented out for v14 api testing
-            //double DCI = Result.dDesignCapacityInteraction;
-            //double CDI = Result.dCriticalDeflectionInteraction;
+            double DCI = Result.dDesignCapacityInteraction;
+            double CDI = Result.dCriticalDeflectionInteraction;
             int studCount = 0;
 
             IAnalyticalResult AnalyticalResult = IBeam.GetAnalyticalResult();
