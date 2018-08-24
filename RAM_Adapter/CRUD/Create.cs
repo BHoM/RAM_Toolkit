@@ -13,12 +13,15 @@ using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
 using BH.Engine.Geometry;
+using BH.oM.Architecture.Elements;
 
 
 namespace BH.Adapter.RAM
 {
     public partial class RAMAdapter
     {
+        private object get;
+
         /***************************************************/
         /**** Adapter overload method                   ****/
         /***************************************************/
@@ -57,6 +60,7 @@ namespace BH.Adapter.RAM
             return success;             //Finally return if the creation was successful or not
 
         }
+
 
         /***************************************************/
         /**** Private methods                           ****/
@@ -276,6 +280,7 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
+
         private bool CreateCollection(IEnumerable<Node> nodes)
         {
             //Code for creating a collection of nodes in the software
@@ -476,6 +481,19 @@ namespace BH.Adapter.RAM
 
         //    return true;
         //}
+
+
+
+        private bool CreateCollection(IEnumerable<Grid> bhomGridSystem)
+        {
+            //Code for creating a Grid System in the software
+
+            List<Grid> GridSystem = bhomGridSystem.ToList();
+            
+
+            return true;
+        }
+
 
 
         /***************************************************/

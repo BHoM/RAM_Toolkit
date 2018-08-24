@@ -49,6 +49,8 @@ namespace RAM_Test
             IFloorType IFloorType;
             ILayoutColumns ILayoutColumns;
             ILayoutBeams ILayoutBeams;
+            IGridSystem IGridSystem; 
+
             Stories = new List<int>();
             List<string> ColumnSections = new List<string>();
             List<string> ColumnStartX = new List<string>();
