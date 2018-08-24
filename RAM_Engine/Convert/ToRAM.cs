@@ -10,6 +10,8 @@ using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
 using BH.oM.Structure.Properties;
 using RAMDATAACCESSLib;
+using BH.oM.Architecture.Elements;
+
 
 namespace BH.Engine.RAM
 {
@@ -18,22 +20,18 @@ namespace BH.Engine.RAM
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
-
         //Add methods for converting From BHoM to the specific software types, if possible to do without any BHoM calls
         //Example:
         //public static RAMNode ToRAM(this Node node)
         //{
         //    //Insert code for convertion
         //}
-
         /***************************************************/
+
 
         //public static IBeam ToRAM(Bar bar)
         //{
         //    IBeam IBeam;
-       
-
-
         //    return IBeam;
         //}
 
@@ -81,5 +79,36 @@ namespace BH.Engine.RAM
             return RAMSecName;
         }
 
+        public static IGridSystem ToRAM(Grid bhomGrid, IModelGrids IModelGrids)
+        {
+
+            IGridSystem myGridSystem = (IGridSystem) bhomGrid;
+            myGridSystem.strLabel = bhomGrid.Name;
+            ICurve grids = bhomGrid.Curve;
+
+            int gridNumber = IModelGrids.GetCount();
+
+
+
+            //TODO: extract more parameters from the 
+            //loop through the curves and , extract info from the curves and pass it to RAM IModelGrid
+            //IModelGrids.Add(gridNumber, crvAxis, CrvAngle)
+            //int gridSpacing = IModelGrids
+            //EGridAxis crvAxis = new Curve(); ;
+                
+           
+            //myGridSystem = bhomGrid.Curve;
+            //myGridSystem.eOrientationType = gridSystem.GridType;
+            //myGridSystem.strLabel = bhomGrid.GridLabel;
+            //myGridSystem.dRotation = bhomGrid.GridRotation;
+            //myGridSystem.dXOffset = bhomGrid.GridXoffset;
+            //myGridSystem.dYOffset = bhomGrid.GridYoffset;
+
+
+            return myGridSystem;
+
+        }
+
     }
+
 }

@@ -9,6 +9,7 @@ using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
 using BH.oM.Structure.Properties;
 using RAMDATAACCESSLib;
+using BH.oM.Architecture.Elements;
 
 namespace BH.Engine.RAM
 {
@@ -17,13 +18,16 @@ namespace BH.Engine.RAM
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
-
+        /// <summary>
         //Add methods for converting to BHoM from the specific software types, if possible to do without any BHoM calls
         //Example:
         //public static Node ToBHoM(this RAMNode node)
         //{
         //    //Insert code for conversion
         //}
+        /// <summary>
+        /// 
+
 
         /***************************************************/
 
@@ -40,6 +44,7 @@ namespace BH.Engine.RAM
                 Point controlPt = new BH.oM.Geometry.Point() { X = SCoordPt.dXLoc, Y = SCoordPt.dYLoc, Z = SCoordPt.dZLoc };
                 controlPts.Add(controlPt);
             }
+
             Polyline polyline = new Polyline();
             polyline.ControlPoints = controlPts;
             return polyline;
@@ -511,6 +516,49 @@ namespace BH.Engine.RAM
             Loadcase.CustomData.Add("Type", LoadType);
 
             return Loadcase;
+        }
+
+
+
+        public static Grid ToBHoMObject(IGridSystem IGridSystem)
+        {
+
+            //initialize the gridSystem
+            Grid myGrid = new Grid();
+            // Set the name of the GridSystem from RAM
+            myGrid.Name = IGridSystem.strLabel;
+
+            //Not sure if the casting of ICurve works
+            myGrid.Curve = (ICurve)IGridSystem.GetGrids();
+            
+
+            string gridSystemType = IGridSystem.eOrientationType.ToString();
+            myGrid.CustomData.Add("Type", gridSystemType);
+
+            // Set the rotation angle of the GridSystem from RAM
+            double gridSystemRotation = IGridSystem.dRotation;
+            myGrid.CustomData.Add("Rotation", gridSystemRotation);
+            // Set the offset of the GridSystem
+
+            double gridXoffset = IGridSystem.dXOffset;
+            myGrid.CustomData.Add("xOffset", gridXoffset);
+            double gridYoffset = IGridSystem.dYOffset;
+            myGrid.CustomData.Add("yOffset", gridYoffset);
+
+            
+
+            //previous code
+            //myGrid.Curve = IGridSystem.GetGrids();
+            //myGrid.GridLabel = IGridSystem.strLabel
+            // myGrid.GridRotation = IGridSystem.dRotation;
+            //string GridSystemType = IGridSystem.eOrientationType.ToString();
+            //myGrid.GridType = IGridSystem.eOrientationType.ToString();
+            //myGrid.GridXoffset = IGridSystem.dXOffset;
+            //myGrid.GridYoffset = IGridSystem.dYOffset;
+
+
+
+            return myGrid;
         }
 
 

@@ -35,10 +35,6 @@
     <Reference Include="BHoM">
       <HintPath>..\..\BHoM\Build\BHoM.dll</HintPath>
     </Reference>
-    <Reference Include="Interop.RAMDATAACCESSLib">
-      <HintPath>..\..\..\..\..\..\Program Files\Bentley\Engineering\RAM Structural System\Prog\Interop.RAMDATAACCESSLib.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="RAM_Engine">
       <HintPath>..\Build\RAM_Engine.dll</HintPath>
     </Reference>
@@ -62,6 +58,15 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <COMReference Include="RAMDATAACCESSLib">
+      <Guid>{045F59D6-DBB7-4A8C-97ED-9BA47C4C5EC9}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
     <COMReference Include="RAMDataBaseAccess">
       <Guid>{E0A75350-BCE3-4969-BCDA-AF252FE8A8DC}</Guid>
       <VersionMajor>1</VersionMajor>
