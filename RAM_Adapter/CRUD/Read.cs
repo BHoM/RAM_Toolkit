@@ -13,6 +13,8 @@ using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
 using BH.Engine;
+using BH.oM.Architecture.Elements;
+
 
 
 namespace BH.Adapter.RAM
@@ -37,8 +39,10 @@ namespace BH.Adapter.RAM
                 return ReadPanels(ids as dynamic);
             else if (type == typeof(IProperty2D))
                 return ReadIProperty2Ds(ids as dynamic);
-            if (type == typeof(Loadcase))
+            else if (type == typeof(Loadcase))
                 return ReadLoadCase(ids as dynamic);
+            if (type == typeof(Grid))
+                return ReadGrid(ids as dynamic);
 
 
             return null;
@@ -233,6 +237,30 @@ namespace BH.Adapter.RAM
 
         }
 
+
+        private List<Grid> ReadGrid(List<string> ids = null)
+        {
+            //Implement code for reading Grids
+            List<Grid> bhomGrids = new List<Grid>();
+
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IGridSystems IGridSystems = IModel.GetGridSystems();
+               for (int i = 0; i < IGridSystems.GetCount(); i++)
+            {
+                //Get Grids
+                IGridSystem GridSystem = IGridSystems.GetAt(i);
+
+                //TO do fix the ref
+               // Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject (IGridSystem);
+
+                //bhomGrids.Add(bhomGrid);
+            }
+
+            return bhomGrids;
+        }
+
+
+
         /***************************************************/
 
         // Read panels method; will need to figure out how to convert geometry (RAM provides four corner points); does not seem to be working properly, crashes Rhino when walls are present
@@ -302,5 +330,8 @@ namespace BH.Adapter.RAM
             }
             return bhomPanels;
         }
+
+
     }
+
 }

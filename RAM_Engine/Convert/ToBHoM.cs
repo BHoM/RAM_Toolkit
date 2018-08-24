@@ -26,9 +26,6 @@ namespace BH.Engine.RAM
         //    //Insert code for conversion
         //}
         /// <summary>
-        /// 
-
-
         /***************************************************/
 
         public static Polyline ToPolyline(IPoints IPoints)
@@ -78,7 +75,6 @@ namespace BH.Engine.RAM
             return  bhomBar;
         }
 
- 
         public static Bar ToBHoMObject(IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
         {
 
@@ -291,7 +287,6 @@ namespace BH.Engine.RAM
 
             return bhomPanel;
         }
-
 
         public static PanelPlanar ToBHoMObject(IDeck IDeck, IModel IModel, int IStoryUID)
         {
@@ -518,8 +513,6 @@ namespace BH.Engine.RAM
             return Loadcase;
         }
 
-
-
         public static Grid ToBHoMObject(IGridSystem IGridSystem)
         {
 
@@ -538,25 +531,12 @@ namespace BH.Engine.RAM
             // Set the rotation angle of the GridSystem from RAM
             double gridSystemRotation = IGridSystem.dRotation;
             myGrid.CustomData.Add("RamRotation", gridSystemRotation);
-            // Set the offset of the GridSystem
 
+            // Set the offset of the GridSystem
             double gridXoffset = IGridSystem.dXOffset;
             myGrid.CustomData.Add("xOffset", gridXoffset);
             double gridYoffset = IGridSystem.dYOffset;
             myGrid.CustomData.Add("yOffset", gridYoffset);
-
-            
-
-            //previous code
-            //myGrid.Curve = IGridSystem.GetGrids();
-            //myGrid.GridLabel = IGridSystem.strLabel
-            // myGrid.GridRotation = IGridSystem.dRotation;
-            //string GridSystemType = IGridSystem.eOrientationType.ToString();
-            //myGrid.GridType = IGridSystem.eOrientationType.ToString();
-            //myGrid.GridXoffset = IGridSystem.dXOffset;
-            //myGrid.GridYoffset = IGridSystem.dYOffset;
-
-
 
             return myGrid;
         }

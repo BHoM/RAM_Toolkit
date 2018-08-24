@@ -58,7 +58,6 @@ namespace BH.Engine.RAM
             Point.dXLoc = point.X;
             Point.dYLoc = point.Y;
             Point.dZLoc = point.Z;
-
             return Point;
         }
 
@@ -69,7 +68,6 @@ namespace BH.Engine.RAM
             if (material.Type == oM.Common.Materials.MaterialType.Concrete) { Material = EMATERIALTYPES.EConcreteMat; }
             else if (material.Type == oM.Common.Materials.MaterialType.Steel) { Material = EMATERIALTYPES.ESteelMat; }
             else { Material = EMATERIALTYPES.ESteelMat; }
-
             return Material;
         }
 
@@ -83,32 +81,30 @@ namespace BH.Engine.RAM
         {
 
             IGridSystem myGridSystem = (IGridSystem) bhomGrid;
+            // grid name
             myGridSystem.strLabel = bhomGrid.Name;
+            // 
             ICurve grids = bhomGrid.Curve;
 
+            // parameter for getting the number of grids
             int gridNumber = IModelGrids.GetCount();
 
-
-
-            //TODO: extract more parameters from the 
+            //TODO: extract more parameters from the curve object 
             //loop through the curves and , extract info from the curves and pass it to RAM IModelGrid
             //IModelGrids.Add(gridNumber, crvAxis, CrvAngle)
             //int gridSpacing = IModelGrids
             //EGridAxis crvAxis = new Curve(); ;
                 
-           
-            //myGridSystem = bhomGrid.Curve;
-            //myGridSystem.eOrientationType = gridSystem.GridType;
-            //myGridSystem.strLabel = bhomGrid.GridLabel;
-            //myGridSystem.dRotation = bhomGrid.GridRotation;
-            //myGridSystem.dXOffset = bhomGrid.GridXoffset;
-            //myGridSystem.dYOffset = bhomGrid.GridYoffset;
 
 
             return myGridSystem;
 
         }
 
+        public static Grid ToBHoMObject()
+        {
+            throw new NotImplementedException();
+        }
     }
 
 }
