@@ -533,11 +533,11 @@ namespace BH.Engine.RAM
             
 
             string gridSystemType = IGridSystem.eOrientationType.ToString();
-            myGrid.CustomData.Add("Type", gridSystemType);
+            myGrid.CustomData.Add("RamType", gridSystemType);
 
             // Set the rotation angle of the GridSystem from RAM
             double gridSystemRotation = IGridSystem.dRotation;
-            myGrid.CustomData.Add("Rotation", gridSystemRotation);
+            myGrid.CustomData.Add("RamRotation", gridSystemRotation);
             // Set the offset of the GridSystem
 
             double gridXoffset = IGridSystem.dXOffset;
