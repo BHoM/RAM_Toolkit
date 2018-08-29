@@ -242,18 +242,30 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Grids
             List<Grid> bhomGrids = new List<Grid>();
-
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            // Get the gridsystems that are in the model
             IGridSystems IGridSystems = IModel.GetGridSystems();
-               for (int i = 0; i < IGridSystems.GetCount(); i++)
+            int numGridSystems = IGridSystems.GetCount();
+
+
+            // Get all elements on each GridSystem
+            for (int i = 0; i < numGridSystems; i++)
             {
-                //Get Grids
-                IGridSystem GridSystem = IGridSystems.GetAt(i);
+                //Look into a speific gridsystem
+                IGridSystem myGridSystem = IGridSystems.GetAt(i);
+                
+                //get the amoount of gridlines that are in the system
+                IModelGrids IModelGrid = myGridSystem.GetGrids();
+                int numGridLines = IModelGrid.GetCount();
 
-                //TO do fix the ref
-               // Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject (IGridSystem);
+                // Loop through all gridlines and add bhomGrid
+                for (int j = 0; j < numGridLines; i++)
+                {
+                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(myGridSystem);
+                    bhomGrids.Add(bhomGrid);
+                }
 
-                //bhomGrids.Add(bhomGrid);
             }
 
             return bhomGrids;
