@@ -474,7 +474,7 @@ namespace BH.Engine.RAM
             //    Node.CustomData["dthetaZ"] = thetaz;
 
             //}
-
+            
             // Collect all member forces at node, tracked by index; should these be combined?
             for (int i = 0; i < IMemberForces.GetCount(); i++)
             {
@@ -515,30 +515,85 @@ namespace BH.Engine.RAM
 
         public static Grid ToBHoMObject(IGridSystem IGridSystem)
         {
-
-            //initialize the gridSystem
+           //initialize the gridSystem
             Grid myGrid = new Grid();
-            // Set the name of the GridSystem from RAM
-            myGrid.Name = IGridSystem.strLabel;
 
-            //Not sure if the casting of ICurve works
-            myGrid.Curve = (ICurve)IGridSystem.GetGrids();
-            
+            // Get the Gridsystem data
+            string gridSystemLabel = IGridSystem.strLabel;// Set the name of the GridSystem from RAM
+            int gridSystemID = IGridSystem.lUID;    //Set the lUID from RAM
+            string gridSystemType = IGridSystem.eOrientationType.ToString();// Set the orientation type
+            double gridXoffset = IGridSystem.dXOffset;   // Set the offset of the GridSystem from 0 along the X axis
+            double gridYoffset = IGridSystem.dYOffset; // Set the offset of the GridSystem from 0 along the Y axis
+            double gridSystemRotation = IGridSystem.dRotation; // Set the rotation angle of the GridSystem
 
-            string gridSystemType = IGridSystem.eOrientationType.ToString();
-            myGrid.CustomData.Add("RamType", gridSystemType);
 
-            // Set the rotation angle of the GridSystem from RAM
-            double gridSystemRotation = IGridSystem.dRotation;
-            myGrid.CustomData.Add("RamRotation", gridSystemRotation);
-
-            // Set the offset of the GridSystem
-            double gridXoffset = IGridSystem.dXOffset;
+            myGrid.CustomData.Add("lUID", gridSystemID);
+            myGrid.CustomData.Add("RAMLabel", gridSystemLabel);
+            myGrid.CustomData.Add("RamGridType", gridSystemType);
             myGrid.CustomData.Add("xOffset", gridXoffset);
-            double gridYoffset = IGridSystem.dYOffset;
             myGrid.CustomData.Add("yOffset", gridYoffset);
+            myGrid.CustomData.Add("RamGridRotation", gridSystemRotation);
+
+           //check if what type is the GridSystem : orthogonal or radial ?? 
+  
+            
+             
+
+            //GET THE GRIDLines FROM THE MODEL
+            IModelGrids IModelGrids = IGridSystem.GetGrids();
+
+            // go through all gridlines and get information for each line
+            for (int i = 0; i < IModelGrids.GetCount(); i++)
+            {
+                IModelGrid IModelGrid = IModelGrids.GetAt(i);
+
+
+                //Get info for each grid line
+                int gridLinelUID = IModelGrid.lUID;
+                string gridLineLabel = IModelGrid.strLabel;
+                double gridLineAngle = IModelGrid.dCoordinate_Angle;   
+                string gridLineAxis = IModelGrid.eAxis.ToString(); // grid line axis , X/Radial Y/Circular 
+
+                double dMaxLimit = IModelGrid.dMaxLimitValue;
+                double dMinLimit = IModelGrid.dMinLimitValue;
+
+
+
+                SCoordinate gridCoordPoint1 = new SCoordinate();
+                SCoordinate gridCoordPoint2 = new SCoordinate();
+
+                gridCoordPoint1.dXLoc = gridXoffset;
+                gridCoordPoint1.dYLoc = gridYoffset;
+                gridCoordPoint1.dZLoc = 0;
+
+                if (gridLineAxis == "X")
+                {
+                    //define the second point based on the orientation 
+                    gridCoordPoint2.dXLoc = gridXoffset + dMaxLimit; // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.dYLoc = gridYoffset;
+                    gridCoordPoint2.dZLoc = 0;
+
+                } else if (gridLineAxis == "Y")
+                {
+                    gridCoordPoint2.dXLoc = gridXoffset ;
+                    gridCoordPoint2.dYLoc = gridYoffset + dMaxLimit ; // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.dZLoc = 0;
+
+                }
+
+
+
+                Line gridLine = new Line();
+                gridLine.Start = new Point { X = gridCoordPoint1.dXLoc, Y = gridCoordPoint1.dYLoc, Z = gridCoordPoint1.dZLoc } ;
+                gridLine.Start = new Point { X = gridCoordPoint2.dXLoc, Y = gridCoordPoint2.dYLoc, Z = gridCoordPoint2.dZLoc };
+                myGrid = new Grid{ Curve = gridLine, Name = gridLineLabel };
+
+
+            }
 
             return myGrid;
+
+
         }
 
 

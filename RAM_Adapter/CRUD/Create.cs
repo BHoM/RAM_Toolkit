@@ -165,6 +165,7 @@ namespace BH.Adapter.RAM
 
 
             //Create floor type at each level
+            
             for (int i = 0; i < levelHeightsUnique.Count(); i++)
             {
                 string LevelName = "Level " + levelHeightsUnique[i].ToString();
@@ -484,13 +485,70 @@ namespace BH.Adapter.RAM
 
 
 
-        private bool CreateCollection(IEnumerable<Grid> bhomGridSystem)
+        private bool CreateCollection(IEnumerable<Grid> bhomGrid)
         {
             //Code for creating a Grid System in the software
 
-            List<Grid> GridSystem = bhomGridSystem.ToList();
-            
+            //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
+            // Register GridSystems
+            IGridSystems IGridSystems = IModel.GetGridSystems();
+            IGridSystem IGridSystem =IModel.GetGridSystem(0);          
+            IModelGrids IModelGrids = IGridSystem.GetGrids();
+           
+
+            //Loop through the existing grids 
+            for (int i = 0; i < IModelGrids.GetCount(); i++)
+            {
+
+                IModelGrid IModelGrid = IModelGrids.GetAt(i);
+                //Create variables to store info about gridLines
+                EGridAxis gridAxis = IModelGrid.eAxis;
+                string gridName = IModelGrid.strLabel;
+                double gridAngle = IModelGrid.dCoordinate_Angle;
+                IModelGrids.Add(gridName, gridAxis,gridAngle);
+
+            }
+
+
+            // initializa a Bhom grid
+            List<Grid> Grids = bhomGrid.ToList();
+
+
+            foreach (Grid grid in Grids)
+            {
+                
+                //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
+                object gridID = grid.CustomData[AdapterId];          
+                
+                // Call the convert to BHOM    
+                ICurve gridLine = grid.Curve;
+
+            }
+
+
+            //create variables to store info about the gridSystem
+            
+            string gridLabel = IGridSystem.strLabel;
+            double gridXOffset = IGridSystem.dXOffset;
+            double gridYOffset = IGridSystem.dYOffset;
+            int sgridID = IGridSystem.lUID;
+            double gridRotation = IGridSystem.dRotation;
+            SGridSysType gridOrientation = IGridSystem.eOrientationType; 
+            IGridSystem myGridSystem = IGridSystems.Add(gridLabel);
+
+
+  
+
+
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
+
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+            //System.IO.File.Delete(filePathUserfile);
             return true;
         }
 

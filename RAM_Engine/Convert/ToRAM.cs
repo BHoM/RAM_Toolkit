@@ -77,34 +77,82 @@ namespace BH.Engine.RAM
             return RAMSecName;
         }
 
-        public static IGridSystem ToRAM(Grid bhomGrid, IModelGrids IModelGrids)
+        /*
+        public static EGridAxis ToRAM(ICurve curve)
         {
+            ICurve gridCrv = curve;
+            // get the orintation of the curve
+        
+            EGridAxis crvAxis = (0,1,0);  
+            return crvAxis; 
+        }
 
-            IGridSystem myGridSystem = (IGridSystem) bhomGrid;
-            // grid name
-            myGridSystem.strLabel = bhomGrid.Name;
-            // 
-            ICurve grids = bhomGrid.Curve;
+        */
+
+           
+
+        public static IGridSystem ToRAM(Grid bhomGrid, IModelGrids IModelGrids, IGridSystem IGridSystem)
+        {
+            
+            //initialize a temp Bhom grid object from the object that is passed
+            Grid myBhomGrid = bhomGrid;
+            //HOW DO I EXTRACT THE CURVES OF A GRID OBJECT?
+            //Get the name of the Bhom Grid
+            string gridSystemName = myBhomGrid.Name;
+            //ICurve myGridCurve = myBhomGrid.Curve;
+            ICurve[] gridCrvs = new ICurve[100];
+
+            foreach (ICurve curve in gridCrvs)
+            {
+                ICurve myGridCurve = curve;
+
+                myGridCurve = bhomGrid.Curve; //take each curve and convert to RAM curve
+
+            }
+
+
+            ///TODO: revise that part, how do I populate the IModelGrid variables?
+            ///
+            IModelGrid myGridModel = IModelGrids.GetAt(0);
+           
+            // grid name get the name from the BHOM grid exists and pass it to RAMobject
+            string gridName = myGridModel.strLabel;
+
+
+            //get the rotation 
+            double gridRotation = myGridModel.dCoordinate_Angle;
+
+            // get the orintation of the curve
+            EGridAxis gridDirection = myGridModel.eAxis;
 
             // parameter for getting the number of grids
-            int gridNumber = IModelGrids.GetCount();
-
-            //TODO: extract more parameters from the curve object 
-            //loop through the curves and , extract info from the curves and pass it to RAM IModelGrid
-            //IModelGrids.Add(gridNumber, crvAxis, CrvAngle)
-            //int gridSpacing = IModelGrids
-            //EGridAxis crvAxis = new Curve(); ;
-                
+            //int gridNumber = gridCrvs.Length();
+                IModelGrids.GetCount();
 
 
+            myGridModel = IModelGrids.Add(gridName, gridDirection, gridRotation);
+
+          
+            IGridSystem myGridSystem = (IGridSystem)myGridModel;
             return myGridSystem;
 
+            /*
+// Create an array of curves to store gridlines
+ICurve[] gridCrvs = new ICurve[100];
+//Loop through array to create BHOMcurves 
+
+foreach (ICurve curve in gridCrvs)
+{
+    ICurve myGridCurve = curve;
+    myGridCurve = bhomGrid.Curve; //take each curve and convert to RAM curve
+    string myGridName = myGridCurve.ToString();
+
+}
+
+*/
+
         }
 
-        public static Grid ToBHoMObject()
-        {
-            throw new NotImplementedException();
-        }
     }
 
 }
