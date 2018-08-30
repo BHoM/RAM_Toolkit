@@ -324,7 +324,7 @@ namespace BH.Adapter.RAM
             // Get all elements on each GridSystem
             for (int i = 0; i < numGridSystems; i++)
             {
-                //Look into a speific gridsystem
+                //Look into a specific gridsystem
                 IGridSystem myGridSystem = IGridSystems.GetAt(i);
 
                 //get the amoount of gridlines that are in the system

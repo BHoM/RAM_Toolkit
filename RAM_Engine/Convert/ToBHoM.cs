@@ -524,16 +524,13 @@ namespace BH.Engine.RAM
             double gridYoffset = IGridSystem.dYOffset; // Set the offset of the GridSystem from 0 along the Y axis
             double gridSystemRotation = IGridSystem.dRotation; // Set the rotation angle of the GridSystem
 
-            // Add the properties of the GridSytem as CustomData 
+            // Add the properties of the GridSystem as CustomData 
             myGrid.CustomData.Add("lUID", gridSystemID);
             myGrid.CustomData.Add("RAMLabel", gridSystemLabel);
             myGrid.CustomData.Add("RamGridType", gridSystemType);
             myGrid.CustomData.Add("xOffset", gridXoffset);
             myGrid.CustomData.Add("yOffset", gridYoffset);
             myGrid.CustomData.Add("RamGridRotation", gridSystemRotation);
-
-            //GET THE GRIDLines FROM THE MODEL
-            IModelGrids IModelGrids = IGridSystem.GetGrids();
 
             //Get info for each grid line
             int gridLinelUID = IModelGrid.lUID; //unique ID od of the grid line object
@@ -543,34 +540,21 @@ namespace BH.Engine.RAM
 
             double dMaxLimit = IModelGrid.dMaxLimitValue; // maximum limit specified by the user to which gridline will be drawn from origin
             double dMinLimit = IModelGrid.dMinLimitValue; // minimum limit specified by the user to which gridline will be drawn from origin
+            double GridLength = 10000; //default grid length value
 
-            double GridLengthX = 10000; // default value for drawing a grid in X
-            double GridLengthY = 10000; // default value for drawing a grid if no vlaue is provided (can change based on units)
-            double spacingX = 0;
-            double spacingY = 0;
-            int gridCountX = 0;
-            int gridCountY = 0;
-
-            for (int i = 0; i < IModelGrids.GetCount(); i++)
+            //Set max and min limit values based on if they are used or if -1 is returned
+            if (dMaxLimit != 0)
             {
-                IModelGrid = IModelGrids.GetAt(1);
-                if (gridLineAxis == "eGridXorRadialAxis")   // code to place grids in orthogonal X and Y
-                {
-                    gridCountX = gridCountX + 1;
-                    IModelGrid = IModelGrids.GetAt(1);
-                    spacingX = IModelGrid.dCoordinate_Angle;
-
-                }
-                else if (gridLineAxis == "eGridYorCircularAxis")
-                {
-                    gridCountY = gridCountY + 1;
-                    IModelGrid = IModelGrids.GetAt(1);
-                    spacingY = IModelGrid.dCoordinate_Angle;
-                }
+                GridLength = 0;
             }
 
-            GridLengthX = gridCountX * spacingX;
-            GridLengthY = gridCountY * spacingY;
+            //Set Grid start offset from system origin
+            double spacing = 0;
+            spacing = IModelGrid.dCoordinate_Angle;
+
+            //implement max grid length per bounds or max dCoord
+            //GridLengthX = spacingY;
+            //GridLengthY = spacingX;
 
             SCoordinate gridCoordPoint1 = new SCoordinate();
             SCoordinate gridCoordPoint2 = new SCoordinate();
@@ -593,7 +577,7 @@ namespace BH.Engine.RAM
                     gridCoordPoint1.dZLoc = 0;
                     // position of second point
                     gridCoordPoint2.dXLoc = gridXoffset + gridLineCoord_Angle;
-                    gridCoordPoint2.dYLoc = gridYoffset + GridLengthY + dMaxLimit;// add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.dYLoc = gridYoffset + GridLength + dMaxLimit;// add the max limit to the origin point to get full length of gridline
                     gridCoordPoint2.dZLoc = 0;
 
                 }
@@ -604,7 +588,7 @@ namespace BH.Engine.RAM
                     gridCoordPoint1.dYLoc = gridYoffset + gridLineCoord_Angle;
                     gridCoordPoint1.dZLoc = 0;
                     // position of second point
-                    gridCoordPoint2.dXLoc = gridXoffset + GridLengthX + dMaxLimit; // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.dXLoc = gridXoffset + GridLength + dMaxLimit; // add the max limit to the origin point to get full length of gridline
                     gridCoordPoint2.dYLoc = gridYoffset + gridLineCoord_Angle;
                     gridCoordPoint2.dZLoc = 0;
 
