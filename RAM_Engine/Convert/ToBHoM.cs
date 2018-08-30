@@ -523,6 +523,7 @@ namespace BH.Engine.RAM
             double gridXoffset = IGridSystem.dXOffset;   // Set the offset of the GridSystem from 0 along the X axis
             double gridYoffset = IGridSystem.dYOffset; // Set the offset of the GridSystem from 0 along the Y axis
             double gridSystemRotation = IGridSystem.dRotation; // Set the rotation angle of the GridSystem
+            double gridRotAngle = 0;
 
             // Add the properties of the GridSystem as CustomData 
             myGrid.CustomData.Add("lUID", gridSystemID);
@@ -540,7 +541,7 @@ namespace BH.Engine.RAM
 
             double dMaxLimit = IModelGrid.dMaxLimitValue; // maximum limit specified by the user to which gridline will be drawn from origin
             double dMinLimit = IModelGrid.dMinLimitValue; // minimum limit specified by the user to which gridline will be drawn from origin
-            double GridLength = 10000; //default grid length value
+            double GridLength = 3000; //default grid length value
 
             //Set max and min limit values based on if they are used or if -1 is returned
             if (dMaxLimit != 0)
@@ -592,21 +593,36 @@ namespace BH.Engine.RAM
                     gridCoordPoint2.Z = 0;
 
                 }
-
                 // initialize a new line to create the gridline
                 Line gridLine = new Line();
                 gridLine.Start = gridCoordPoint1;
                 gridLine.End = gridCoordPoint2;
+
                 //Create a new grid object from the drawn line and return it
                 myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
             }
             else if (gridSystemType == "eGridRadial")  //code to place grids radially
             {
-                //TODO: Implement the code for placing the 
                 gridIsRadial = true;
+                gridRotAngle = (Math.PI / 180) * (gridLineCoord_Angle + gridSystemRotation);
                 if (gridLineAxis == "eGridXorRadialAxis")
                 {
-                    // here goes all the code for Radial Grids 
+                    // position of first point
+                    gridCoordPoint1.X = gridXoffset; // at the origin point we add the coordinate of the grid 
+                    gridCoordPoint1.Y = gridYoffset;
+                    gridCoordPoint1.Z = 0;
+                    // position of second point
+                    gridCoordPoint2.X = gridXoffset + Math.Cos(gridRotAngle) *(GridLength + dMaxLimit); // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.Y = gridYoffset + Math.Sin(gridRotAngle) * (GridLength + dMaxLimit);
+                    gridCoordPoint2.Z = 0;
+                    
+                    // initialize a new line to create the gridline
+                    Line gridLine = new Line();
+                    gridLine.Start = gridCoordPoint1;
+                    gridLine.End = gridCoordPoint2;
+
+                    //Create a new grid object from the drawn line and return it
+                    myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
                 }
                 else if (gridLineAxis == "eGridYorCircularAxis")
                 {
@@ -614,9 +630,9 @@ namespace BH.Engine.RAM
                     // here goes all the code for Circualr Grids
 
                 }
-
-
-            } /// end of Grid toBhomObject method
+            }
+            
+            /// end of Grid toBhomObject method
             return myGrid;
 
         }
