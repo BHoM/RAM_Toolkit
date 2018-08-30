@@ -320,7 +320,7 @@ namespace BH.Adapter.RAM
             IGridSystems IGridSystems = IModel.GetGridSystems();
             int numGridSystems = IGridSystems.GetCount();
 
-
+            
             // Get all elements on each GridSystem
             for (int i = 0; i < numGridSystems; i++)
             {
