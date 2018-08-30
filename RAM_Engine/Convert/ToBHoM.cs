@@ -52,7 +52,7 @@ namespace BH.Engine.RAM
 
             // Get the column name
             string section = IColumn.strSectionLabel;
-            
+
             // Get the start and end pts of every column
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
@@ -61,7 +61,7 @@ namespace BH.Engine.RAM
             Node endNode = new Node();
             startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
             endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
-            
+
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
 
@@ -72,7 +72,7 @@ namespace BH.Engine.RAM
             bhomBar.CustomData["FrameNumber"] = IColumn.lLabel;
             bhomBar.Tags.Add("Column");
 
-            return  bhomBar;
+            return bhomBar;
         }
 
         public static Bar ToBHoMObject(IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
@@ -257,11 +257,11 @@ namespace BH.Engine.RAM
                 SCoordinate BottomendPt = new SCoordinate();
 
                 IWall.GetEndCoordinates(ref TopstartPt, ref TopendPt, ref BottomstartPt, ref BottomendPt);
-                
-                if (TopendPt.dZLoc > maxZ) { maxZ = TopendPt.dZLoc;  }
+
+                if (TopendPt.dZLoc > maxZ) { maxZ = TopendPt.dZLoc; }
                 if (BottomendPt.dZLoc < minZ) { minZ = BottomendPt.dZLoc; }
-            } 
-            
+            }
+
             // Create list of points
             List<Point> corners = new List<Point>();
             corners.Add(new Point { X = startPt.dXLoc, Y = startPt.dYLoc, Z = minZ });
@@ -322,7 +322,7 @@ namespace BH.Engine.RAM
                 deckLabel = DeckProp.strLabel;
             }
 
-            
+
             //Find polylines of deck in RAM Model
 
             //get count of deck polygons
@@ -380,7 +380,7 @@ namespace BH.Engine.RAM
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Floor");
-            
+
             bhomPanel.Tags = tag;
             bhomPanel.Name = type.ToString();
 
@@ -442,15 +442,15 @@ namespace BH.Engine.RAM
             // Get the location of the node
             SCoordinate Location = new SCoordinate();
             Location = INode.sLocation;
-           
+
             Node Node = new Node();
-           
+
             Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
-            
+
             //Commented out for v14 api testing
             //IDisplacements IDisplacements = INode.GetDisplacements();
             IMemberForces IMemberForces = INode.GetReactions();
-           
+
 
             //for (int i = 0; i < IDisplacements.GetCount(); i++)
             //{
@@ -474,7 +474,7 @@ namespace BH.Engine.RAM
             //    Node.CustomData["dthetaZ"] = thetaz;
 
             //}
-            
+
             // Collect all member forces at node, tracked by index; should these be combined?
             for (int i = 0; i < IMemberForces.GetCount(); i++)
             {
@@ -515,11 +515,8 @@ namespace BH.Engine.RAM
 
         public static Grid ToBHoMObject(IGridSystem IGridSystem, IModelGrid IModelGrid, int counter)
         {
-           //initialize the gridSystem
-            
-            List<Grid> myGrids = new List<Grid>();
             Grid myGrid = new Grid();
-            // Get the Gridsystem data
+            // Get the parameters of Gridsystem 
             string gridSystemLabel = IGridSystem.strLabel;// Set the name of the GridSystem from RAM
             int gridSystemID = IGridSystem.lUID;    //Set the lUID from RAM
             string gridSystemType = IGridSystem.eOrientationType.ToString();// Set the orientation type
@@ -527,7 +524,7 @@ namespace BH.Engine.RAM
             double gridYoffset = IGridSystem.dYOffset; // Set the offset of the GridSystem from 0 along the Y axis
             double gridSystemRotation = IGridSystem.dRotation; // Set the rotation angle of the GridSystem
 
-
+            // Add the properties of the GridSytem as CustomData 
             myGrid.CustomData.Add("lUID", gridSystemID);
             myGrid.CustomData.Add("RAMLabel", gridSystemLabel);
             myGrid.CustomData.Add("RamGridType", gridSystemType);
@@ -538,87 +535,110 @@ namespace BH.Engine.RAM
             //GET THE GRIDLines FROM THE MODEL
             IModelGrids IModelGrids = IGridSystem.GetGrids();
 
-           // int gridCountX = counter;
-           // int gridCountY = counter;
-           // int gridCount = 0;
-         
-            Boolean ortho = false;
-            Boolean radial = false;
+            //Get info for each grid line
+            int gridLinelUID = IModelGrid.lUID; //unique ID od of the grid line object
+            string gridLineLabel = IModelGrid.strLabel; // label of the gridline
+            double gridLineCoord_Angle = IModelGrid.dCoordinate_Angle; // the grid coordinate or angle
+            string gridLineAxis = IModelGrid.eAxis.ToString(); // grid line axis , X/Radial Y/Circular 
+
+            double dMaxLimit = IModelGrid.dMaxLimitValue; // maximum limit specified by the user to which gridline will be drawn from origin
+            double dMinLimit = IModelGrid.dMinLimitValue; // minimum limit specified by the user to which gridline will be drawn from origin
+
+            double GridLengthX = 10000; // default value for drawing a grid in X
+            double GridLengthY = 10000; // default value for drawing a grid if no vlaue is provided (can change based on units)
+            double spacingX = 0;
+            double spacingY = 0;
+            int gridCountX = 0;
+            int gridCountY = 0;
+
+            for (int i = 0; i < IModelGrids.GetCount(); i++)
+            {
+                IModelGrid = IModelGrids.GetAt(1);
+                if (gridLineAxis == "eGridXorRadialAxis")   // code to place grids in orthogonal X and Y
+                {
+                    gridCountX = gridCountX + 1;
+                    IModelGrid = IModelGrids.GetAt(1);
+                    spacingX = IModelGrid.dCoordinate_Angle;
+
+                }
+                else if (gridLineAxis == "eGridYorCircularAxis")
+                {
+                    gridCountY = gridCountY + 1;
+                    IModelGrid = IModelGrids.GetAt(1);
+                    spacingY = IModelGrid.dCoordinate_Angle;
+                }
+            }
+
+            GridLengthX = gridCountX * spacingX;
+            GridLengthY = gridCountY * spacingY;
+
+            SCoordinate gridCoordPoint1 = new SCoordinate();
+            SCoordinate gridCoordPoint2 = new SCoordinate();
+
+
             //check if what type is the GridSystem : orthogonal or radial ?? 
-            if (gridSystemType == "eGridOrthogonal")
+            Boolean gridIsOrtho = false;
+            Boolean gridIsRadial = false;
+
+            if (gridSystemType == "eGridOrthogonal")   // code to place grids in orthogonal X and Y
             {
-
-
-                ortho = true;
-    
-                // code to place grids in x and y
-            }
-            else if (gridSystemType == "eGridRadial")
-            {
-                //code to place grids radially
-                radial = true;
-            }
-
-                //Get info for each grid line
-                int gridLinelUID = IModelGrid.lUID;
-                string gridLineLabel = IModelGrid.strLabel;
-                double gridLineCoord_Angle = IModelGrid.dCoordinate_Angle;
-
-                string gridLineAxis = IModelGrid.eAxis.ToString(); // grid line axis , X/Radial Y/Circular 
-
-                //double dMaxLimit = IModelGrid.dMaxLimitValue;
-                double dMaxLimit = 10000;
-                double dMinLimit = IModelGrid.dMinLimitValue;
-
-                SCoordinate gridCoordPoint1 = new SCoordinate();
-                SCoordinate gridCoordPoint2 = new SCoordinate();
-                //double gridSpacing = IModelGrid.dCoordinate_Angle; 
-
+                gridIsOrtho = true;
                 //check the orientation to place grides accordingly
                 if (gridLineAxis == "eGridXorRadialAxis")
                 {
-                    
+
                     // position of first point
                     gridCoordPoint1.dXLoc = gridXoffset + gridLineCoord_Angle; // at the origin point we add the spacing of the grid 
-                    gridCoordPoint1.dYLoc = gridYoffset ;
+                    gridCoordPoint1.dYLoc = gridYoffset + dMinLimit;
                     gridCoordPoint1.dZLoc = 0;
                     // position of second point
-                    gridCoordPoint2.dXLoc = gridXoffset + gridLineCoord_Angle; // add the max limit to the origin point to get full length of gridline
-                    gridCoordPoint2.dYLoc = gridYoffset + dMaxLimit;
+                    gridCoordPoint2.dXLoc = gridXoffset + gridLineCoord_Angle;
+                    gridCoordPoint2.dYLoc = gridYoffset + GridLengthY + dMaxLimit;// add the max limit to the origin point to get full length of gridline
                     gridCoordPoint2.dZLoc = 0;
-                   
-
 
                 }
                 else if (gridLineAxis == "eGridYorCircularAxis")
                 {
                     // position of first point
-                    gridCoordPoint1.dXLoc = gridXoffset ; // at the origin point we add the spacing of the grid 
-                    gridCoordPoint1.dYLoc = gridYoffset +  gridLineCoord_Angle;
+                    gridCoordPoint1.dXLoc = gridXoffset + dMinLimit; // at the origin point we add the coordinate of the grid 
+                    gridCoordPoint1.dYLoc = gridYoffset + gridLineCoord_Angle;
                     gridCoordPoint1.dZLoc = 0;
                     // position of second point
-                    gridCoordPoint2.dXLoc = gridXoffset + dMaxLimit ; // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.dXLoc = gridXoffset + GridLengthX + dMaxLimit; // add the max limit to the origin point to get full length of gridline
                     gridCoordPoint2.dYLoc = gridYoffset + gridLineCoord_Angle;
                     gridCoordPoint2.dZLoc = 0;
-           
-     
+
                 }
 
                 // initialize a new line to create the gridline
                 Line gridLine = new Line();
                 gridLine.Start = new Point { X = gridCoordPoint1.dXLoc, Y = gridCoordPoint1.dYLoc, Z = gridCoordPoint1.dZLoc };
                 gridLine.End = new Point { X = gridCoordPoint2.dXLoc, Y = gridCoordPoint2.dYLoc, Z = gridCoordPoint2.dZLoc };
+                //Create a new grid object from the drawn line and return it
                 myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
-                myGrids.Add(myGrid);
+            }
+            else if (gridSystemType == "eGridRadial")  //code to place grids radially
+            {
+                //TODO: Implement the code for placing the 
+                gridIsRadial = true;
+                if (gridLineAxis == "eGridXorRadialAxis")
+                {
+                    // here goes all the code for Radial Grids 
+                }
+                else if (gridLineAxis == "eGridYorCircularAxis")
+                {
 
-            //}
+                    // here goes all the code for Circualr Grids
 
-            
+                }
+
+
+            } /// end of Grid toBhomObject method
             return myGrid;
-        
 
         }
 
 
-    }
+
+    } //Public Conver methods ends here 
 }
