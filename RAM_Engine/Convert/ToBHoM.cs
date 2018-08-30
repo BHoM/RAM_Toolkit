@@ -626,9 +626,23 @@ namespace BH.Engine.RAM
                 }
                 else if (gridLineAxis == "eGridYorCircularAxis")
                 {
+                    // position of first point
+                    gridCoordPoint1.X = gridXoffset; // at the origin point we add the coordinate of the grid 
+                    gridCoordPoint1.Y = gridYoffset;
+                    gridCoordPoint1.Z = 0;
 
-                    // here goes all the code for Circualr Grids
+                    // initialize a new line to create the gridline
+                    Circle gridLine = new Circle();
+                    Vector cirNormal = new Vector();
+                    cirNormal.X = 0;
+                    cirNormal.Y = 0;
+                    cirNormal.Z = 1;
+                    gridLine.Centre = gridCoordPoint1;
+                    gridLine.Normal = cirNormal;
+                    gridLine.Radius = gridLineCoord_Angle;
 
+                    //Create a new grid object from the drawn line and return it
+                    myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
                 }
             }
             
