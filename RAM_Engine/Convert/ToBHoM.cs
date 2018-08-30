@@ -513,11 +513,12 @@ namespace BH.Engine.RAM
             return Loadcase;
         }
 
-        public static Grid ToBHoMObject(IGridSystem IGridSystem)
+        public static Grid ToBHoMObject(IGridSystem IGridSystem, IModelGrid IModelGrid, int counter)
         {
            //initialize the gridSystem
+            
+            List<Grid> myGrids = new List<Grid>();
             Grid myGrid = new Grid();
-
             // Get the Gridsystem data
             string gridSystemLabel = IGridSystem.strLabel;// Set the name of the GridSystem from RAM
             int gridSystemID = IGridSystem.lUID;    //Set the lUID from RAM
@@ -534,65 +535,87 @@ namespace BH.Engine.RAM
             myGrid.CustomData.Add("yOffset", gridYoffset);
             myGrid.CustomData.Add("RamGridRotation", gridSystemRotation);
 
-           //check if what type is the GridSystem : orthogonal or radial ?? 
-  
-            
-             
-
             //GET THE GRIDLines FROM THE MODEL
             IModelGrids IModelGrids = IGridSystem.GetGrids();
 
-            // go through all gridlines and get information for each line
-            for (int i = 0; i < IModelGrids.GetCount(); i++)
+           // int gridCountX = counter;
+           // int gridCountY = counter;
+           // int gridCount = 0;
+         
+            Boolean ortho = false;
+            Boolean radial = false;
+            //check if what type is the GridSystem : orthogonal or radial ?? 
+            if (gridSystemType == "eGridOrthogonal")
             {
-                IModelGrid IModelGrid = IModelGrids.GetAt(i);
 
+
+                ortho = true;
+    
+                // code to place grids in x and y
+            }
+            else if (gridSystemType == "eGridRadial")
+            {
+                //code to place grids radially
+                radial = true;
+            }
 
                 //Get info for each grid line
                 int gridLinelUID = IModelGrid.lUID;
                 string gridLineLabel = IModelGrid.strLabel;
-                double gridLineAngle = IModelGrid.dCoordinate_Angle;   
+                double gridLineCoord_Angle = IModelGrid.dCoordinate_Angle;
+
                 string gridLineAxis = IModelGrid.eAxis.ToString(); // grid line axis , X/Radial Y/Circular 
 
-                double dMaxLimit = IModelGrid.dMaxLimitValue;
+                //double dMaxLimit = IModelGrid.dMaxLimitValue;
+                double dMaxLimit = 10000;
                 double dMinLimit = IModelGrid.dMinLimitValue;
-
-
 
                 SCoordinate gridCoordPoint1 = new SCoordinate();
                 SCoordinate gridCoordPoint2 = new SCoordinate();
+                //double gridSpacing = IModelGrid.dCoordinate_Angle; 
 
-                gridCoordPoint1.dXLoc = gridXoffset;
-                gridCoordPoint1.dYLoc = gridYoffset;
-                gridCoordPoint1.dZLoc = 0;
-
-                if (gridLineAxis == "X")
+                //check the orientation to place grides accordingly
+                if (gridLineAxis == "eGridXorRadialAxis")
                 {
-                    //define the second point based on the orientation 
-                    gridCoordPoint2.dXLoc = gridXoffset + dMaxLimit; // add the max limit to the origin point to get full length of gridline
-                    gridCoordPoint2.dYLoc = gridYoffset;
+                    
+                    // position of first point
+                    gridCoordPoint1.dXLoc = gridXoffset + gridLineCoord_Angle; // at the origin point we add the spacing of the grid 
+                    gridCoordPoint1.dYLoc = gridYoffset ;
+                    gridCoordPoint1.dZLoc = 0;
+                    // position of second point
+                    gridCoordPoint2.dXLoc = gridXoffset + gridLineCoord_Angle; // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.dYLoc = gridYoffset + dMaxLimit;
                     gridCoordPoint2.dZLoc = 0;
+                   
 
-                } else if (gridLineAxis == "Y")
-                {
-                    gridCoordPoint2.dXLoc = gridXoffset ;
-                    gridCoordPoint2.dYLoc = gridYoffset + dMaxLimit ; // add the max limit to the origin point to get full length of gridline
-                    gridCoordPoint2.dZLoc = 0;
 
                 }
+                else if (gridLineAxis == "eGridYorCircularAxis")
+                {
+                    // position of first point
+                    gridCoordPoint1.dXLoc = gridXoffset ; // at the origin point we add the spacing of the grid 
+                    gridCoordPoint1.dYLoc = gridYoffset +  gridLineCoord_Angle;
+                    gridCoordPoint1.dZLoc = 0;
+                    // position of second point
+                    gridCoordPoint2.dXLoc = gridXoffset + dMaxLimit ; // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.dYLoc = gridYoffset + gridLineCoord_Angle;
+                    gridCoordPoint2.dZLoc = 0;
+           
+     
+                }
 
-
-
+                // initialize a new line to create the gridline
                 Line gridLine = new Line();
-                gridLine.Start = new Point { X = gridCoordPoint1.dXLoc, Y = gridCoordPoint1.dYLoc, Z = gridCoordPoint1.dZLoc } ;
-                gridLine.Start = new Point { X = gridCoordPoint2.dXLoc, Y = gridCoordPoint2.dYLoc, Z = gridCoordPoint2.dZLoc };
-                myGrid = new Grid{ Curve = gridLine, Name = gridLineLabel };
+                gridLine.Start = new Point { X = gridCoordPoint1.dXLoc, Y = gridCoordPoint1.dYLoc, Z = gridCoordPoint1.dZLoc };
+                gridLine.End = new Point { X = gridCoordPoint2.dXLoc, Y = gridCoordPoint2.dYLoc, Z = gridCoordPoint2.dZLoc };
+                myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
+                myGrids.Add(myGrid);
 
+            //}
 
-            }
-
+            
             return myGrid;
-
+        
 
         }
 

@@ -238,41 +238,6 @@ namespace BH.Adapter.RAM
         }
 
 
-        private List<Grid> ReadGrid(List<string> ids = null)
-        {
-            //Implement code for reading Grids
-            List<Grid> bhomGrids = new List<Grid>();
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-            // Get the gridsystems that are in the model
-            IGridSystems IGridSystems = IModel.GetGridSystems();
-            int numGridSystems = IGridSystems.GetCount();
-
-
-            // Get all elements on each GridSystem
-            for (int i = 0; i < numGridSystems; i++)
-            {
-                //Look into a speific gridsystem
-                IGridSystem myGridSystem = IGridSystems.GetAt(i);
-                
-                //get the amoount of gridlines that are in the system
-                IModelGrids IModelGrid = myGridSystem.GetGrids();
-                int numGridLines = IModelGrid.GetCount();
-
-                // Loop through all gridlines and add bhomGrid
-                for (int j = 0; j < numGridLines; i++)
-                {
-                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(myGridSystem);
-                    bhomGrids.Add(bhomGrid);
-                }
-
-            }
-
-            return bhomGrids;
-        }
-
-
-
         /***************************************************/
 
         // Read panels method; will need to figure out how to convert geometry (RAM provides four corner points); does not seem to be working properly, crashes Rhino when walls are present
@@ -342,6 +307,56 @@ namespace BH.Adapter.RAM
             }
             return bhomPanels;
         }
+
+
+
+        private List<Grid> ReadGrid(List<string> ids = null)
+        {
+            //Implement code for reading Grids
+            List<Grid> bhomGrids = new List<Grid>();
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            // Get the gridsystems that are in the model
+            IGridSystems IGridSystems = IModel.GetGridSystems();
+            int numGridSystems = IGridSystems.GetCount();
+
+
+            // Get all elements on each GridSystem
+            for (int i = 0; i < numGridSystems; i++)
+            {
+                //Look into a speific gridsystem
+                IGridSystem myGridSystem = IGridSystems.GetAt(i);
+
+                //get the amoount of gridlines that are in the system
+                IModelGrids IModelGrids = myGridSystem.GetGrids();
+                
+                int numGridLines = IModelGrids.GetCount();
+
+                // Loop through all gridlines in the GridSystem and add a bhomGrid
+                 for (int j = 0; j < numGridLines; j++){
+
+                    IModelGrid IModelGrid = IModelGrids.GetAt(j);
+                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(myGridSystem, IModelGrid,j);
+                    bhomGrids.Add(bhomGrid);
+
+                }
+
+
+                /*
+                List<Grid> grids = Engine.RAM.Convert.ToBHoMObject(myGridSystem);
+                for (int j = 0; j < grids.Count; j++)
+                {
+
+                    Grid bhomGrid = grids[i];
+                    bhomGrids.Add(bhomGrid);
+                }
+                  */
+
+
+            }
+
+            return bhomGrids;
+            }
 
 
     }
