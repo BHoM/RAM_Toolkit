@@ -504,62 +504,67 @@ namespace BH.Adapter.RAM
             List<Grid> YGrids = new List<Grid>();
             List<Grid> skewGrids = new List<Grid>();
             List<Grid> circGrids = new List<Grid>();
-            Grid Grid = new Grid();
+            Grid grid = new Grid();
             Polyline gridLine = new Polyline();
 
             //Loop through the BHoM grids and sort per type (x,y,radial, circular) 
             for (int i = 0; i < Grids.Count(); i++)
             {
-                Grid = Grids[i];
+                grid = Grids[i];
 
-                if (Grid.Curve is Circle)
+                if (grid.Curve is Circle)
                 {
-                    circGrids.Add(Grid);
+                    circGrids.Add(grid);
                 }
                 else
                 {
-                    gridLine = Engine.Geometry.Modify.CollapseToPolyline(Grid.Curve as dynamic,10);
+                    gridLine = Engine.Geometry.Modify.CollapseToPolyline(grid.Curve as dynamic,10);
                     if (gridLine.StartPoint().X == gridLine.EndPoint().X)
                     {
-                        YGrids.Add(Grid);
+                        YGrids.Add(grid);
                     }
                     else if (gridLine.StartPoint().Y == gridLine.EndPoint().Y)
                     {
-                        XGrids.Add(Grid);
+                        XGrids.Add(grid);
                     }
                     else
                     {
-                        skewGrids.Add(Grid);
+                        skewGrids.Add(grid);
                     }
                 }
             }
 
-
-
-
             //Create grid systems per grid lists
-            foreach (Grid grid in XGrids)
+
+            //XGrids
+            
+            IGridSystem IGridSystemXY = IGridSystems.Add("XY Grids");
+            IGridSystemXY.dXOffset = 0;
+            IGridSystemXY.dYOffset = 0;
+            IGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
+
+            IModelGrids IModelGridsXY = IGridSystemXY.GetGrids();
+
+            foreach (Grid XGrid in XGrids)
             {
-
-                // Create GridSystem in RAM for XGrids    
-
+                gridLine = Engine.Geometry.Modify.CollapseToPolyline(XGrid.Curve as dynamic, 10);
+                IModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y);
             }
 
-            foreach (Grid grid in YGrids)
+            foreach (Grid YGrid in YGrids)
             {
-
-                // Create GridSystem in RAM for YGrids  
-
+                gridLine = Engine.Geometry.Modify.CollapseToPolyline(YGrid.Curve as dynamic, 10);
+                IModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X);
             }
 
-            foreach (Grid grid in skewGrids)
+            foreach (Grid skGrid in skewGrids)
             {
 
                 // Create GridSystem in RAM for each unique angle of skewGrids
 
             }
 
-            foreach (Grid grid in circGrids)
+            foreach (Grid cGrid in circGrids)
             {
 
                 // Create GridSystem in RAM for each unique centerpt of circGrids  
