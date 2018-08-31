@@ -495,52 +495,80 @@ namespace BH.Adapter.RAM
 
             // Register GridSystems
             IGridSystems IGridSystems = IModel.GetGridSystems();
-            IGridSystem IGridSystem =IModel.GetGridSystem(0);          
-            IModelGrids IModelGrids = IGridSystem.GetGrids();
-           
 
-            //Loop through the existing grids 
-            for (int i = 0; i < IModelGrids.GetCount(); i++)
+            // initializa a BhoM grid
+            List<Grid> Grids = bhomGrid.ToList();
+
+            //Split grids by gridtypes
+            List<Grid> XGrids = new List<Grid>();
+            List<Grid> YGrids = new List<Grid>();
+            List<Grid> skewGrids = new List<Grid>();
+            List<Grid> circGrids = new List<Grid>();
+            Grid Grid = new Grid();
+            Polyline gridLine = new Polyline();
+
+            //Loop through the BHoM grids and sort per type (x,y,radial, circular) 
+            for (int i = 0; i < Grids.Count(); i++)
             {
+                Grid = Grids[i];
 
-                IModelGrid IModelGrid = IModelGrids.GetAt(i);
-                //Create variables to store info about gridLines
-                EGridAxis gridAxis = IModelGrid.eAxis;
-                string gridName = IModelGrid.strLabel;
-                double gridAngle = IModelGrid.dCoordinate_Angle;
-                IModelGrids.Add(gridName, gridAxis,gridAngle);
-
+                if (Grid.Curve is Circle)
+                {
+                    circGrids.Add(Grid);
+                }
+                else
+                {
+                    gridLine = Engine.Geometry.Modify.CollapseToPolyline(Grid.Curve as dynamic,10);
+                    if (gridLine.StartPoint().X == gridLine.EndPoint().X)
+                    {
+                        YGrids.Add(Grid);
+                    }
+                    else if (gridLine.StartPoint().Y == gridLine.EndPoint().Y)
+                    {
+                        XGrids.Add(Grid);
+                    }
+                    else
+                    {
+                        skewGrids.Add(Grid);
+                    }
+                }
             }
 
 
-            // initializa a Bhom grid
-            List<Grid> Grids = bhomGrid.ToList();
 
 
-            foreach (Grid grid in Grids)
+            //Create grid systems per grid lists
+            foreach (Grid grid in XGrids)
             {
-                
-                //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
-                object gridID = grid.CustomData[AdapterId];          
-                
-                // Call the convert to BHOM    
-                ICurve gridLine = grid.Curve;
+
+                // Create GridSystem in RAM for XGrids    
+
+            }
+
+            foreach (Grid grid in YGrids)
+            {
+
+                // Create GridSystem in RAM for YGrids  
+
+            }
+
+            foreach (Grid grid in skewGrids)
+            {
+
+                // Create GridSystem in RAM for each unique angle of skewGrids
+
+            }
+
+            foreach (Grid grid in circGrids)
+            {
+
+                // Create GridSystem in RAM for each unique centerpt of circGrids  
 
             }
 
 
             //create variables to store info about the gridSystem
-            
-            string gridLabel = IGridSystem.strLabel;
-            double gridXOffset = IGridSystem.dXOffset;
-            double gridYOffset = IGridSystem.dYOffset;
-            int sgridID = IGridSystem.lUID;
-            double gridRotation = IGridSystem.dRotation;
-            SGridSysType gridOrientation = IGridSystem.eOrientationType; 
-            IGridSystem myGridSystem = IGridSystems.Add(gridLabel);
 
-
-  
 
 
             //Save file

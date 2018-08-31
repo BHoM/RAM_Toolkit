@@ -633,10 +633,7 @@ namespace BH.Engine.RAM
 
                     // initialize a new line to create the gridline
                     Circle gridLine = new Circle();
-                    Vector cirNormal = new Vector();
-                    cirNormal.X = 0;
-                    cirNormal.Y = 0;
-                    cirNormal.Z = 1;
+                    Vector cirNormal = new Vector { X = 0, Y = 0, Z = 1 };
                     gridLine.Centre = gridCoordPoint1;
                     gridLine.Normal = cirNormal;
                     gridLine.Radius = gridLineCoord_Angle;
