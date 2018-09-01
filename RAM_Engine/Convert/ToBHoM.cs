@@ -513,7 +513,7 @@ namespace BH.Engine.RAM
             return Loadcase;
         }
 
-        public static Grid ToBHoMObject(IGridSystem IGridSystem, IModelGrid IModelGrid, int counter)
+        public static Grid ToBHoMObject(IGridSystem IGridSystem, IModelGrid IModelGrid, double gridLengthX,double gridLengthY )
         {
             Grid myGrid = new Grid();
             // Get the parameters of Gridsystem 
@@ -541,21 +541,20 @@ namespace BH.Engine.RAM
 
             double dMaxLimit = IModelGrid.dMaxLimitValue; // maximum limit specified by the user to which gridline will be drawn from origin
             double dMinLimit = IModelGrid.dMinLimitValue; // minimum limit specified by the user to which gridline will be drawn from origin
-            double GridLength = 3000; //default grid length value
+
+            double IGridLength = 10000; //default grid length value
 
             //Set max and min limit values based on if they are used or if -1 is returned
             if (dMaxLimit != 0)
             {
-                GridLength = 0;
+                IGridLength = 0;
             }
 
-            //Set Grid start offset from system origin
-            double spacing = 0;
-            spacing = IModelGrid.dCoordinate_Angle;
+
 
             //implement max grid length per bounds or max dCoord
-            //GridLengthX = spacingY;
-            //GridLengthY = spacingX;
+            double myGridLengthX = gridLengthX;
+            double myGridLengthY = gridLengthY;
 
             Point gridCoordPoint1 = new Point();
             Point gridCoordPoint2 = new Point();
@@ -568,6 +567,8 @@ namespace BH.Engine.RAM
             {
                 gridIsOrtho = true;
                 //check the orientation to place grides accordingly
+                
+
                 if (gridLineAxis == "eGridXorRadialAxis")
                 {
 
@@ -577,7 +578,7 @@ namespace BH.Engine.RAM
                     gridCoordPoint1.Z = 0;
                     // position of second point
                     gridCoordPoint2.X = gridXoffset + gridLineCoord_Angle;
-                    gridCoordPoint2.Y = gridYoffset + GridLength + dMaxLimit;// add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.Y = gridYoffset + myGridLengthY + dMaxLimit;// add the max limit to the origin point to get full length of gridline
                     gridCoordPoint2.Z = 0;
 
                 }
@@ -588,7 +589,7 @@ namespace BH.Engine.RAM
                     gridCoordPoint1.Y = gridYoffset + gridLineCoord_Angle;
                     gridCoordPoint1.Z = 0;
                     // position of second point
-                    gridCoordPoint2.X = gridXoffset + GridLength + dMaxLimit; // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.X = gridXoffset + myGridLengthX + dMaxLimit; // add the max limit to the origin point to get full length of gridline
                     gridCoordPoint2.Y = gridYoffset + gridLineCoord_Angle;
                     gridCoordPoint2.Z = 0;
 
@@ -605,17 +606,36 @@ namespace BH.Engine.RAM
             {
                 gridIsRadial = true;
                 gridRotAngle = (Math.PI / 180) * (gridLineCoord_Angle + gridSystemRotation);
-                if (gridLineAxis == "eGridXorRadialAxis")
+                double radius = 0;
+
+                if (gridLineAxis == "eGridYorCircularAxis")
                 {
                     // position of first point
                     gridCoordPoint1.X = gridXoffset; // at the origin point we add the coordinate of the grid 
                     gridCoordPoint1.Y = gridYoffset;
                     gridCoordPoint1.Z = 0;
-                    // position of second point
-                    gridCoordPoint2.X = gridXoffset + Math.Cos(gridRotAngle) *(GridLength + dMaxLimit); // add the max limit to the origin point to get full length of gridline
-                    gridCoordPoint2.Y = gridYoffset + Math.Sin(gridRotAngle) * (GridLength + dMaxLimit);
-                    gridCoordPoint2.Z = 0;
+
+                    // initialize a new line to create the gridline
+                    Circle gridArc = new Circle();
+                    Vector cirNormal = new Vector { X = 0, Y = 0, Z = 1 };
+                    gridArc.Centre = gridCoordPoint1;
+                    gridArc.Normal = cirNormal;
+                    gridArc.Radius = gridLineCoord_Angle;
+                    //radius = gridArc.Radius;
+                    //Create a new grid object from the drawn line and return it
+                    myGrid = new Grid { Curve = gridArc, Name = gridLineLabel };
+                }else if (gridLineAxis == "eGridXorRadialAxis")
+                {
                     
+                    // position of first point
+                    gridCoordPoint1.X = gridXoffset; // at the origin point we add the coordinate of the grid 
+                    gridCoordPoint1.Y = gridYoffset;
+                    gridCoordPoint1.Z = 0;
+                    // position of second point
+                    gridCoordPoint2.X = gridXoffset + Math.Cos(gridRotAngle) * (IGridLength + dMaxLimit); // add the max limit to the origin point to get full length of gridline
+                    gridCoordPoint2.Y = gridYoffset + Math.Sin(gridRotAngle) * (IGridLength + dMaxLimit);
+                    gridCoordPoint2.Z = 0;
+
                     // initialize a new line to create the gridline
                     Line gridLine = new Line();
                     gridLine.Start = gridCoordPoint1;
@@ -624,31 +644,14 @@ namespace BH.Engine.RAM
                     //Create a new grid object from the drawn line and return it
                     myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
                 }
-                else if (gridLineAxis == "eGridYorCircularAxis")
-                {
-                    // position of first point
-                    gridCoordPoint1.X = gridXoffset; // at the origin point we add the coordinate of the grid 
-                    gridCoordPoint1.Y = gridYoffset;
-                    gridCoordPoint1.Z = 0;
 
-                    // initialize a new line to create the gridline
-                    Circle gridLine = new Circle();
-                    Vector cirNormal = new Vector { X = 0, Y = 0, Z = 1 };
-                    gridLine.Centre = gridCoordPoint1;
-                    gridLine.Normal = cirNormal;
-                    gridLine.Radius = gridLineCoord_Angle;
-
-                    //Create a new grid object from the drawn line and return it
-                    myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
-                }
             }
             
-            /// end of Grid toBhomObject method
-            return myGrid;
+            return myGrid;     /// end of Grid toBhomObject method
 
         }
 
 
 
-    } //Public Conver methods ends here 
+    } //Public Convert methods ends here 
 }

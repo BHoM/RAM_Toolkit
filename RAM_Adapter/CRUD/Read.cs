@@ -320,7 +320,7 @@ namespace BH.Adapter.RAM
             IGridSystems IGridSystems = IModel.GetGridSystems();
             int numGridSystems = IGridSystems.GetCount();
 
-            
+
             // Get all elements on each GridSystem
             for (int i = 0; i < numGridSystems; i++)
             {
@@ -331,27 +331,37 @@ namespace BH.Adapter.RAM
                 IModelGrids IModelGrids = myGridSystem.GetGrids();
                 
                 int numGridLines = IModelGrids.GetCount();
+                int gridCountX = 0;
+                int gridCountY = 0;
+
+                double gridLengthX = 0;
+                double gridLengthY = 0;
+                // Loop through all gridlines in the GridSystem to count for  grids in X and Y
+                for (int j = 0; j < numGridLines; j++)
+                {
+                    IModelGrid IModelGrid = IModelGrids.GetAt(j);
+                    double gridCoord = IModelGrid.dCoordinate_Angle;
+                    string gridAxis = IModelGrid.eAxis.ToString();
+
+                    if (gridAxis == "eGridXorRadialAxis")
+                    {
+                        gridCountX += 1;
+                        gridLengthX = gridCoord;
+                    }
+                    else if (gridAxis == "eGridYorCircularAxis")
+                    {
+                        gridCountY += 1;
+                        gridLengthY = gridCoord;
+                    }
+                }
 
                 // Loop through all gridlines in the GridSystem and add a bhomGrid
-                 for (int j = 0; j < numGridLines; j++){
-
+                for (int j = 0; j < numGridLines; j++){
                     IModelGrid IModelGrid = IModelGrids.GetAt(j);
-                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(myGridSystem, IModelGrid,j);
+                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(myGridSystem, IModelGrid, gridLengthX, gridLengthY);
                     bhomGrids.Add(bhomGrid);
 
                 }
-
-
-                /*
-                List<Grid> grids = Engine.RAM.Convert.ToBHoMObject(myGridSystem);
-                for (int j = 0; j < grids.Count; j++)
-                {
-
-                    Grid bhomGrid = grids[i];
-                    bhomGrids.Add(bhomGrid);
-                }
-                  */
-
 
             }
 
