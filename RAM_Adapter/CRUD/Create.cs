@@ -536,49 +536,71 @@ namespace BH.Adapter.RAM
 
             //Create grid systems per grid lists
 
-            //XGrids
-            
-            IGridSystem IGridSystemXY = IGridSystems.Add("XY Grids");
+            //XYGrids
+            double gridSystemRotation = 0;       
+            string gridSystemLabel = "";
+
+            if (YGrids.Count() != 0 || XGrids.Count() != 0) {
+                 gridSystemLabel = "XY_grids";
+            }else if (circGrids.Count() != 0)
+            {
+                gridSystemLabel = "Radial_grid";
+            } else if (circGrids.Count() != 0){
+                gridSystemLabel = "XY_grids";
+            }
+
+            IGridSystem IGridSystemXY = IGridSystems.Add(gridSystemLabel);
             IGridSystemXY.dXOffset = 0;
             IGridSystemXY.dYOffset = 0;
             IGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
-
+            IGridSystemXY.dRotation = gridSystemRotation;
             IModelGrids IModelGridsXY = IGridSystemXY.GetGrids();
+
+            string gridLabelX = "X";
+            string gridLabelY = "Y";
+            int gridCountX = 1;
+            int gridCountY = 1;
 
             foreach (Grid XGrid in XGrids)
             {
+
+                XGrid.Name = gridLabelX + gridCountX.ToString() ;
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(XGrid.Curve as dynamic, 10);
                 IModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y);
+                //IGridSystemXY = Engine.RAM.Convert.ToRAM(XGrid, IModelGridsXY, IGridSystemXY);
+                gridCountX += 1;
             }
 
             foreach (Grid YGrid in YGrids)
             {
+                YGrid.Name = gridLabelY + gridCountY.ToString();
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(YGrid.Curve as dynamic, 10);
+
                 IModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X);
-            }
-
-            foreach (Grid skGrid in skewGrids)
-            {
-
-                // Create GridSystem in RAM for each unique angle of skewGrids
-
+                //IGridSystemXY = Engine.RAM.Convert.ToRAM(YGrid, IModelGridsXY, IGridSystemXY);
+                gridCountY += 1;
             }
 
             foreach (Grid cGrid in circGrids)
             {
-
+                // TODO: add code to impement circular grids
                 // Create GridSystem in RAM for each unique centerpt of circGrids  
 
             }
 
+            foreach (Grid skGrid in skewGrids)
+            {
+                // TODO: add code to impement skewed grids
+                // Create GridSystem in RAM for each unique angle of skewGrids
 
-            //create variables to store info about the gridSystem
+            }
 
+            //call the convert method 
+            IGridSystemXY = Engine.RAM.Convert.ToRAM(Grids, IModelGridsXY, IGridSystemXY);
 
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
-
             // Release main interface and delete user file
             RAMDataAccIDBIO = null;
             //System.IO.File.Delete(filePathUserfile);
