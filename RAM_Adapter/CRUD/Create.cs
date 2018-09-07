@@ -493,8 +493,13 @@ namespace BH.Adapter.RAM
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
+
+
             // Register GridSystems
             IGridSystems IGridSystems = IModel.GetGridSystems();
+
+            // Register FloorTypes
+            IFloorTypes myFloorTypes = IModel.GetFloorTypes();
 
             // initializa a BhoM grid
             List<Grid> Grids = bhomGrid.ToList();
@@ -556,6 +561,20 @@ namespace BH.Adapter.RAM
             IGridSystemXY.dRotation = gridSystemRotation;
             IModelGrids IModelGridsXY = IGridSystemXY.GetGrids();
 
+            /*
+            //TODO: NEEDS TO BE TESTED
+            // Create a default floor type and assign the newly created 
+
+            IFloorTypes myFloorTypes = IModel.GetFloorTypes();
+            string defFloorTypeName = "Default_floorType";
+            IFloorType myFloorType = myFloorTypes.Add(defFloorTypeName);
+            DAArray gsID = myFloorType.GetGridSystemIDArray();
+            myFloorType.SetGridSystemIDArray(gsID);
+
+            //add floor type as custom data o Grid
+            */
+
+            //labels for grids in each direction
             string gridLabelX = "X";
             string gridLabelY = "Y";
             int gridCountX = 1;

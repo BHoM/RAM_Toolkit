@@ -43,7 +43,12 @@ namespace BH.Adapter.RAM
                     string filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
                     try
                     {
+
+
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                        // Permits the model to be opened by multiple users simultaneously
+                        // TODO: thogoughly test that
+                        RAMDataAccIDBIO.AllowConcurrentAccess(1);
 
                         // Object Model Interface
                         IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
