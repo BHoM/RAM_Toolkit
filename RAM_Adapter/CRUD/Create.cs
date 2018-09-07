@@ -494,7 +494,6 @@ namespace BH.Adapter.RAM
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
 
-
             // Register GridSystems
             IGridSystems IGridSystems = IModel.GetGridSystems();
 
@@ -512,7 +511,7 @@ namespace BH.Adapter.RAM
             Grid grid = new Grid();
             Polyline gridLine = new Polyline();
 
-            //Loop through the BHoM grids and sort per type (x,y,radial, circular) 
+            //Loop through the BHoM grids and sort per type (x,y,radial, circular, skewed) 
             for (int i = 0; i < Grids.Count(); i++)
             {
                 grid = Grids[i];
@@ -523,7 +522,7 @@ namespace BH.Adapter.RAM
                 }
                 else
                 {
-                    gridLine = Engine.Geometry.Modify.CollapseToPolyline(grid.Curve as dynamic,10);
+                    gridLine = Engine.Geometry.Modify.CollapseToPolyline(grid.Curve as dynamic, 10);
                     if (gridLine.StartPoint().X == gridLine.EndPoint().X)
                     {
                         YGrids.Add(grid);
@@ -539,40 +538,58 @@ namespace BH.Adapter.RAM
                 }
             }
 
+
             //Create grid systems per grid lists
 
-            //XYGrids
-            double gridSystemRotation = 0;       
+            //create different names for the gridSystem based on if there are items in the list
+            double gridSystemRotation = 0;
             string gridSystemLabel = "";
+            IGridSystem IGridSystemXY = null;
+            IGridSystem IGridSystemRad = null;
+            IGridSystem IGridSystemSk = null;
+            IModelGrids IModelGridsXY = null;
+            IModelGrids IModelGridsRad = null;
+            IModelGrids IModelGridsSk = null; 
 
-            if (YGrids.Count() != 0 || XGrids.Count() != 0) {
-                 gridSystemLabel = "XY_grids";
-            }else if (circGrids.Count() != 0)
+            //XYGrids
+            if (YGrids.Count() != 0 || XGrids.Count() != 0)
             {
-                gridSystemLabel = "Radial_grid";
-            } else if (circGrids.Count() != 0){
-                gridSystemLabel = "XY_grids";
+                 gridSystemLabel = "XY_grid";
+                 IGridSystemXY = IGridSystems.Add(gridSystemLabel);
+                 IGridSystemXY.dXOffset = 0;
+                 IGridSystemXY.dYOffset = 0;
+                 IGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
+                 IGridSystemXY.dRotation = gridSystemRotation;
+                 IModelGridsXY = IGridSystemXY.GetGrids();
             }
 
-            IGridSystem IGridSystemXY = IGridSystems.Add(gridSystemLabel);
-            IGridSystemXY.dXOffset = 0;
-            IGridSystemXY.dYOffset = 0;
-            IGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
-            IGridSystemXY.dRotation = gridSystemRotation;
-            IModelGrids IModelGridsXY = IGridSystemXY.GetGrids();
 
-            /*
-            //TODO: NEEDS TO BE TESTED
-            // Create a default floor type and assign the newly created 
 
-            IFloorTypes myFloorTypes = IModel.GetFloorTypes();
-            string defFloorTypeName = "Default_floorType";
-            IFloorType myFloorType = myFloorTypes.Add(defFloorTypeName);
-            DAArray gsID = myFloorType.GetGridSystemIDArray();
-            myFloorType.SetGridSystemIDArray(gsID);
+            //Radial Circular Grid
+            if (circGrids.Count() != 0)
+            {
+                gridSystemLabel = "Radial_grid";
+                IGridSystemRad = IGridSystems.Add(gridSystemLabel);
+                IGridSystemRad.dXOffset = 0;
+                IGridSystemRad.dYOffset = 0;
+                IGridSystemRad.eOrientationType = SGridSysType.eGridOrthogonal;
+                IGridSystemRad.dRotation = gridSystemRotation;
+                IModelGridsRad = IGridSystemRad.GetGrids();
+            }
+            // Skewed grid
+            if (skewGrids.Count() != 0) {
+                gridSystemLabel = "Skew_gird";
+                IGridSystemSk = IGridSystems.Add(gridSystemLabel);
+                IGridSystemSk.dXOffset = 0;
+                IGridSystemSk.dYOffset = 0;
+                IGridSystemSk.eOrientationType = SGridSysType.eGridOrthogonal;
+                IGridSystemSk.dRotation = gridSystemRotation;
+                IModelGridsSk = IGridSystemSk.GetGrids();
 
-            //add floor type as custom data o Grid
-            */
+            }
+
+
+
 
             //labels for grids in each direction
             string gridLabelX = "X";
@@ -583,7 +600,7 @@ namespace BH.Adapter.RAM
             foreach (Grid XGrid in XGrids)
             {
 
-                XGrid.Name = gridLabelX + gridCountX.ToString() ;
+                XGrid.Name = gridLabelX + gridCountX.ToString();
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(XGrid.Curve as dynamic, 10);
                 IModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y);
                 //IGridSystemXY = Engine.RAM.Convert.ToRAM(XGrid, IModelGridsXY, IGridSystemXY);
@@ -602,6 +619,8 @@ namespace BH.Adapter.RAM
 
             foreach (Grid cGrid in circGrids)
             {
+
+                IModelGridsRad.Add(cGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y);
                 // TODO: add code to impement circular grids
                 // Create GridSystem in RAM for each unique centerpt of circGrids  
 
@@ -616,6 +635,30 @@ namespace BH.Adapter.RAM
 
             //call the convert method 
             IGridSystemXY = Engine.RAM.Convert.ToRAM(Grids, IModelGridsXY, IGridSystemXY);
+
+            //get the ID of the fridsystem
+            int gridSystemID = IGridSystemXY.lUID;
+
+
+            /* FOR now we are not creating not creating floor type up until we test the rest of the elements
+            //TODO: NEEDS TO BE TESTED
+// Create a default floor type and assign the newly created gridsystem
+//string defFloorTypeName = "Default_floorType";
+//IFloorType myFloorType = myFloorTypes.Add(defFloorTypeName);
+//IStories myStories = IModel.GetStories();
+
+
+//Cycle through floortypes, access the existing floortype/story, place grids on those stories
+for (int i = 0; i < myFloorTypes.GetCount(); i++)
+{
+    myFloorType = myFloorTypes.GetAt(i);
+    IStory myStory= myStories.GetAt(i);
+    DAArray gsID = myFloorType.GetGridSystemIDArray();
+    gsID.Add(IGridSystemXY.lUID, 0);
+    myFloorType.SetGridSystemIDArray(gsID);
+}
+*/
+
 
 
             //Save file
