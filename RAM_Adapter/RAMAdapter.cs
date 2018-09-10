@@ -37,8 +37,9 @@ namespace BH.Adapter.RAM
                 IDBIO1 RAMDataAccIDBIO;
                 IModel IModel;
 
+                // if an EMPTY filepath is proivded and NO  .rss file exists
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
-                if (filePath == "" && !File.Exists(filePath))
+                if (filePath == "" || !File.Exists(filePath))
                 {
                     string filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
                     try
@@ -63,10 +64,11 @@ namespace BH.Adapter.RAM
                     }
 
                 }
-
+                // if a filepath is not provided but a .rss file exists
                 // Initialize to interface (CREATE NEW MODEL at provided filepath)
-                if (filePath != "" && !File.Exists(filePath))
+                if (filePath != "" && File.Exists(filePath))
                 {
+                    //string filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
                     try
                     {
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
@@ -74,6 +76,10 @@ namespace BH.Adapter.RAM
                         // Object Model Interface
                         IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
                         RAMDataAccIDBIO.CreateNewDatabase2(filePath, EUnits.eUnitsEnglish, "Grasshopper");
+
+                        // Permits the model to be opened by multiple users simultaneously 
+                        // 1 if not permitted, 0 if  permitted
+                        RAMDataAccIDBIO.AllowConcurrentAccess(1);
 
                         // Delete usr file
                         System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
@@ -84,7 +90,7 @@ namespace BH.Adapter.RAM
                         Console.WriteLine("Cannot create RAM database, check that the provided filepath is valid");
                     }
                 }
-
+                // if an .rss file is provided
                 // Initialize to inferface (OF EXISTING MODEL)
                 if (File.Exists(filePath))
                 {
@@ -106,15 +112,21 @@ namespace BH.Adapter.RAM
                     }
 
                     RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                    // Permits the model to be opened by multiple users simultaneously 
+                    RAMDataAccIDBIO.AllowConcurrentAccess(1);
+
+
                     double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper");
+                    //check if data base is properly loaded
+
+
                     if (loadOutput == 25673)
                     {
                         throw new ArgumentException("Cannot access RAM database. Please open the file in RAM, close RAM, and try again.");
                     }
                     else if (loadOutput == 25657)
                     {
-                        // Delete usr file
-                        File.Delete(filePath.Replace(".rss", ".usr"));
+                        File.Delete(filePath.Replace(".rss", ".usr"));       // Delete usr file
                         throw new ArgumentException("RAM Version installed does not match version of file.");
                     }
                     else if (loadOutput == 25674)
@@ -135,8 +147,6 @@ namespace BH.Adapter.RAM
             }
         }
             
-
-      
 
         /***************************************************/
         /**** Private  Fields                           ****/

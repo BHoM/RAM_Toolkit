@@ -511,6 +511,20 @@ namespace BH.Adapter.RAM
             Grid grid = new Grid();
             Polyline gridLine = new Polyline();
 
+            //create different names for the gridSystem based on if there are items in the list
+            double gridSystemRotation = 0;
+            string gridSystemLabel = "";
+            double gridOffsetX = 0;
+            double gridOffsetY = 0;
+            IGridSystem IGridSystemXY = null;
+            IGridSystem IGridSystemRad = null;
+            IGridSystem IGridSystemSk = null;
+            IModelGrids IModelGridsXY = null;
+            IModelGrids IModelGridsRad = null;
+            IModelGrids IModelGridsSk = null;
+
+
+
             //Loop through the BHoM grids and sort per type (x,y,radial, circular, skewed) 
             for (int i = 0; i < Grids.Count(); i++)
             {
@@ -523,6 +537,8 @@ namespace BH.Adapter.RAM
                 else
                 {
                     gridLine = Engine.Geometry.Modify.CollapseToPolyline(grid.Curve as dynamic, 10);
+                    //check if the first provided line are offset from the 0,0,0 and give that as gridOffset in X and Y
+                    //add lines to corresponding lists (XGrids, YGrids) based on their  orientation
                     if (gridLine.StartPoint().X == gridLine.EndPoint().X)
                     {
                         YGrids.Add(grid);
@@ -535,29 +551,33 @@ namespace BH.Adapter.RAM
                     {
                         skewGrids.Add(grid);
                     }
+
+                }
+                if (i == 0)
+                {
+                    if (gridLine.StartPoint().X != 0)
+                    {
+                        gridOffsetX = gridLine.StartPoint().X;
+
+                    }
+                    if (gridLine.StartPoint().Y != 0)
+                    {
+                        gridOffsetY = gridLine.StartPoint().Y;
+
+                    }
                 }
             }
 
 
             //Create grid systems per grid lists
 
-            //create different names for the gridSystem based on if there are items in the list
-            double gridSystemRotation = 0;
-            string gridSystemLabel = "";
-            IGridSystem IGridSystemXY = null;
-            IGridSystem IGridSystemRad = null;
-            IGridSystem IGridSystemSk = null;
-            IModelGrids IModelGridsXY = null;
-            IModelGrids IModelGridsRad = null;
-            IModelGrids IModelGridsSk = null; 
-
             //XYGrids
             if (YGrids.Count() != 0 || XGrids.Count() != 0)
             {
                  gridSystemLabel = "XY_grid";
                  IGridSystemXY = IGridSystems.Add(gridSystemLabel);
-                 IGridSystemXY.dXOffset = 0;
-                 IGridSystemXY.dYOffset = 0;
+                 IGridSystemXY.dXOffset = gridOffsetX;
+                 IGridSystemXY.dYOffset = gridOffsetY;
                  IGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
                  IGridSystemXY.dRotation = gridSystemRotation;
                  IModelGridsXY = IGridSystemXY.GetGrids();
@@ -570,9 +590,9 @@ namespace BH.Adapter.RAM
             {
                 gridSystemLabel = "Radial_grid";
                 IGridSystemRad = IGridSystems.Add(gridSystemLabel);
-                IGridSystemRad.dXOffset = 0;
-                IGridSystemRad.dYOffset = 0;
-                IGridSystemRad.eOrientationType = SGridSysType.eGridOrthogonal;
+                IGridSystemRad.dXOffset = gridOffsetX;
+                IGridSystemRad.dYOffset = gridOffsetY;
+                IGridSystemRad.eOrientationType = SGridSysType.eGridRadial;
                 IGridSystemRad.dRotation = gridSystemRotation;
                 IModelGridsRad = IGridSystemRad.GetGrids();
             }
@@ -582,7 +602,7 @@ namespace BH.Adapter.RAM
                 IGridSystemSk = IGridSystems.Add(gridSystemLabel);
                 IGridSystemSk.dXOffset = 0;
                 IGridSystemSk.dYOffset = 0;
-                IGridSystemSk.eOrientationType = SGridSysType.eGridOrthogonal;
+                IGridSystemSk.eOrientationType = SGridSysType.eGridSkewed;
                 IGridSystemSk.dRotation = gridSystemRotation;
                 IModelGridsSk = IGridSystemSk.GetGrids();
 
@@ -642,22 +662,22 @@ namespace BH.Adapter.RAM
 
             /* FOR now we are not creating not creating floor type up until we test the rest of the elements
             //TODO: NEEDS TO BE TESTED
-// Create a default floor type and assign the newly created gridsystem
-//string defFloorTypeName = "Default_floorType";
-//IFloorType myFloorType = myFloorTypes.Add(defFloorTypeName);
-//IStories myStories = IModel.GetStories();
+            // Create a default floor type and assign the newly created gridsystem
+            //string defFloorTypeName = "Default_floorType";
+            //IFloorType myFloorType = myFloorTypes.Add(defFloorTypeName);
+            //IStories myStories = IModel.GetStories();
 
 
-//Cycle through floortypes, access the existing floortype/story, place grids on those stories
-for (int i = 0; i < myFloorTypes.GetCount(); i++)
-{
-    myFloorType = myFloorTypes.GetAt(i);
-    IStory myStory= myStories.GetAt(i);
-    DAArray gsID = myFloorType.GetGridSystemIDArray();
-    gsID.Add(IGridSystemXY.lUID, 0);
-    myFloorType.SetGridSystemIDArray(gsID);
-}
-*/
+            //Cycle through floortypes, access the existing floortype/story, place grids on those stories
+            for (int i = 0; i < myFloorTypes.GetCount(); i++)
+                {
+                    myFloorType = myFloorTypes.GetAt(i);
+                    IStory myStory= myStories.GetAt(i);
+                    DAArray gsID = myFloorType.GetGridSystemIDArray();
+                    gsID.Add(IGridSystemXY.lUID, 0);
+                    myFloorType.SetGridSystemIDArray(gsID);
+                }
+                */
 
 
 
@@ -668,8 +688,6 @@ for (int i = 0; i < myFloorTypes.GetCount(); i++)
             //System.IO.File.Delete(filePathUserfile);
             return true;
         }
-
-
 
         /***************************************************/
     }
