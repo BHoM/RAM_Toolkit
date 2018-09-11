@@ -38,22 +38,24 @@ namespace BH.Adapter.RAM
                 IDBIO1 RAMDataAccIDBIO;
                 IModel IModel;
 
-                //CASE01 :  if NO filepath is proivded and NO .rss file exists 
+
+                //CASE01 :  if NO filepath is proivded and NO .rss file exists
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
 
-                //if the file does not exist create a new file
-                if (filePath == "" && !File.Exists(filePath))
+                if (filePath != "" && !File.Exists(filePath))
                 {
                     //string filePathNew = "Q:\\BHLA Comp Collective Dev\\RAM_test\\BHoM_Model.rss";
                     string filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
                     string filePathOld = filePath;
-                    filePathOld = filePathOld.Replace("\r\n", "");
+
                     try
                     {
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+
                         // Object Model Interface
                         IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
                         RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
+
                         // Delete usr file
                         File.Delete(filePathNew.Replace(".rss", ".usr"));
 
@@ -65,45 +67,66 @@ namespace BH.Adapter.RAM
 
                 }
 
-                // if a file path is provided by the USER check it for Validity
 
-                if (filePath != "") 
+
+                //CASE02:  if a filepath to an .rss file is provided either as a explicit filepath or wiith a component
+                // Initialize to interface (CREATE NEW MODEL at provided filepath)
+
+                //if (filePath!= "")
+                  if (filePath == "" && File.Exists(filePath))
                 {
+                    //string defaultPath = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
+                    string filePathNew = filePath.Replace("\\\\", "\\");
+                    //string filePaPath.GetFullPath(filePath);
+                    filePathNew = filePathNew.Replace("\r\n", "");
+                    string fileName = Path.GetFileName(filePathNew);
+                   
+                    filePath = filePathNew;
 
-                    //modify file path to ensure its validity
-                    string filePathMod = filePath.Replace("\\\\", "\\");
-                    filePathMod = filePathMod.Replace("\r\n", "");
-                    filePath = filePathMod;
-                    //check if after modification file exists
-                    if (!File.Exists(filePath))
+
+                    /*
+                    string fileNameRAM = fileName.Replace(".rss", ".ram");
+                    string filePathTempRAMFile0 = Path.GetFullPath(filePath);
+                    string filePathTempRAMFile1 = filePathTempRAMFile0.Replace(fileName, "");
+
+                    filePathTempRAMFile0 = filePathTempRAMFile1 + fileNameRAM;
+                    if (File.Exists(filePathTempRAMFile0))
                     {
+                        File.Delete(filePathTempRAMFile0);
+                    }
+                    */
 
-                        //string filePathNew = "Q:\\BHLA Comp Collective Dev\\RAM_test\\BHoM_Model.rss";
-                        string defaultPath1 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
-                        string filePathOld = filePath;
-                        filePathOld = filePathOld.Replace("\r\n", "");
-                        try
-                        {
-                            RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                            // Object Model Interface
-                            IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-                            RAMDataAccIDBIO.CreateNewDatabase2(defaultPath1, EUnits.eUnitsEnglish, "Grasshopper");
-                            // Delete usr file
-                            File.Delete(defaultPath1.Replace(".rss", ".usr"));
+                    try
+                    {
+                        RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
 
-                        }
-                        catch
-                        {
-                            Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
-                        }
+                        // Object Model Interface
 
+                        RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
+
+                        IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                        // double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePathNew, "Grasshopper");
+
+                        // Delete usr file
+                        File.Delete(filePathNew.Replace(".rss", ".usr"));
 
                     }
-                    else if (File.Exists(filePath))
+                    catch
                     {
-                        // if an .rss file is provided
-                        // Initialize to interface (OF EXISTING MODEL)
+                        Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
+                    }
 
+                }
+
+
+
+                    //case03
+                    // if an .rss file is provided
+                    // Initialize to interface (OF EXISTING MODEL)
+
+                    if (File.Exists(filePath))
+                    {
+                        //Delete .ram file in working directory if it exists
                         string fileName = Path.GetFileName(filePath);
                         string fileNameRAM = fileName.Replace(".rss", ".ram");
                         //Two possible working dirs depending on install
@@ -111,7 +134,6 @@ namespace BH.Adapter.RAM
                         string filePathWorkingDir2 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Working\\";
                         string filePathTempRAMFile1 = filePathWorkingDir1 + fileNameRAM;
                         string filePathTempRAMFile2 = filePathWorkingDir2 + fileNameRAM;
-                        //Delete .ram file in working directory if it exists
                         if (File.Exists(filePathTempRAMFile1))
                         {
                             File.Delete(filePathTempRAMFile1);
@@ -122,11 +144,10 @@ namespace BH.Adapter.RAM
                         }
 
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                        double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper"); //if 0 successful
-
-                        //check if data base is properly loaded
-
-                        if (loadOutput == 25673)
+                        double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper");
+  
+                    //check if data base is properly loaded
+                    if (loadOutput == 25673)
                         {
                             throw new ArgumentException("Cannot access RAM database. Please open the file in RAM, close RAM, and try again.");
                         }
@@ -149,15 +170,73 @@ namespace BH.Adapter.RAM
 
                         // Delete usr file
                         System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
+                }
+
+
+
+
+                /*
+               // if an EMPTY filepath is proivded and NO  .rss file exists
+                // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
+                //case01
+                if (filePath == "" && File.Exists(filePath))
+                {
+                    //Delete .ram file in working directory if it exists
+                    string fileName = Path.GetFileName(filePath);
+                    string fileNameRAM = fileName.Replace(".rss", ".ram");
+                    //Two possible working dirs depending on install
+                    string filePathWorkingDir1 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Working\\";
+                    string filePathWorkingDir2 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\";
+                    string filePathTempRAMFile1 = filePathWorkingDir1 + fileNameRAM;
+                    string filePathTempRAMFile2 = filePathWorkingDir2 + fileNameRAM;
+                    if (File.Exists(filePathTempRAMFile1))
+                    {
+                        File.Delete(filePathTempRAMFile1);
+                    }
+                    if (File.Exists(filePathTempRAMFile2))
+                    {
+                        File.Delete(filePathTempRAMFile2);
                     }
 
-                }//check of filepath ends here
+                    RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
 
+                    double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper");
+                    //check if data base is properly loaded
+
+
+                    if (loadOutput == 25673)
+                    {
+                        throw new ArgumentException("Cannot access RAM database. Please open the file in RAM, close RAM, and try again.");
+                    }
+                    else if (loadOutput == 25657)
+                    {
+                        File.Delete(filePath.Replace(".rss", ".usr"));       // Delete usr file
+                        throw new ArgumentException("RAM Version installed does not match version of file.");
+                    }
+                    else if (loadOutput == 25674)
+                    {
+                        throw new ArgumentException(".rss and .ram file exist for same model.");
+                    }
+                    else if (loadOutput == 301)
+                    {
+                        throw new ArgumentException("Failed to read .ram file.");
+                    }
+
+                    // Object Model Interface
+                    IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+                    // Delete usr file
+                    System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
+                    }
+
+                 
+
+                */
 
             }
 
         }
-
+            
 
         /***************************************************/
         /**** Private  Fields                           ****/
