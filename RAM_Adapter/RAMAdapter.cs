@@ -41,13 +41,9 @@ namespace BH.Adapter.RAM
                 //CASE01 :  if NO filepath is proivded and NO .rss file exists 
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
 
-                //if the file does not exist create a new file
                 if (filePath == "" && !File.Exists(filePath))
                 {
-                    //string filePathNew = "Q:\\BHLA Comp Collective Dev\\RAM_test\\BHoM_Model.rss";
                     string filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
-                    string filePathOld = filePath;
-                    filePathOld = filePathOld.Replace("\r\n", "");
                     try
                     {
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
@@ -69,27 +65,23 @@ namespace BH.Adapter.RAM
 
                 if (filePath != "") 
                 {
-
                     //modify file path to ensure its validity
                     string filePathMod = filePath.Replace("\\\\", "\\");
                     filePathMod = filePathMod.Replace("\r\n", "");
                     filePath = filePathMod;
+                    
                     //check if after modification file exists
+                    //if the file does not exist create a new file
                     if (!File.Exists(filePath))
                     {
-
-                        //string filePathNew = "Q:\\BHLA Comp Collective Dev\\RAM_test\\BHoM_Model.rss";
-                        string defaultPath1 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
-                        string filePathOld = filePath;
-                        filePathOld = filePathOld.Replace("\r\n", "");
                         try
                         {
                             RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                             // Object Model Interface
                             IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-                            RAMDataAccIDBIO.CreateNewDatabase2(defaultPath1, EUnits.eUnitsEnglish, "Grasshopper");
+                            RAMDataAccIDBIO.CreateNewDatabase2(filePath, EUnits.eUnitsEnglish, "Grasshopper");
                             // Delete usr file
-                            File.Delete(defaultPath1.Replace(".rss", ".usr"));
+                            File.Delete(filePath.Replace(".rss", ".usr"));
 
                         }
                         catch
