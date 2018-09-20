@@ -72,7 +72,8 @@ namespace BH.Adapter.RAM
                 int numColumns = IColumns.GetCount();
 
                 //Get Beams
-                ILayoutBeams ILayoutBeams = IStories.GetAt(i).GetFloorType().GetLayoutBeams();
+                IFloorType IFloorType = IStories.GetAt(i).GetFloorType();
+                ILayoutBeams ILayoutBeams = IFloorType.GetLayoutBeams();
                 IBeams IBeams = IStories.GetAt(i).GetBeams();
                 int numBeams = ILayoutBeams.GetCount();
 
@@ -102,6 +103,7 @@ namespace BH.Adapter.RAM
                     IBeam IBeam = IBeams.GetAt(j);
                     ILayoutBeam ILayoutBeam = ILayoutBeams.GetAt(j);
                     Bar bhomBar = BH.Engine.RAM.Convert.ToBHoMObject(IBeam, ILayoutBeam, dElevation);
+                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
 
@@ -119,6 +121,7 @@ namespace BH.Adapter.RAM
                     IHorizBrace IHorizBrace = IHorizBraces.GetAt(j);
                     ILayoutHorizBrace ILayoutHorizBrace = ILayoutHorizBraces.GetAt(j);
                     Bar bhomBar = BH.Engine.RAM.Convert.ToBHoMObject(IHorizBrace, ILayoutHorizBrace, dElevation);
+                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
 
