@@ -28,6 +28,29 @@ namespace BH.Engine.RAM
         /// <summary>
         /***************************************************/
 
+        public static List<double> ToLevelElevations(IModel IModel)
+        {
+            List<double> RAMLevelHeights = new List<double>();
+
+            //Get existing levels
+            List<string> FloorTypeNames = new List<string>();
+            List<string> StoryNames = new List<string>();
+            string FloorTypeName;
+            double StoryElevation;
+            int FloorID;
+            IFloorTypes IFloorTypes = IModel.GetFloorTypes();
+            IStories IStories = IModel.GetStories();
+
+            double storyCount = IStories.GetCount();
+
+            for (int i = 0; i < storyCount; i++)
+            {
+                StoryElevation = IStories.GetAt(i).dElevation;
+                RAMLevelHeights.Add(StoryElevation);
+            }
+            return RAMLevelHeights;
+        }
+            
         public static Polyline ToPolyline(IPoints IPoints)
         {
             List<Point> controlPts = new List<Point>();
@@ -447,33 +470,32 @@ namespace BH.Engine.RAM
 
             Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
 
-            //Commented out for v14 api testing
-            //IDisplacements IDisplacements = INode.GetDisplacements();
+            IDisplacements IDisplacements = INode.GetDisplacements();
             IMemberForces IMemberForces = INode.GetReactions();
 
 
-            //for (int i = 0; i < IDisplacements.GetCount(); i++)
-            //{
-            //    IDisplacement IDisplacement = IDisplacements.GetAt(i);
+            for (int i = 0; i < IDisplacements.GetCount(); i++)
+            {
+                IDisplacement IDisplacement = IDisplacements.GetAt(i);
 
-            //    double x = IDisplacement.dDispX;
-            //    double y = IDisplacement.dDispY;
-            //    double z = IDisplacement.dDispZ;
-            //    double thetax = IDisplacement.dThetaX;
-            //    double thetay = IDisplacement.dThetaY;
-            //    double thetaz = IDisplacement.dThetaZ;
+                double x = IDisplacement.dDispX;
+                double y = IDisplacement.dDispY;
+                double z = IDisplacement.dDispZ;
+                double thetax = IDisplacement.dThetaX;
+                double thetay = IDisplacement.dThetaY;
+                double thetaz = IDisplacement.dThetaZ;
 
-            //    // Unique RAM ID
-            //    Node.CustomData["lUID"] = INode.lUniqueID;
+                // Unique RAM ID
+                Node.CustomData["lUID"] = INode.lUniqueID;
 
-            //    Node.CustomData["dX"] = x;
-            //    Node.CustomData["dY"] = y;
-            //    Node.CustomData["dZ"] = z;
-            //    Node.CustomData["dthetaX"] = thetax;
-            //    Node.CustomData["dthetaY"] = thetay;
-            //    Node.CustomData["dthetaZ"] = thetaz;
+                Node.CustomData["dX"] = x;
+                Node.CustomData["dY"] = y;
+                Node.CustomData["dZ"] = z;
+                Node.CustomData["dthetaX"] = thetax;
+                Node.CustomData["dthetaY"] = thetay;
+                Node.CustomData["dthetaZ"] = thetaz;
 
-            //}
+            }
 
             // Collect all member forces at node, tracked by index; should these be combined?
             for (int i = 0; i < IMemberForces.GetCount(); i++)

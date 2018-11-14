@@ -31,13 +31,21 @@ namespace BH.Adapter.RAM
             bool success = true;        //boolean returning if the creation was successfull or not
 
             //Test if push is going into an empty model
-            //This is a requirement for RAM Push to work reliably
+            //This is a requirement for RAM Push to work reliably as of now
             
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
             double storyCount = IModel.GetStories().GetCount();
             double floorCount = IModel.GetFloorTypes().GetCount();
+
+            //Get all levels of objects
+
+            //Create default floorType if none exist
+
+            //Create new stories for all stories that do not exist
+
+            //Create objects
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
@@ -55,7 +63,7 @@ namespace BH.Adapter.RAM
                 throw new Exception("RAM Model must not contain Stories and Floor Types. Set Path to a RAM file without these and try again.");
             }
 
-            //UpdateViews()             //If there exists a command for updating the views is the software call it now:
+            //UpdateViews()             //If there exists a command for updating the views in the software call it now:
 
             return success;             //Finally return if the creation was successful or not
 
@@ -76,6 +84,7 @@ namespace BH.Adapter.RAM
             IFloorTypes IFloorTypes;
             IFloorType IFloorType;
             IStories IStories;
+            IStory IStory;
             ILayoutColumns ILayoutColumns;
             ILayoutBeams ILayoutBeams;
 
@@ -120,83 +129,20 @@ namespace BH.Adapter.RAM
                 }
             }
 
-            levelHeights.Sort();
-            
-            List<double> levelHeightsUnique = levelHeights.Distinct().ToList();
-
-            //RAM requires positive levels. Added logic allows for throwing negative level exception.
-
-            if (levelHeightsUnique[0] < 0)
-            {
-                throw new Exception("Base level can not be negative for RAM. Please move model origin point to set base level at 0 or greater.");
-            }
-
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            //Logic for deleting stories and then adding new
-            //Phased out for now
-            
-            //Delete Model FloorTypes and Stories Names
-            //List<string> FloorTypeNames = new List<string>();
-            //List<string> StoryNames = new List<string>();
-            //string FloorTypeName;
-            //int StoryID;
-            //int FloorID;
-            //IFloorTypes = IModel.GetFloorTypes();
-            //IStories = IModel.GetStories();
-
-
-            //double storyCount = IStories.GetCount();
-
-            //for (int i = 0; i < storyCount; i++)
-            //{
-            //    StoryID = IStories.GetAt(i).lUID;
-            //    IStories.Delete(StoryID);
-            //}
-            //double floorCount = IFloorTypes.GetCount();
-
-            //for (int i = 0; i < IFloorTypes.GetCount(); i++)
-            //{
-            //    FloorID = IFloorTypes.GetAt(i).lUID;
-            //    IFloorTypes.Delete(FloorID);
-            //}
-
-
-            //Create floor type at each level
-            
-            for (int i = 0; i < levelHeightsUnique.Count(); i++)
-            {
-                string LevelName = "Level " + levelHeightsUnique[i].ToString();
-                string StoryName = "Story " + i.ToString();
-
-                IFloorTypes = IModel.GetFloorTypes();
-                IFloorTypes.Add(LevelName);
-                IFloorType = IFloorTypes.GetAt(i);
-        
-                ILayoutColumns = IFloorType.GetLayoutColumns();
-                ILayoutBeams = IFloorType.GetLayoutBeams();
-
-                IStories = IModel.GetStories();
-
-                // Find floor heights from z-elevations
-                double height;
-                if (i == 0) { height = levelHeightsUnique[i]; }
-                else { height = levelHeightsUnique[i] - levelHeightsUnique[i - 1]; }
-
-                IStories.Add(IFloorType.lUID, StoryName, height);
-
-            }
-
-
+            //Create new levels in RAM per unique z values
+            CreateLevels(levelHeights,IModel);
 
             // Cycle through floortypes, access appropriate story, place beams on those stories
-            for (int i = 0; i < levelHeightsUnique.Count(); i++)
-            {
+            IStories = IModel.GetStories();
 
-                IFloorTypes = IModel.GetFloorTypes();
-                IFloorType = IFloorTypes.GetAt(i);
+            for (int i = 0; i < IStories.GetCount(); i++)
+            {
+                IStory = IStories.GetAt(i);
+                IFloorType = IStory.GetFloorType();
                 ILayoutBeams = IFloorType.GetLayoutBeams();
                 ILayoutColumns = IFloorType.GetLayoutColumns();
 
@@ -214,7 +160,7 @@ namespace BH.Adapter.RAM
                     double zEnd = Math.Round(bar.EndNode.Position.Z,2);
 
                     //If bar is on level, add it during that iteration of the loop 
-                    if (zStart == levelHeightsUnique[i])
+                    if (zStart == IStory.dElevation)
                     {
                         ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd,5);
                         ILayoutBeam.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
@@ -234,9 +180,9 @@ namespace BH.Adapter.RAM
                     double yEnd = bar.EndNode.Position.Y;
                     double zEnd = Math.Round(bar.EndNode.Position.Z,2);
 
-                    if (zStart == levelHeightsUnique[i])
+                    if (zEnd == IStory.dElevation)
                     {
-                        IFloorType = IFloorTypes.GetAt(i+1);
+                        IFloorType = IStory.GetFloorType();
                         ILayoutColumns = IFloorType.GetLayoutColumns();
 
                         if (Engine.Structure.Query.IsVertical(bar))
@@ -345,144 +291,183 @@ namespace BH.Adapter.RAM
             return true;
         }
 
-
-        private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
-        {
-            throw new NotImplementedException();
-        }
         //TODO: TEST METHOD AND RESOLVE FREEZING WHEN OPENING RAM
 
-        //// Create Panel Method -- Commented because it is not yet working
-        //private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
-        //{
-        //    //Code for creating a collection of floors (and/or walls?) in the software
+        // Create Panel Method -- Commented because it is not yet working
+        private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
+        {
+            //Code for creating a collection of floors (and/or walls?) in the software
 
-        //    List<PanelPlanar> panels = bhomPanels.ToList();
+            List<PanelPlanar> panels = bhomPanels.ToList();
 
-        //    // Register Floor types
-        //    IFloorTypes IFloorTypes;
-        //    IFloorType IFloorType;
-        //    IStories IStories;
-        //    IStory IStory;
+            // Register Floor types
+            IFloorTypes IFloorTypes;
+            IFloorType IFloorType;
+            IStories IStories;
+            IStory IStory;
 
-        //    //Create wall and floor lists with individual heights
-        //    List<PanelPlanar> WallPanels = new List<PanelPlanar>();
-        //    List<PanelPlanar> floors = new List<PanelPlanar>();
-        //    List<double> panelHeights = new List<double>();
-
-
-        //    // Split walls and floors
-        //    foreach (PanelPlanar panel in panels)
-        //    {
-        //        if (panel.Tags.Contains("WallPanel"))
-        //        {
-        //            WallPanels.Add(panel);
-        //        }
-        //        else
-        //        {
-        //            floors.Add(panel);
-        //        }
-        //    }
-
-        //    //Access model
-        //    IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-        //    IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-        //    IFloorTypes = IModel.GetFloorTypes();
-        //    IStories = IModel.GetStories();
+            //Create wall and floor lists with individual heights
+            List<PanelPlanar> WallPanels = new List<PanelPlanar>();
+            List<PanelPlanar> floors = new List<PanelPlanar>();
+            List<double> panelHeights = new List<double>();
 
 
-        //    // Cycle through floortypes, access appropriate story, place panels on those stories
-        //    for (int i = 0; i < IFloorTypes.GetCount(); i++)
-        //    {
+            // Split walls and floors
+            foreach (PanelPlanar panel in panels)
+            {
+                if (panel.Tags.Contains("WallPanel"))
+                {
+                    WallPanels.Add(panel);
+                }
+                else
+                {
+                    floors.Add(panel);
+                }
+            }
 
-        //        IFloorType = IFloorTypes.GetAt(i);
-        //        IStory = IStories.GetAt(i);
+            //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-        //        IDecks IDecks = IFloorType.GetDecks();
-        //        IDeck IDeck;
-
-        //        //Cycle through floors; if z of bar = the floor height, add it
-        //        for (int j = 0; j < floors.Count(); j++)
-        //        {
-
-        //            PanelPlanar floor = floors[j];
-
-        //            // Find outline of planar panel
-        //            List<SCoordinate> corners = new List<SCoordinate>();
-        //            //Polyline outline = BH.Engine.Structure.Query.Outline(floor);
-
-        //            List<Edge> edges = floor.ExternalEdges;
-
-        //            /////////////// Method 1 to get points
-        //            //List<Point> ctrlPoints = edges.Select(e => (e.Curve as Line).Start)..ToList();
-
-        //            /////////////// Method 2 to get points
-        //            //List<ICurve> ICurveSegs = new List<ICurve>();
-        //            //IEnumerable<List<ICurve>> segments = edges.Select(e => (e.Curve as PolyCurve).Curves.ToList<ICurve>());
-        //            //List<Point> ctrlPoints2 = new List<Point>();
-
-        //            //foreach (List<ICurve> segment in segments)
-        //            //{
-        //            //    for (int l = 0; l < segments.Count(); l++)
-        //            //    {
-        //            //        ICurveSegs.Add(segment[l]);
-        //            //    }
-        //            //}
-
-        //            //for (int l = 0; l < segments.Count(); l++)
-        //            //{
-        //            //    Line bhomLine = ICurveSegs[l] as Line;
-        //            //    ctrlPoints2.Add(bhomLine.Start);       
-        //            //}
-
-        //            ////////////// Method 3
-        //            List<ICurve> segments2 = BH.Engine.Structure.Query.AllEdgeCurves(floor);
-        //            List<Point> ctrlPoints3 = new List<Point>();
-        //            PolyCurve bhomCurve = new PolyCurve { Curves = segments2.ToList() };
-
-        //            ctrlPoints3 = BH.Engine.Geometry.Query.ControlPoints(bhomCurve);
+            IFloorTypes = IModel.GetFloorTypes();
+            IStories = IModel.GetStories();
 
 
-        //            // Get list of coordinates
-        //            foreach (Point point in ctrlPoints3)
-        //            {
-        //                SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
-        //                corners.Add(corner);
-        //            }
+            // Cycle through floortypes, access appropriate story, place panels on those stories
+            for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            {
 
-        //            //Add back first point to end
-        //            corners.Add(corners[0]);
+                IFloorType = IFloorTypes.GetAt(i);
+                IStory = IStories.GetAt(i);
 
-        //            // If on level, add deck to IDecks for that level
-        //            if (Math.Round(corners[0].dZLoc) == IStory.dFlrHeight || Math.Round(corners[0].dZLoc) == IStory.dElevation)
-        //            {
+                IDecks IDecks = IFloorType.GetDecks();
+                IDeck IDeck;
 
-        //                IDeck = IDecks.Add(0, ctrlPoints3.Count + 1);
-        //                IPoints IPoints = IDeck.GetPoints();
+                //Cycle through floors; if z of bar = the floor height, add it
+                for (int j = 0; j < floors.Count(); j++)
+                {
 
-        //                for (int k = 0; k < corners.Count; k++)
-        //                {
-        //                    IPoints.Add(corners[k]);
-        //                }
+                    PanelPlanar floor = floors[j];
 
-        //                IDeck.SetPoints(IPoints);
+                    // Find outline of planar panel
+                    List<SCoordinate> corners = new List<SCoordinate>();
+                    //Polyline outline = BH.Engine.Structure.Query.Outline(floor);
 
-        //            }
-        //        }
+                    List<Edge> edges = floor.ExternalEdges;
 
-        //    }
+                    /////////////// Method 1 to get points
+                    //List<Point> ctrlPoints = edges.Select(e => (e.Curve as Line).Start)..ToList();
 
-        //    //Save file
-        //    RAMDataAccIDBIO.SaveDatabase();
+                    /////////////// Method 2 to get points
+                    //List<ICurve> ICurveSegs = new List<ICurve>();
+                    //IEnumerable<List<ICurve>> segments = edges.Select(e => (e.Curve as PolyCurve).Curves.ToList<ICurve>());
+                    //List<Point> ctrlPoints2 = new List<Point>();
 
-        //    // Release main interface and delete user file
-        //    RAMDataAccIDBIO = null;
-        //    //System.IO.File.Delete(filePathUserfile);
+                    //foreach (List<ICurve> segment in segments)
+                    //{
+                    //    for (int l = 0; l < segments.Count(); l++)
+                    //    {
+                    //        ICurveSegs.Add(segment[l]);
+                    //    }
+                    //}
 
-        //    return true;
-        //}
+                    //for (int l = 0; l < segments.Count(); l++)
+                    //{
+                    //    Line bhomLine = ICurveSegs[l] as Line;
+                    //    ctrlPoints2.Add(bhomLine.Start);       
+                    //}
 
+                    ////////////// Method 3
+                    List<ICurve> segments2 = BH.Engine.Structure.Query.AllEdgeCurves(floor);
+                    List<Point> ctrlPoints3 = new List<Point>();
+                    PolyCurve bhomCurve = new PolyCurve { Curves = segments2.ToList() };
+
+                    ctrlPoints3 = BH.Engine.Geometry.Query.ControlPoints(bhomCurve);
+
+
+                    // Get list of coordinates
+                    foreach (Point point in ctrlPoints3)
+                    {
+                        SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
+                        corners.Add(corner);
+                    }
+
+                    //Add back first point to end
+                    corners.Add(corners[0]);
+
+                    // If on level, add deck to IDecks for that level
+                    if (Math.Round(corners[0].dZLoc) == IStory.dFlrHeight || Math.Round(corners[0].dZLoc) == IStory.dElevation)
+                    {
+
+                        IDeck = IDecks.Add(0, ctrlPoints3.Count + 1);
+                        IPoints IPoints = IDeck.GetPoints();
+
+                        for (int k = 0; k < corners.Count; k++)
+                        {
+                            IPoints.Add(corners[k]);
+                        }
+
+                        IDeck.SetPoints(IPoints);
+
+                    }
+                }
+
+            }
+
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
+
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+            //System.IO.File.Delete(filePathUserfile);
+
+            return true;
+        }
+
+        private bool CreateLevels(List<double> Elevations, IModel IModel)
+        {
+
+            Elevations.Sort();
+
+            List<double> levelHeightsUnique = Elevations.Distinct().ToList();
+
+            //RAM requires positive levels. Added logic allows for throwing negative level exception.
+
+            if (levelHeightsUnique[0] < 0)
+            {
+                throw new Exception("Base level can not be negative for RAM. Please move model origin point to set all geometry and levels at 0 or greater.");
+            }
+
+            // Register Floor types
+            IFloorTypes IFloorTypes;
+            IFloorType IFloorType;
+            IStories IStories;
+            IStory IStory;
+            
+            //Create floor type at each level
+            //TODO: Working method for checking existing levels and adding levels at nonexisting level elevations
+
+            for (int i = 0; i < levelHeightsUnique.Count(); i++)
+            {
+                string LevelName = "Level " + levelHeightsUnique[i].ToString();
+                string StoryName = "Story " + i.ToString();
+
+                IFloorTypes = IModel.GetFloorTypes();
+                IFloorTypes.Add(LevelName);
+                IFloorType = IFloorTypes.GetAt(i);
+
+                IStories = IModel.GetStories();
+
+                // Find floor heights from z-elevations
+                double height;
+                if (i == 0) { height = levelHeightsUnique[i]; }
+                else { height = levelHeightsUnique[i] - levelHeightsUnique[i - 1]; }
+
+                IStories.Add(IFloorType.lUID, StoryName, height);
+
+            }
+            return true;
+        }
 
 
         private bool CreateCollection(IEnumerable<Grid> bhomGrid)
