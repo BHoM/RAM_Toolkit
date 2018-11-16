@@ -303,8 +303,15 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j < numDecks; j++)
                 {
                     IDeck IDeck = IDecks.GetAt(j);
-                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
-                    bhomPanels.Add(Panel);
+                    try
+                    {
+                        PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
+                        bhomPanels.Add(Panel);
+                    }
+                    catch
+                    {
+                        BH.Engine.Reflection.Compute.RecordWarning("This story has no slab edges defined. IStoryUID: " + IStoryUID);
+                    }
                 }
 
             }

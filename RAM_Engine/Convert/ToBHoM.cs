@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BH.oM.Structure.Elements;
 using BH.oM.Geometry;
+using BH.oM.Architecture.Elements;
+using BH.oM.Structure.Elements;
+using BH.oM.Structure.Properties;
 using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
-using BH.oM.Structure.Properties;
 using RAMDATAACCESSLib;
-using BH.oM.Architecture.Elements;
 
 namespace BH.Engine.RAM
 {
