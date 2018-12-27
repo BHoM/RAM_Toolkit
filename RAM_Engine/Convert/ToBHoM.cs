@@ -8,6 +8,7 @@ using BH.oM.Geometry;
 using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
 using BH.oM.Structure.Properties;
+using BH.oM.Structure.Properties.Surface;
 using RAMDATAACCESSLib;
 using BH.oM.Architecture.Elements;
 
@@ -321,7 +322,7 @@ namespace BH.Engine.RAM
             //Get panel props
             EDeckType type = IDeck.eDeckPropType;
 
-            IProperty2D bh2DProp = null;
+            ISurfaceProperty bh2DProp = null;
             ConstantThickness deck2DProp = new ConstantThickness();
             double deckThickness = 0;
             string deckLabel = "";

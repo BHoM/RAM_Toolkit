@@ -7,6 +7,8 @@ using System.Threading.Tasks;
 using BH.oM.Base;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.Properties;
+using BH.oM.Structure.Properties.Section;
+using BH.oM.Structure.Properties.Surface;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
@@ -263,7 +265,7 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<IProperty2D> IProperty2Ds)
+        private bool CreateCollection(IEnumerable<ISurfaceProperty> ISurfacePropertys)
         {           
             //TODO: DECK PROPERTY FUNCTIONALITY
             
@@ -276,7 +278,7 @@ namespace BH.Adapter.RAM
             ////Get composite deck properties
             //ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
 
-            //foreach (IProperty2D iProp in IProperty2Ds)
+            //foreach (ISurfaceProperty iProp in ISurfacePropertys)
             //{
             //    //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
             //    string deckName = iProp.Name;

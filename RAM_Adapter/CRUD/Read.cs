@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 using BH.oM.Base;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.Properties;
+using BH.oM.Structure.Properties.Section;
+using BH.oM.Structure.Properties.Constraint;
+using BH.oM.Structure.Properties.Surface;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
@@ -37,8 +40,8 @@ namespace BH.Adapter.RAM
                 return ReadMaterials(ids as dynamic);
             else if (type == typeof(PanelPlanar))
                 return ReadPanels(ids as dynamic);
-            else if (type == typeof(IProperty2D))
-                return ReadIProperty2Ds(ids as dynamic);
+            else if (type == typeof(ISurfaceProperty))
+                return ReadISurfacePropertys(ids as dynamic);
             else if (type == typeof(Loadcase))
                 return ReadLoadCase(ids as dynamic);
             if (type == typeof(Grid))
@@ -194,15 +197,15 @@ namespace BH.Adapter.RAM
 
         }
 
-        private List<IProperty2D> ReadIProperty2Ds(List<string> ids = null)
+        private List<ISurfaceProperty> ReadISurfacePropertys(List<string> ids = null)
         {
             //Implement code for reading materials
 
-            List<IProperty2D> IProps = new List<IProperty2D>();
+            List<ISurfaceProperty> IProps = new List<ISurfaceProperty>();
 
             //Material steel = BMaterialType.Steel, 210000, 0.3, 0.00012, 78500);
 
-            IProperty2D IProp = (IProperty2D) new ConstantThickness();
+            ISurfaceProperty IProp = (ISurfaceProperty) new ConstantThickness();
             IProp.Name = "default";
             //IProp.Type = MaterialType.Concrete;
 
