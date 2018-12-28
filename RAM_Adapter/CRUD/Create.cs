@@ -28,44 +28,12 @@ namespace BH.Adapter.RAM
         /**** Adapter overload method                   ****/
         /***************************************************/
 
-        protected override bool Create<T>(IEnumerable<T> objects, bool replaceAll = false)
+        protected override bool Create<T>(IEnumerable<T> objects, bool replaceAll = true)
         {
             bool success = true;        //boolean returning if the creation was successfull or not
 
-            //Test if push is going into an empty model
-            //This is a requirement for RAM Push to work reliably as of now
-            
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            double storyCount = IModel.GetStories().GetCount();
-            double floorCount = IModel.GetFloorTypes().GetCount();
-
-            //Get all levels of objects
-
-            //Create default floorType if none exist
-
-            //Create new stories for all stories that do not exist
-
-            //Create objects
-
-            //Save file
-            RAMDataAccIDBIO.SaveDatabase();
-
-            // Release main interface
-            RAMDataAccIDBIO = null;
-
-            if (storyCount == 0 && floorCount == 0)
-            {
-                success = CreateCollection(objects as dynamic);
-            }
-
-            else
-            {
-                throw new Exception("RAM Model must not contain Stories and Floor Types. Set Path to a RAM file without these and try again.");
-            }
-
-            //UpdateViews()             //If there exists a command for updating the views in the software call it now:
+            // Create objects per type
+            success = CreateCollection(objects as dynamic);
 
             return success;             //Finally return if the creation was successful or not
 
@@ -96,9 +64,18 @@ namespace BH.Adapter.RAM
             List<double> beamHeights = new List<double>();
             List<double> levelHeights = new List<double>();
 
+            //Create null section property
+            ISectionProperty nullSectionProp = Engine.Structure.Create.SteelTubeSection(10, 1, null, "unassigned");
+
             // Find all level heights present
             foreach (Bar bar in bars)
             {
+                //Assign null section property
+                if (bar.SectionProperty == null)
+                {
+                    bar.SectionProperty = nullSectionProp;
+                }
+
                 if (bar.StartNode.Position.Z > bar.EndNode.Position.Z)
                 {
                     Node LowNode = bar.EndNode;
@@ -137,7 +114,7 @@ namespace BH.Adapter.RAM
 
             //Create new levels in RAM per unique z values
             CreateLevels(levelHeights,IModel);
-
+            
             // Cycle through floortypes, access appropriate story, place beams on those stories
             IStories = IModel.GetStories();
 
@@ -147,6 +124,7 @@ namespace BH.Adapter.RAM
                 IFloorType = IStory.GetFloorType();
                 ILayoutBeams = IFloorType.GetLayoutBeams();
                 ILayoutColumns = IFloorType.GetLayoutColumns();
+
 
                 //Cycle through bars; if z of bar = the floor height, add it
                 for (int j = 0; j < beams.Count(); j++)
@@ -174,6 +152,7 @@ namespace BH.Adapter.RAM
                 {
                     //If bar is on level, add it during that iteration of the loop 
                     Bar bar = columns[j];
+                    
 
                     double xStart = bar.StartNode.Position.X;
                     double yStart = bar.StartNode.Position.Y;
@@ -189,6 +168,7 @@ namespace BH.Adapter.RAM
 
                         if (Engine.Structure.Query.IsVertical(bar))
                         {
+                            //Failing if no section property is provided
                             ILayoutColumn ILayoutColumn = ILayoutColumns.Add(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
                             ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
                         }
@@ -312,11 +292,20 @@ namespace BH.Adapter.RAM
             List<PanelPlanar> WallPanels = new List<PanelPlanar>();
             List<PanelPlanar> floors = new List<PanelPlanar>();
             List<double> panelHeights = new List<double>();
-
+            List<Point> panelPoints = new List<Point>();
 
             // Split walls and floors
             foreach (PanelPlanar panel in panels)
             {
+                // Get heights of wall and floor corners to create levels
+                PolyCurve panelOutline = Engine.Structure.Query.Outline(panel);
+                panelPoints = panelOutline.DiscontinuityPoints();
+                foreach (Point pt in panelPoints)
+                {
+                    panelHeights.Add(Math.Round(pt.Z, 2));
+                }
+
+                //Split walls and floors
                 if (panel.Tags.Contains("WallPanel"))
                 {
                     WallPanels.Add(panel);
@@ -330,6 +319,8 @@ namespace BH.Adapter.RAM
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            CreateLevels(panelHeights, IModel);
 
             IFloorTypes = IModel.GetFloorTypes();
             IStories = IModel.GetStories();
@@ -431,11 +422,11 @@ namespace BH.Adapter.RAM
 
             Elevations.Sort();
 
-            List<double> levelHeightsUnique = Elevations.Distinct().ToList();
+            List<double> levelHeights = Elevations.Distinct().ToList();
 
             //RAM requires positive levels. Added logic allows for throwing negative level exception.
 
-            if (levelHeightsUnique[0] < 0)
+            if (levelHeights[0] < 0)
             {
                 throw new Exception("Base level can not be negative for RAM. Please move model origin point to set all geometry and levels at 0 or greater.");
             }
@@ -445,27 +436,50 @@ namespace BH.Adapter.RAM
             IFloorType IFloorType;
             IStories IStories;
             IStory IStory;
-            
-            //Create floor type at each level
-            //TODO: Working method for checking existing levels and adding levels at nonexisting level elevations
+            List<double> levelHeightsInRam = new List<double>();
+            List<double> allUniqueLevels = new List<double>();
 
-            for (int i = 0; i < levelHeightsUnique.Count(); i++)
+            //TESTING
+            // Get all levels already in RAM
+            IStories = IModel.GetStories();
+            double storyCount = IStories.GetCount();
+            for (int i = 0; i < storyCount; i++)
             {
-                string LevelName = "Level " + levelHeightsUnique[i].ToString();
-                string StoryName = "Story " + i.ToString();
+                IStory = IStories.GetAt(i);
+                double elev = IStory.dElevation;
+                levelHeightsInRam.Add(elev);
+            }
 
-                IFloorTypes = IModel.GetFloorTypes();
-                IFloorTypes.Add(LevelName);
-                IFloorType = IFloorTypes.GetAt(i);
+            levelHeights.AddRange(levelHeightsInRam);
+            levelHeights.Sort();
 
-                IStories = IModel.GetStories();
+            List<double> sortedLevelHeights = levelHeights.Distinct().ToList();
 
-                // Find floor heights from z-elevations
-                double height;
-                if (i == 0) { height = levelHeightsUnique[i]; }
-                else { height = levelHeightsUnique[i] - levelHeightsUnique[i - 1]; }
 
-                IStories.Add(IFloorType.lUID, StoryName, height);
+            //Create floor type at each level
+
+            for (int i = 0; i < sortedLevelHeights.Count(); i++)
+            {
+                if (!levelHeightsInRam.Contains(sortedLevelHeights[i]))
+                {
+                    string LevelName = "Level " + sortedLevelHeights[i].ToString();
+                    string StoryName = "Story " + i.ToString();
+
+                    IFloorTypes = IModel.GetFloorTypes();
+                    IFloorType = IFloorTypes.Add(LevelName);
+
+                    // Find floor heights from z-elevations
+                    double height;
+
+                    // Ground floor ht = 0 for RAM
+                    if (i == 0) { height = sortedLevelHeights[i]; }
+                    else { height = sortedLevelHeights[i] - sortedLevelHeights[i - 1]; }
+
+                    // Insert story at index
+                    IStories = IModel.GetStories();
+                    IStories.InsertAt(i,IFloorType.lUID, StoryName, height);
+                }
+                
 
             }
             return true;
@@ -672,7 +686,6 @@ namespace BH.Adapter.RAM
             RAMDataAccIDBIO.SaveDatabase();
             // Release main interface and delete user file
             RAMDataAccIDBIO = null;
-            //System.IO.File.Delete(filePathUserfile);
             return true;
         }
 

@@ -246,7 +246,7 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        // Read panels method; will need to figure out how to convert geometry (RAM provides four corner points); does not seem to be working properly, crashes Rhino when walls are present
+        // Read panels method
         private List<PanelPlanar> ReadPanels(List<string> ids = null)
         {
             //Implement code for reading panels
@@ -256,25 +256,6 @@ namespace BH.Adapter.RAM
             //Get stories
             IStories IStories = IModel.GetStories();
             int numStories = IStories.GetCount();
-
-            ////Code for accessing IWallPanels, which need to go through the IWallDesignGroups interface that is accessed directly through IModel
-            ////THIS CODE DOES NOT RELEASE THE DATABASE .db.sdk FILE AFTER RUNNING, RESULTING IN CRASHING
-            //IWallDesignGroups IWallDesignGroups = IModel.GetWallDesignGroups();
-
-            //for (int i = 0; i < IWallDesignGroups.GetCount(); i++)
-            //{
-            //    IWallDesignGroup IWallDesignGroup = IWallDesignGroups.GetAt(i);
-            //    IWallPanels IWallPanels = IWallDesignGroup.GetWallPanels();
-
-            //    for (int j = 0; j < IWallPanels.GetCount(); j++)
-            //    {
-            //        IWallPanel IWallPanel = IWallPanels.GetAt(j);
-
-            //    //CAUTION: Will assume all walls are the same height, cannot handle variable-height walls as written
-            //        PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWallPanel);
-            //        bhomPanels.Add(Panel);
-            //    }
-            //}
 
             // Get all elements on each story
             for (int i = 0; i < numStories; i++)
