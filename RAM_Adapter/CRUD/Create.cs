@@ -88,23 +88,23 @@ namespace BH.Adapter.RAM
                 double length = Engine.Structure.Query.Length(bar);
                 double barRise = ((bar.EndNode.Position.Z - bar.StartNode.Position.Z) / Engine.Structure.Query.Length(bar));
 
-                //if altitude>45 degrees create as column
-                if (barRise>0.7071)
+                //if altitude>0 degrees create as column
+                if (barRise>0.001)
                 {
                     columns.Add(bar);
                     double zStart = bar.StartNode.Position.Z;
                     double zEnd = bar.EndNode.Position.Z;
                     beamHeights.Add(zStart);
                     beamHeights.Add(zEnd);
-                    levelHeights.Add(Math.Round(zStart,2));
-                    levelHeights.Add(Math.Round(zEnd,2));
+                    levelHeights.Add(Math.Round(zStart,0));
+                    levelHeights.Add(Math.Round(zEnd,0));
                 }
                 else
                 {
                     beams.Add(bar);
                     double z = bar.StartNode.Position.Z;
                     beamHeights.Add(z);
-                    levelHeights.Add(Math.Round(z,2));
+                    levelHeights.Add(Math.Round(z,0));
                 }
             }
 
@@ -136,8 +136,8 @@ namespace BH.Adapter.RAM
                     double yStart = bar.StartNode.Position.Y;
                     double xEnd = bar.EndNode.Position.X;
                     double yEnd = bar.EndNode.Position.Y;
-                    double zStart = Math.Round(bar.StartNode.Position.Z,2);
-                    double zEnd = Math.Round(bar.EndNode.Position.Z,2);
+                    double zStart = Math.Round(bar.StartNode.Position.Z,0);
+                    double zEnd = Math.Round(bar.EndNode.Position.Z,0);
 
                     //If bar is on level, add it during that iteration of the loop 
                     if (zStart == IStory.dElevation)
@@ -156,10 +156,10 @@ namespace BH.Adapter.RAM
 
                     double xStart = bar.StartNode.Position.X;
                     double yStart = bar.StartNode.Position.Y;
-                    double zStart = Math.Round(bar.StartNode.Position.Z,2);
+                    double zStart = Math.Round(bar.StartNode.Position.Z,0);
                     double xEnd = bar.EndNode.Position.X;
                     double yEnd = bar.EndNode.Position.Y;
-                    double zEnd = Math.Round(bar.EndNode.Position.Z,2);
+                    double zEnd = Math.Round(bar.EndNode.Position.Z,0);
 
                     if (zEnd == IStory.dElevation)
                     {
@@ -289,7 +289,7 @@ namespace BH.Adapter.RAM
             IStory IStory;
 
             //Create wall and floor lists with individual heights
-            List<PanelPlanar> WallPanels = new List<PanelPlanar>();
+            List<PanelPlanar> wallPanels = new List<PanelPlanar>();
             List<PanelPlanar> floors = new List<PanelPlanar>();
             List<double> panelHeights = new List<double>();
             List<Point> panelPoints = new List<Point>();
@@ -297,18 +297,24 @@ namespace BH.Adapter.RAM
             // Split walls and floors
             foreach (PanelPlanar panel in panels)
             {
+                List<double> thisPanelHeights = new List<double>();
+                
                 // Get heights of wall and floor corners to create levels
                 PolyCurve panelOutline = Engine.Structure.Query.Outline(panel);
                 panelPoints = panelOutline.DiscontinuityPoints();
+
                 foreach (Point pt in panelPoints)
                 {
-                    panelHeights.Add(Math.Round(pt.Z, 2));
+                    panelHeights.Add(Math.Round(pt.Z, 0));
+                    thisPanelHeights.Add(Math.Round(pt.Z, 0));
                 }
 
+                double panelHeight = thisPanelHeights.Max() - thisPanelHeights.Min();
+                
                 //Split walls and floors
-                if (panel.Tags.Contains("WallPanel"))
+                if (panelHeight>0.1)
                 {
-                    WallPanels.Add(panel);
+                    wallPanels.Add(panel);
                 }
                 else
                 {
@@ -360,7 +366,7 @@ namespace BH.Adapter.RAM
                     }
 
                     // If on level, add deck to IDecks for that level
-                    if (Math.Round(corners[0].dZLoc,2) == IStory.dElevation)
+                    if (Math.Round(corners[0].dZLoc,0) == IStory.dElevation)
                     {
 
                         IDecks IDecks = IFloorType.GetDecks();
@@ -390,6 +396,31 @@ namespace BH.Adapter.RAM
                         //    IPoints.InsertAt(k, corners[k]);
                         //}
 
+                    }
+                }
+
+                //Cycle through walls; if top of wall is at floor height add wall to FloorType
+                for (int j = 0; j < wallPanels.Count(); j++)
+                {
+
+                    PanelPlanar wallPanel = wallPanels[j];
+
+                    // Default Thickness for now
+                    double thickness = 6;
+
+                    // Find outline of planar panel
+                    PolyCurve outline = BH.Engine.Structure.Query.Outline(wallPanel);
+                    BoundingBox wallBounds = Query.Bounds(outline);
+                    Point wallMin = wallBounds.Min;
+                    Point wallMax = wallBounds.Max;
+
+                    // If on level, add deck to IDecks for that level
+                    if (Math.Round(wallMax.Z, 0) == IStory.dElevation)
+                    {
+                        //Get ILayoutWalls of FloorType
+                        ILayoutWalls ILayoutWalls = IFloorType.GetLayoutWalls();
+
+                        ILayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
                     }
                 }
             }
