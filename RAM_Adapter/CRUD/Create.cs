@@ -322,19 +322,18 @@ namespace BH.Adapter.RAM
 
             CreateLevels(panelHeights, IModel);
 
-            IFloorTypes = IModel.GetFloorTypes();
             IStories = IModel.GetStories();
 
+            //Get concrete deck properties
+            IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
+            IConcSlabProp IConcSlabProp;
 
             // Cycle through floortypes, access appropriate story, place panels on those stories
-            for (int i = 0; i < IFloorTypes.GetCount(); i++)
+            for (int i = 0; i < IStories.GetCount(); i++)
             {
 
-                IFloorType = IFloorTypes.GetAt(i);
                 IStory = IStories.GetAt(i);
-
-                IDecks IDecks = IFloorType.GetDecks();
-                IDeck IDeck;
+                IFloorType = IStory.GetFloorType();
 
                 //Cycle through floors; if z of bar = the floor height, add it
                 for (int j = 0; j < floors.Count(); j++)
@@ -343,68 +342,56 @@ namespace BH.Adapter.RAM
                     PanelPlanar floor = floors[j];
 
                     // Find outline of planar panel
-                    List<SCoordinate> corners = new List<SCoordinate>();
-                    //Polyline outline = BH.Engine.Structure.Query.Outline(floor);
+                    PolyCurve outline = BH.Engine.Structure.Query.Outline(floor);
 
-                    List<Edge> edges = floor.ExternalEdges;
 
-                    /////////////// Method 1 to get points
-                    //List<Point> ctrlPoints = edges.Select(e => (e.Curve as Line).Start)..ToList();
-
-                    /////////////// Method 2 to get points
-                    //List<ICurve> ICurveSegs = new List<ICurve>();
-                    //IEnumerable<List<ICurve>> segments = edges.Select(e => (e.Curve as PolyCurve).Curves.ToList<ICurve>());
-                    //List<Point> ctrlPoints2 = new List<Point>();
-
-                    //foreach (List<ICurve> segment in segments)
-                    //{
-                    //    for (int l = 0; l < segments.Count(); l++)
-                    //    {
-                    //        ICurveSegs.Add(segment[l]);
-                    //    }
-                    //}
-
-                    //for (int l = 0; l < segments.Count(); l++)
-                    //{
-                    //    Line bhomLine = ICurveSegs[l] as Line;
-                    //    ctrlPoints2.Add(bhomLine.Start);       
-                    //}
-
-                    ////////////// Method 3
-                    List<ICurve> segments2 = BH.Engine.Structure.Query.AllEdgeCurves(floor);
-                    List<Point> ctrlPoints3 = new List<Point>();
-                    PolyCurve bhomCurve = new PolyCurve { Curves = segments2.ToList() };
-
-                    ctrlPoints3 = BH.Engine.Geometry.Query.ControlPoints(bhomCurve);
+                    // Get coords of corner points
+                    List<Point> ctrlPoints = new List<Point>();
+                    ctrlPoints = BH.Engine.Geometry.Query.ControlPoints(outline);
 
 
                     // Get list of coordinates
-                    foreach (Point point in ctrlPoints3)
+                    List<SCoordinate> corners = new List<SCoordinate>();
+
+                    foreach (Point point in ctrlPoints)
                     {
                         SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
                         corners.Add(corner);
                     }
 
-                    //Add back first point to end
-                    corners.Add(corners[0]);
-
                     // If on level, add deck to IDecks for that level
-                    if (Math.Round(corners[0].dZLoc) == IStory.dFlrHeight || Math.Round(corners[0].dZLoc) == IStory.dElevation)
+                    if (Math.Round(corners[0].dZLoc,2) == IStory.dElevation)
                     {
 
-                        IDeck = IDecks.Add(0, ctrlPoints3.Count + 1);
-                        IPoints IPoints = IDeck.GetPoints();
+                        IDecks IDecks = IFloorType.GetDecks();
+                        IDeck IDeck = null;
 
-                        for (int k = 0; k < corners.Count; k++)
+                        // Set slab edges (required in addition to deck perimeter
+                        ISlabEdges ISlabEdges = IFloorType.GetAllSlabEdges();
+
+                        for (int k = 0; k < corners.Count - 1; k++)
                         {
-                            IPoints.Add(corners[k]);
+                            ISlabEdges.Add(corners[k].dXLoc, corners[k].dYLoc, corners[k + 1].dXLoc, corners[k + 1].dYLoc, 0);
                         }
 
-                        IDeck.SetPoints(IPoints);
+                        //// Default panel properties to apply to model
+                        //string deckName = "Default RAM_Toolkit"; //pull deck name from decktable
+                        //double thickness = 8;
+                        //double selfweight = 150;
+
+                        //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now) 
+                        //IConcSlabProp = IConcSlabProps.Add(deckName, thickness, selfweight);
+                        //IDeck = IDecks.Add(IConcSlabProp.lUID, ctrlPoints.Count); // This causes the read memory error crashing at save
+                        //IPoints IPoints = IDeck.GetPoints();
+
+                        //for (int k = 0; k < corners.Count; k++)
+                        //{
+                        //    IPoints.Delete(k);
+                        //    IPoints.InsertAt(k, corners[k]);
+                        //}
 
                     }
                 }
-
             }
 
             //Save file
@@ -439,7 +426,6 @@ namespace BH.Adapter.RAM
             List<double> levelHeightsInRam = new List<double>();
             List<double> allUniqueLevels = new List<double>();
 
-            //TESTING
             // Get all levels already in RAM
             IStories = IModel.GetStories();
             double storyCount = IStories.GetCount();
@@ -460,24 +446,33 @@ namespace BH.Adapter.RAM
 
             for (int i = 0; i < sortedLevelHeights.Count(); i++)
             {
+                string LevelName = "Level " + sortedLevelHeights[i].ToString();
+                string StoryName = "Story " + i.ToString();
+
+                // Find floor heights from z-elevations
+                double height;
+                // Ground floor ht = 0 for RAM
+                if (i == 0) { height = sortedLevelHeights[i]; }
+                else { height = sortedLevelHeights[i] - sortedLevelHeights[i - 1]; }
+
+                IStories = IModel.GetStories();
+
                 if (!levelHeightsInRam.Contains(sortedLevelHeights[i]))
                 {
-                    string LevelName = "Level " + sortedLevelHeights[i].ToString();
-                    string StoryName = "Story " + i.ToString();
-
                     IFloorTypes = IModel.GetFloorTypes();
                     IFloorType = IFloorTypes.Add(LevelName);
 
-                    // Find floor heights from z-elevations
-                    double height;
-
-                    // Ground floor ht = 0 for RAM
-                    if (i == 0) { height = sortedLevelHeights[i]; }
-                    else { height = sortedLevelHeights[i] - sortedLevelHeights[i - 1]; }
-
                     // Insert story at index
-                    IStories = IModel.GetStories();
                     IStories.InsertAt(i,IFloorType.lUID, StoryName, height);
+                }
+                else
+                {
+                    //Set story and floor type data to sync with added levels
+                    IStory = IStories.GetAt(i);
+                    IStory.dFlrHeight = height;
+                    IStory.strLabel = StoryName;
+                    IFloorType = IStory.GetFloorType();
+                    IFloorType.strLabel = LevelName;
                 }
                 
 

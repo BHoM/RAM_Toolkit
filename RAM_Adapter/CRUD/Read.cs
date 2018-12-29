@@ -308,18 +308,13 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Grids
             List<Grid> bhomGrids = new List<Grid>();
-            //testying 
+ 
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-            //IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-           
-            
-            
+                 
             // Get the gridsystems that are in the model
             IGridSystems IGridSystems = IModel.GetGridSystems();
             int numGridSystems = IGridSystems.GetCount();
-
-            
+     
             // Get all elements on each GridSystem
             for (int i = 0; i < numGridSystems; i++)
             {
