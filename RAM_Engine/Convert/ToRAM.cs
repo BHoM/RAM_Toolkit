@@ -90,49 +90,6 @@ namespace BH.Engine.RAM
         */
 
            
-
-        public static IGridSystem ToRAM(List<Grid> bhomGrids, IModelGrids IModelGrids, IGridSystem IGridSystem)
-        {
-
-            //initialize a temp Bhom grid object from the object that is passed
-            //Grid myBhomGrid = bhomGrid;
-            List<Grid> myBhomGrids = bhomGrids;
-            IGridSystem myGridSystem = IGridSystem;
-            IModelGrids myModelGrids = IModelGrids;
-            
-
-            //HOW DO I EXTRACT THE CURVES OF A GRID OBJECT?
-            //Get the name of the Bhom Grid
-            //string gridSystemName = myBhomGrid.Name;
-            //ICurve myGridCurve = myBhomGrid.Curve;
-            int numGridLines = myModelGrids.GetCount();
-
-            for (int i = 0; i < myBhomGrids.Count(); i++)
-            {
-                IModelGrid myGridModel = IModelGrids.GetAt(i);
-                string gridLabel = myBhomGrids[i].Name;
-                myGridModel.strLabel = gridLabel;
-            }
-
-
-
-            /*
-            // Create an array of curves to store gridlines
-            //Loop through array to create BHOMcurves 
-            ICurve[] gridCrvs = new ICurve[100];
-
-            foreach (ICurve curve in gridCrvs)
-            {
-                ICurve myGridCurve = curve;
-                myGridCurve = bhomGrid.Curve; //take each curve and convert to RAM curve
-                string myGridName = myGridCurve.ToString();
-
-            }
-            // myGridModel = IModelGrids.Add(gridName, gridDirection, gridRotation);
-            */
-            return myGridSystem;
-        }
-
     }
 
 }
