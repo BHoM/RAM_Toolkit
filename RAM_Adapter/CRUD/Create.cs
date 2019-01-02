@@ -540,8 +540,6 @@ namespace BH.Adapter.RAM
             //create different names for the gridSystem based on if there are items in the list
             double gridSystemRotation = 0;
             string gridSystemLabel = "";
-            double gridOffsetX = 0;
-            double gridOffsetY = 0;
             IGridSystem IGridSystemXY = null;
             IGridSystem IGridSystemRad = null;
             IGridSystem IGridSystemSk = null;
@@ -563,7 +561,6 @@ namespace BH.Adapter.RAM
                 else
                 {
                     gridLine = Engine.Geometry.Modify.CollapseToPolyline(grid.Curve as dynamic, 10);
-                    //check if the first provided line are offset from the 0,0,0 and give that as gridOffset in X and Y
                     //add lines to corresponding lists (XGrids, YGrids) based on their  orientation
                     if (gridLine.StartPoint().X == gridLine.EndPoint().X)
                     {
@@ -577,20 +574,6 @@ namespace BH.Adapter.RAM
                     {
                         skewGrids.Add(grid);
                     }
-
-                }
-                if (i == 0)
-                {
-                    if (gridLine.StartPoint().X != 0)
-                    {
-                        gridOffsetX = gridLine.StartPoint().X;
-
-                    }
-                    if (gridLine.StartPoint().Y != 0)
-                    {
-                        gridOffsetY = gridLine.StartPoint().Y;
-
-                    }
                 }
             }
 
@@ -602,64 +585,78 @@ namespace BH.Adapter.RAM
             {
                  gridSystemLabel = "XY_grid";
                  IGridSystemXY = IGridSystems.Add(gridSystemLabel);
-                 IGridSystemXY.dXOffset = gridOffsetX;
-                 IGridSystemXY.dYOffset = gridOffsetY;
                  IGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
                  IGridSystemXY.dRotation = gridSystemRotation;
                  IModelGridsXY = IGridSystemXY.GetGrids();
             }
 
 
+            // Radial and Skewed Not Yet Implemented
 
-            //Radial Circular Grid
-            if (circGrids.Count() != 0)
+            ////Radial Circular Grid
+            //if (circGrids.Count() != 0)
+            //{
+            //    gridSystemLabel = "Radial_grid";
+            //    IGridSystemRad = IGridSystems.Add(gridSystemLabel);
+            //    IGridSystemRad.dXOffset = gridOffsetX;
+            //    IGridSystemRad.dYOffset = gridOffsetY;
+            //    IGridSystemRad.eOrientationType = SGridSysType.eGridRadial;
+            //    IGridSystemRad.dRotation = gridSystemRotation;
+            //    IModelGridsRad = IGridSystemRad.GetGrids();
+            //}
+            //// Skewed grid
+            //if (skewGrids.Count() != 0) {
+            //    gridSystemLabel = "Skew_gird";
+            //    IGridSystemSk = IGridSystems.Add(gridSystemLabel);
+            //    IGridSystemSk.dXOffset = 0;
+            //    IGridSystemSk.dYOffset = 0;
+            //    IGridSystemSk.eOrientationType = SGridSysType.eGridSkewed;
+            //    IGridSystemSk.dRotation = gridSystemRotation;
+            //    IModelGridsSk = IGridSystemSk.GetGrids();
+
+            //}
+
+
+            //  Get Grid System Offset
+            double minY = XGrids[0].Curve.IStartPoint().Y;
+            double minX = YGrids[0].Curve.IStartPoint().X;
+
+            foreach (Grid XGrid in XGrids)
             {
-                gridSystemLabel = "Radial_grid";
-                IGridSystemRad = IGridSystems.Add(gridSystemLabel);
-                IGridSystemRad.dXOffset = gridOffsetX;
-                IGridSystemRad.dYOffset = gridOffsetY;
-                IGridSystemRad.eOrientationType = SGridSysType.eGridRadial;
-                IGridSystemRad.dRotation = gridSystemRotation;
-                IModelGridsRad = IGridSystemRad.GetGrids();
-            }
-            // Skewed grid
-            if (skewGrids.Count() != 0) {
-                gridSystemLabel = "Skew_gird";
-                IGridSystemSk = IGridSystems.Add(gridSystemLabel);
-                IGridSystemSk.dXOffset = 0;
-                IGridSystemSk.dYOffset = 0;
-                IGridSystemSk.eOrientationType = SGridSysType.eGridSkewed;
-                IGridSystemSk.dRotation = gridSystemRotation;
-                IModelGridsSk = IGridSystemSk.GetGrids();
-
+                double gridY = XGrid.Curve.IStartPoint().Y;
+                if (gridY < minY)
+                    minY = gridY;
             }
 
+            foreach (Grid YGrid in YGrids)
+            {
+                double gridX = YGrid.Curve.IStartPoint().X;
+                if (gridX < minX)
+                    minX = gridX;
+            }
+            IGridSystemXY.dXOffset = minX;
+            IGridSystemXY.dYOffset = minY;
 
 
-
-            //labels for grids in each direction
+            //  Labels for grids in each direction
             string gridLabelX = "X";
             string gridLabelY = "Y";
             int gridCountX = 1;
             int gridCountY = 1;
 
+
+            // Create Grids in GridSystem
             foreach (Grid XGrid in XGrids)
             {
-
-                XGrid.Name = gridLabelX + gridCountX.ToString();
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(XGrid.Curve as dynamic, 10);
-                IModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y);
-                //IGridSystemXY = Engine.RAM.Convert.ToRAM(XGrid, IModelGridsXY, IGridSystemXY);
+                IModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y-minY);
                 gridCountX += 1;
             }
 
             foreach (Grid YGrid in YGrids)
             {
-                YGrid.Name = gridLabelY + gridCountY.ToString();
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(YGrid.Curve as dynamic, 10);
-
-                IModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X);
-                //IGridSystemXY = Engine.RAM.Convert.ToRAM(YGrid, IModelGridsXY, IGridSystemXY);
+                IModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X-minX);
                 gridCountY += 1;
             }
 
@@ -679,10 +676,7 @@ namespace BH.Adapter.RAM
 
             }
 
-            //call the convert method 
-            IGridSystemXY = Engine.RAM.Convert.ToRAM(Grids, IModelGridsXY, IGridSystemXY);
-
-            //get the ID of the fridsystem
+            //get the ID of the gridsystem
             int gridSystemID = IGridSystemXY.lUID;
 
 
