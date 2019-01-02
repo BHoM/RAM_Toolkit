@@ -245,7 +245,7 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<ISurfaceProperty> ISurfacePropertys)
+        private bool CreateCollection(IEnumerable<ISurfaceProperty> ISurfaceProperties)
         {           
             //TODO: DECK PROPERTY FUNCTIONALITY
             
@@ -258,7 +258,7 @@ namespace BH.Adapter.RAM
             ////Get composite deck properties
             //ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
 
-            //foreach (ISurfaceProperty iProp in ISurfacePropertys)
+            //foreach (ISurfaceProperty iProp in ISurfaceProperties)
             //{
             //    //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
             //    string deckName = iProp.Name;
@@ -273,12 +273,11 @@ namespace BH.Adapter.RAM
             return true;
         }
 
-        //TODO: TEST METHOD AND RESOLVE FREEZING WHEN OPENING RAM
+        //TODO: TEST METHOD AND RESOLVE NEW DECK ISSUE
 
-        // Create Panel Method -- Commented because it is not yet working
         private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
         {
-            //Code for creating a collection of floors (and/or walls?) in the software
+            //Code for creating a collection of floors and walls in the software
 
             List<PanelPlanar> panels = bhomPanels.ToList();
 
@@ -294,7 +293,7 @@ namespace BH.Adapter.RAM
             List<double> panelHeights = new List<double>();
             List<Point> panelPoints = new List<Point>();
 
-            // Split walls and floors
+            // Split walls and floors and get all elevations
             foreach (PanelPlanar panel in panels)
             {
                 List<double> thisPanelHeights = new List<double>();
@@ -414,8 +413,8 @@ namespace BH.Adapter.RAM
                     Point wallMin = wallBounds.Min;
                     Point wallMax = wallBounds.Max;
 
-                    // If on level, add deck to IDecks for that level
-                    if (Math.Round(wallMax.Z, 0) == IStory.dElevation)
+                    // If wall crosses level, add wall to ILayoutWalls for that level
+                    if (Math.Round(wallMax.Z, 0) >= IStory.dElevation && Math.Round(wallMin.Z, 0) <= IStory.dElevation)
                     {
                         //Get ILayoutWalls of FloorType
                         ILayoutWalls ILayoutWalls = IFloorType.GetLayoutWalls();
