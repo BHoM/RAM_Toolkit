@@ -88,11 +88,35 @@ namespace BH.Engine.RAM
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
 
+            // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
+            // May be better to just do in custom data, although if we can do this mapping it may be useful
+            bhomBar.Release = new BarRelease();
+            bhomBar.Release.StartRelease = new Constraint6DOF();
+            bhomBar.Release.EndRelease = new Constraint6DOF();
+            bhomBar.Release.StartRelease.RotationX = new DOFType();
+            bhomBar.Release.EndRelease.RotationX = new DOFType();
+            bhomBar.Release.StartRelease.RotationY = new DOFType();
+            bhomBar.Release.EndRelease.RotationY = new DOFType();
+
+            if (IColumn.bMajAxisBendFixedTop == 1) { bhomBar.Release.StartRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationX = DOFType.Free; }
+            if (IColumn.bMajAxisBendFixedBot == 1) { bhomBar.Release.EndRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationX = DOFType.Free; }
+            if (IColumn.bMinAxisBendFixedTop == 1) { bhomBar.Release.StartRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationY = DOFType.Free; }
+            if (IColumn.bMinAxisBendFixedBot == 1) { bhomBar.Release.EndRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationY = DOFType.Free; }
+
+
             bhomBar.OrientationAngle = 0;
 
-            // Unique RAM ID
+            // Add RAM Unique ID, custom Data
             bhomBar.CustomData["lUID"] = IColumn.lUID;
             bhomBar.CustomData["FrameNumber"] = IColumn.lLabel;
+            bhomBar.CustomData["FrameType"] = IColumn.eFramingType;
+            bhomBar.CustomData["Material"] = IColumn.eMaterial.ToString();
+
+            // Add Custom Data "NA" for beam-only properties
+            bhomBar.CustomData["CantDist"] = "NA";
+            bhomBar.CustomData["Studs"] = "NA";
+            bhomBar.CustomData["Camber"] = "NA";
+
             bhomBar.Tags.Add("Column");
 
             return bhomBar;
@@ -140,6 +164,9 @@ namespace BH.Engine.RAM
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IBeam.lUID;
             bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
+            bhomBar.CustomData["CantDist"] = IBeam.dEndCantilever;
+            bhomBar.CustomData["FrameType"] = IBeam.eFramingType;
+            bhomBar.CustomData["Material"] = IBeam.eMaterial.ToString();
             bhomBar.Tags.Add("Beam");
 
             //Add studs to custom Data by total stud count only
@@ -158,6 +185,21 @@ namespace BH.Engine.RAM
             {
                 bhomBar.CustomData["Camber"] = Camber;
             }
+
+            // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
+            // May be better to just do in custom data, although if we can do this mapping it may be useful
+            bhomBar.Release = new BarRelease();
+            bhomBar.Release.StartRelease = new Constraint6DOF();
+            bhomBar.Release.EndRelease = new Constraint6DOF();
+            bhomBar.Release.StartRelease.RotationX = new DOFType();
+            bhomBar.Release.EndRelease.RotationX = new DOFType();
+            bhomBar.Release.StartRelease.RotationY = new DOFType();
+            bhomBar.Release.EndRelease.RotationY = new DOFType();
+
+            if (IBeam.bMajAxisBendFixedStart == 1) { bhomBar.Release.StartRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationX = DOFType.Free; }
+            if (IBeam.bMajAxisBendFixedEnd == 1) { bhomBar.Release.EndRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationX = DOFType.Free; }
+            if (IBeam.bMinAxisBendFixedStart == 1) { bhomBar.Release.StartRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationY = DOFType.Free; }
+            if (IBeam.bMinAxisBendFixedEnd == 1) { bhomBar.Release.EndRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationY = DOFType.Free; }
 
             //Commented out for v14 api testing
             //bhomBar.CustomData["Design Capacity Interaction"] = DCI;
@@ -219,6 +261,8 @@ namespace BH.Engine.RAM
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IVerticalBrace.lUID;
             bhomBar.CustomData["FrameNumber"] = IVerticalBrace.lLabel;
+            bhomBar.CustomData["FrameType"] = IVerticalBrace.eSeismicFrameType;
+            bhomBar.CustomData["Material"] = IVerticalBrace.eMaterial.ToString();
             bhomBar.Tags.Add("VerticalBrace");
 
             return bhomBar;
@@ -253,6 +297,7 @@ namespace BH.Engine.RAM
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IHorizBrace.lUID;
             bhomBar.CustomData["FrameNumber"] = IHorizBrace.lLabel;
+            bhomBar.CustomData["Material"] = IHorizBrace.eMaterial.ToString();
             bhomBar.Tags.Add("HorizontalBrace");
 
             return bhomBar;
