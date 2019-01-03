@@ -120,7 +120,7 @@ namespace BH.Adapter.RAM
 
                         if (loadOutput == 25673)
                         {
-                            throw new ArgumentException("Cannot access RAM database. Please open the file in RAM, close RAM, and try again.");
+                            throw new ArgumentException("Cannot access RAM database. If file is open in RAM, please close. Otherwise, open the file in RAM, close RAM, and try again.");
                         }
                         else if (loadOutput == 25657)
                         {
