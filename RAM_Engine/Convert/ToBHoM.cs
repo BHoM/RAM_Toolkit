@@ -487,11 +487,32 @@ namespace BH.Engine.RAM
             outline.ControlPoints = corners;
 
             // Create openings
-            List<ICurve> openings = null;
+            List<ICurve> wallOpenings = null;
             IFinalWallOpenings IFinalWallOpenings = IWall.GetFinalOpenings();
 
+            //Create opening outlines
+            List<ICurve> wallOpeningPLs = new List<ICurve>();
+            List<Opening> bhomWallOpenings = new List<Opening>();
+
+            for (int i = 0; i < IFinalWallOpenings.GetCount(); i++)
+            {
+                IFinalWallOpening IFinalWallOpening = IFinalWallOpenings.GetAt(i);
+                IPoints openingPts = IFinalWallOpening.GetOpeningVertices();
+
+                //Re-add first point to close Polygon
+                IPoint firstOPt = openingPts.GetAt(0);
+                SCoordinate firstOCoord = new SCoordinate();
+                firstOPt.GetCoordinate(ref firstOCoord);
+                openingPts.Add(firstOCoord);
+
+                ICurve wallOpeningOutline = ToPolyline(openingPts);
+
+                Opening bhomOpening = Create.Opening(wallOpeningOutline);
+                bhomWallOpenings.Add(bhomOpening);
+            }
+
             //  Create wall
-            PanelPlanar bhomPanel = Create.PanelPlanar(outline,openings);
+            PanelPlanar bhomPanel = Create.PanelPlanar(outline,bhomWallOpenings);
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
