@@ -638,26 +638,17 @@ namespace BH.Adapter.RAM
             IGridSystemXY.dYOffset = minY;
 
 
-            //  Labels for grids in each direction
-            string gridLabelX = "X";
-            string gridLabelY = "Y";
-            int gridCountX = 1;
-            int gridCountY = 1;
-
-
             // Create Grids in GridSystem
             foreach (Grid XGrid in XGrids)
             {
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(XGrid.Curve as dynamic, 10);
                 IModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y-minY);
-                gridCountX += 1;
             }
 
             foreach (Grid YGrid in YGrids)
             {
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(YGrid.Curve as dynamic, 10);
                 IModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X-minX);
-                gridCountY += 1;
             }
 
             foreach (Grid cGrid in circGrids)

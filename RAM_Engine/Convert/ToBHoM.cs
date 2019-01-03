@@ -485,12 +485,13 @@ namespace BH.Engine.RAM
             // Create outline from corner points
             Polyline outline = new Polyline();
             outline.ControlPoints = corners;
-            List<Polyline> outlines = new List<Polyline>();
-            outlines.Add(outline);
 
-            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+            // Create openings
+            List<ICurve> openings = null;
+            IFinalWallOpenings IFinalWallOpenings = IWall.GetFinalOpenings();
 
-            PanelPlanar bhomPanel = bhomPanels[0];
+            //  Create wall
+            PanelPlanar bhomPanel = Create.PanelPlanar(outline,openings);
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
