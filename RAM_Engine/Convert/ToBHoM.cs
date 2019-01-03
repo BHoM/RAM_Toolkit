@@ -4,6 +4,7 @@ using System.Linq;
 using BH.oM.Geometry;
 using BH.oM.Architecture.Elements;
 using BH.oM.Structure.Elements;
+using BH.oM.Structure.Properties.Constraint;
 using BH.oM.Structure.Properties;
 using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
@@ -109,13 +110,8 @@ namespace BH.Engine.RAM
             // Add RAM Unique ID, custom Data
             bhomBar.CustomData["lUID"] = IColumn.lUID;
             bhomBar.CustomData["FrameNumber"] = IColumn.lLabel;
-            bhomBar.CustomData["FrameType"] = IColumn.eFramingType;
+            bhomBar.CustomData["FrameType"] = IColumn.eFramingType.ToString();
             bhomBar.CustomData["Material"] = IColumn.eMaterial.ToString();
-
-            // Add Custom Data "NA" for beam-only properties
-            bhomBar.CustomData["CantDist"] = "NA";
-            bhomBar.CustomData["Studs"] = "NA";
-            bhomBar.CustomData["Camber"] = "NA";
 
             bhomBar.Tags.Add("Column");
 
@@ -134,8 +130,6 @@ namespace BH.Engine.RAM
             int numStudSegments = new int();
             ppalNumStuds.GetSize(ref numStudSegments);
             double Camber = IBeam.dCamber;
-            double DCI = Result.dDesignCapacityInteraction;
-            double CDI = Result.dCriticalDeflectionInteraction;
             int studCount = 0;
 
             IAnalyticalResult AnalyticalResult = IBeam.GetAnalyticalResult();
@@ -164,8 +158,8 @@ namespace BH.Engine.RAM
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IBeam.lUID;
             bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
-            bhomBar.CustomData["CantDist"] = IBeam.dEndCantilever;
-            bhomBar.CustomData["FrameType"] = IBeam.eFramingType;
+            bhomBar.CustomData["CantDist"] = IBeam.dEndCantilever.ToString();
+            bhomBar.CustomData["FrameType"] = IBeam.eFramingType.ToString();
             bhomBar.CustomData["Material"] = IBeam.eMaterial.ToString();
             bhomBar.Tags.Add("Beam");
 
@@ -177,13 +171,13 @@ namespace BH.Engine.RAM
                 string segStudStr = segStudCount.ToString();
                 int segStudNum = System.Convert.ToInt16(segStudStr);
                 studCount += segStudNum;
-                bhomBar.CustomData["Studs"] = studCount;
+                bhomBar.CustomData["Studs"] = studCount.ToString();
             }
 
             // Add camber to Custom Data
             if (Camber > Double.MinValue)
             {
-                bhomBar.CustomData["Camber"] = Camber;
+                bhomBar.CustomData["Camber"] = Camber.ToString();
             }
 
             // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
@@ -201,6 +195,9 @@ namespace BH.Engine.RAM
             if (IBeam.bMinAxisBendFixedStart == 1) { bhomBar.Release.StartRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationY = DOFType.Free; }
             if (IBeam.bMinAxisBendFixedEnd == 1) { bhomBar.Release.EndRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationY = DOFType.Free; }
 
+            double DCI = Result.dDesignCapacityInteraction;
+            double CDI = Result.dCriticalDeflectionInteraction;
+            
             //Commented out for v14 api testing
             //bhomBar.CustomData["Design Capacity Interaction"] = DCI;
             //bhomBar.CustomData["Critical Deflection Interaction"] = CDI;
@@ -261,7 +258,7 @@ namespace BH.Engine.RAM
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IVerticalBrace.lUID;
             bhomBar.CustomData["FrameNumber"] = IVerticalBrace.lLabel;
-            bhomBar.CustomData["FrameType"] = IVerticalBrace.eSeismicFrameType;
+            bhomBar.CustomData["FrameType"] = IVerticalBrace.eSeismicFrameType.ToString();
             bhomBar.CustomData["Material"] = IVerticalBrace.eMaterial.ToString();
             bhomBar.Tags.Add("VerticalBrace");
 
