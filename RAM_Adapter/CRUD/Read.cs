@@ -97,6 +97,7 @@ namespace BH.Adapter.RAM
                 {
                     IColumn IColumn = IColumns.GetAt(j);
                     Bar bhomBar = BH.Engine.RAM.Convert.ToBHoMObject(IColumn);
+                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
 
@@ -115,6 +116,7 @@ namespace BH.Adapter.RAM
                 {
                     IVerticalBrace IVerticalBrace = IVBraces.GetAt(j);
                     Bar bhomBar = BH.Engine.RAM.Convert.ToBHoMObject(IVerticalBrace);
+                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
 
@@ -261,8 +263,7 @@ namespace BH.Adapter.RAM
             for (int i = 0; i < numStories; i++)
             {
 
-                //WIP
-                //Get Walls (from IWALL DIRECTLY--SINCE IWALL CAN BE NON-PLANAR, THIS DOES NOT RETURN CORRECT RESULTS)
+                //Get Walls
                 IWalls IWalls = IStories.GetAt(i).GetWalls();
                 int numWalls = IWalls.GetCount();
 
