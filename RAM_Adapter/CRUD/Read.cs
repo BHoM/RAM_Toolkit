@@ -78,7 +78,8 @@ namespace BH.Adapter.RAM
                 IFloorType IFloorType = IStories.GetAt(i).GetFloorType();
                 ILayoutBeams ILayoutBeams = IFloorType.GetLayoutBeams();
                 IBeams IBeams = IStories.GetAt(i).GetBeams();
-                int numBeams = ILayoutBeams.GetCount();
+                int numLayoutBeams = ILayoutBeams.GetCount();
+                int numBeams = IBeams.GetCount();
 
                 //Get Vertical Braces
                 IVerticalBraces IVBraces = IStories.GetAt(i).GetVerticalBraces();

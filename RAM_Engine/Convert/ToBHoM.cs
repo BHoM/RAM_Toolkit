@@ -2,14 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Geometry;
+using BH.oM.Common.Materials;
 using BH.oM.Architecture.Elements;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.Properties.Constraint;
 using BH.oM.Structure.Properties;
 using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
-using BH.oM.Structure.Properties;
 using BH.oM.Structure.Properties.Surface;
+using BH.oM.Structure.Properties.Section;
+using BH.oM.Structure.Properties.Section.ShapeProfiles;
 using RAMDATAACCESSLib;
 
 namespace BH.Engine.RAM
@@ -121,7 +123,50 @@ namespace BH.Engine.RAM
         public static Bar ToBHoMObject(IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
         {
 
-            string section = IBeam.strSectionLabel;
+            // Get coordinates from IBeam
+            SCoordinate startPt = new SCoordinate();
+            SCoordinate endPt = new SCoordinate();
+            IBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
+            Node startNode = new Node();
+            Node endNode = new Node();
+            startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
+            endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
+
+            //Assign section property per bar
+            string sectionName = IBeam.strSectionLabel;
+
+            IProfile sectionProfile = null;
+            ISectionProperty sectionProperty = null;
+            
+            Material Material = new Material();
+
+            if (IBeam.eMaterial == EMATERIALTYPES.EConcreteMat)
+            {
+                Material.Name = "Concrete";
+                Material.Type = MaterialType.Concrete;
+                sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
+            }
+            else if (IBeam.eMaterial == EMATERIALTYPES.ESteelMat)
+            {
+                Material.Name = "Steel";
+                Material.Type = MaterialType.Steel;
+                sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
+            }
+
+            // Create bars with section properties
+            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+
+            // Set Properties
+            bhomBar.OrientationAngle = 0;
+
+            // Unique RAM ID
+            bhomBar.CustomData["lUID"] = IBeam.lUID;
+            bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
+            bhomBar.CustomData["CantDist"] = IBeam.dEndCantilever.ToString();
+            bhomBar.CustomData["FrameType"] = IBeam.eFramingType.ToString();
+            bhomBar.CustomData["Material"] = IBeam.eMaterial.ToString();
+            bhomBar.Tags.Add("Beam");
+
 
             // Get Steel beam results **STILL IN PROGRESS
             ISteelBeamDesignResult Result = IBeam.GetSteelDesignResult();
@@ -135,33 +180,6 @@ namespace BH.Engine.RAM
             IAnalyticalResult AnalyticalResult = IBeam.GetAnalyticalResult();
             COMBO_MATERIAL_TYPE Steel_Grav = COMBO_MATERIAL_TYPE.GRAV_STEEL;
             IMemberForces IMemberForces = AnalyticalResult.GetMaximumComboReactions(Steel_Grav);
-
-            // Get coordinates from IBeam
-            SCoordinate startPt = new SCoordinate();
-            SCoordinate endPt = new SCoordinate();
-            IBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
-            Node startNode = new Node();
-            Node endNode = new Node();
-            startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
-            endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
-
-            //Assign section property per bar
-
-            //get RAM bar section props
-            //call RAM to bhom section convert method
-            //assign bhom section to bars
-
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
-
-            bhomBar.OrientationAngle = 0;
-
-            // Unique RAM ID
-            bhomBar.CustomData["lUID"] = IBeam.lUID;
-            bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
-            bhomBar.CustomData["CantDist"] = IBeam.dEndCantilever.ToString();
-            bhomBar.CustomData["FrameType"] = IBeam.eFramingType.ToString();
-            bhomBar.CustomData["Material"] = IBeam.eMaterial.ToString();
-            bhomBar.Tags.Add("Beam");
 
             //Add studs to custom Data by total stud count only
             for (int i = 0; i < numStudSegments; i++)
@@ -198,9 +216,9 @@ namespace BH.Engine.RAM
             double DCI = Result.dDesignCapacityInteraction;
             double CDI = Result.dCriticalDeflectionInteraction;
             
-            //Commented out for v14 api testing
-            //bhomBar.CustomData["Design Capacity Interaction"] = DCI;
-            //bhomBar.CustomData["Critical Deflection Interaction"] = CDI;
+            // Add DCI and CDI data
+            bhomBar.CustomData["DesignCapacityInteraction"] = DCI;
+            bhomBar.CustomData["CriticalDeflectionInteraction"] = CDI;
 
             //// Add reactions to custom data //NOTE: Commented out because it seems to be interfering with "push" (when updating?), sometimes affecting exploding of custom data
             //if (IMemberForces != null)
@@ -264,7 +282,7 @@ namespace BH.Engine.RAM
 
             return bhomBar;
         }
-
+  
         public static Bar ToBHoMObject(IHorizBrace IHorizBrace, ILayoutHorizBrace ILayoutHorizBrace, double dElevation)
         {
 
@@ -300,93 +318,11 @@ namespace BH.Engine.RAM
             return bhomBar;
         }
 
-        public static PanelPlanar ToBHoMObject(IWallPanel IWallPanel)
-        {
-
-            //Find corner points of IWallPanel in RAM model
-            SCoordinate startPt = IWallPanel.sCoordinateStart;
-            SCoordinate endPt = IWallPanel.sCoordinateEnd;
-
-            IWalls IWalls = IWallPanel.GetWalls();
-            double maxZ = 0;
-            double minZ = 10000000;
-
-            //Go through all walls that are part of the panel; find extreme top and bottom
-            for (int i = 0; i < IWalls.GetCount(); i++)
-            {
-                IWall IWall = IWalls.GetAt(i);
-
-                SCoordinate TopstartPt = new SCoordinate();
-                SCoordinate TopendPt = new SCoordinate();
-                SCoordinate BottomstartPt = new SCoordinate();
-                SCoordinate BottomendPt = new SCoordinate();
-
-                IWall.GetEndCoordinates(ref TopstartPt, ref TopendPt, ref BottomstartPt, ref BottomendPt);
-
-                if (TopendPt.dZLoc > maxZ) { maxZ = TopendPt.dZLoc; }
-                if (BottomendPt.dZLoc < minZ) { minZ = BottomendPt.dZLoc; }
-            }
-
-            // Create list of points
-            List<Point> corners = new List<Point>();
-            corners.Add(new Point { X = startPt.dXLoc, Y = startPt.dYLoc, Z = minZ });
-            corners.Add(new Point { X = endPt.dXLoc, Y = endPt.dYLoc, Z = minZ });
-            corners.Add(new Point { X = endPt.dXLoc, Y = endPt.dYLoc, Z = maxZ });
-            corners.Add(new Point { X = startPt.dXLoc, Y = startPt.dYLoc, Z = maxZ });
-            corners.Add(new Point { X = startPt.dXLoc, Y = startPt.dYLoc, Z = minZ });
-
-            // Create outline from corner points
-            Polyline outline = new Polyline();
-            outline.ControlPoints = corners;
-            List<Polyline> outlines = new List<Polyline>();
-            outlines.Add(outline);
-
-            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
-
-            PanelPlanar bhomPanel = bhomPanels[0];
-
-            HashSet<String> tag = new HashSet<string>();
-            tag.Add("WallPanel");
-
-            bhomPanel.Tags = tag;
-
-            return bhomPanel;
-        }
-
         public static PanelPlanar ToBHoMObject(IDeck IDeck, IModel IModel, int IStoryUID)
         {
-            //Get all floor props
-            ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
-            INonCompDeckProps INonCompDeckProps = IModel.GetNonCompDeckProps();
-            IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
 
             //Get panel props
             EDeckType type = IDeck.eDeckPropType;
-
-            ISurfaceProperty bh2DProp = null;
-            ConstantThickness deck2DProp = new ConstantThickness();
-            double deckThickness = 0;
-            string deckLabel = "";
-            int deckID = IDeck.lPropID;
-            if (type == EDeckType.eDeckType_Composite)
-            {
-                ICompDeckProp DeckProp = ICompDeckProps.Get(deckID);
-                deckThickness = DeckProp.dThickAboveFlutes;
-                deckLabel = DeckProp.strLabel + deckThickness.ToString();
-            }
-            else if (type == EDeckType.eDeckType_Concrete)
-            {
-                IConcSlabProp DeckProp = IConcSlabProps.Get(deckID);
-                deckThickness = DeckProp.dThickness;
-                deckLabel = DeckProp.strLabel;
-            }
-            else if (type == EDeckType.eDeckType_NonComposite)
-            {
-                INonCompDeckProp DeckProp = INonCompDeckProps.Get(deckID);
-                deckThickness = DeckProp.dEffectiveThickness;
-                deckLabel = DeckProp.strLabel;
-            }
-
 
             //Find polylines of deck in RAM Model
 
@@ -449,22 +385,53 @@ namespace BH.Engine.RAM
             bhomPanel.Tags = tag;
             bhomPanel.Name = type.ToString();
 
+            //Get all floor props
+            ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
+            INonCompDeckProps INonCompDeckProps = IModel.GetNonCompDeckProps();
+            IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
+
+            // Get deck section property
+            ISurfaceProperty bh2DProp = null;
+            ConstantThickness deck2DProp = new ConstantThickness();
+            double deckThickness = 0;
+            string deckLabel = "";
+            int deckID = IDeck.lPropID;
+            Material Material = new Material();
+
+            if (type == EDeckType.eDeckType_Composite)
+            {
+                ICompDeckProp DeckProp = ICompDeckProps.Get(deckID);
+                deckThickness = DeckProp.dThickAboveFlutes;
+                deckLabel = DeckProp.strLabel + " " + deckThickness.ToString();
+                Material.Name = "Composite";
+            }
+            else if (type == EDeckType.eDeckType_Concrete)
+            {
+                IConcSlabProp DeckProp = IConcSlabProps.Get(deckID);
+                deckThickness = DeckProp.dThickness;
+                deckLabel = DeckProp.strLabel;
+                Material.Name = "Concrete";
+                Material.Type = MaterialType.Concrete;
+            }
+            else if (type == EDeckType.eDeckType_NonComposite)
+            {
+                INonCompDeckProp DeckProp = INonCompDeckProps.Get(deckID);
+                deckThickness = DeckProp.dEffectiveThickness;
+                deckLabel = DeckProp.strLabel;
+                Material.Name = "NonComposite";
+            }
+
             deck2DProp.Name = deckLabel;
             deck2DProp.Thickness = deckThickness;
+            deck2DProp.PanelType = PanelType.Slab;
+            deck2DProp.Material = Material;
             bhomPanel.Property = deck2DProp;
 
             return bhomPanel;
         }
-
-        //Currently obsolete, use IWallPanel method instead; keeping for potential future use
+    
         public static PanelPlanar ToBHoMObject(IWall IWall)
         {
-
-            //Extract properties
-            List<string> CustomProps = new List<string>();
-            double thickness = IWall.dThickness;
-            EFRAMETYPE type = IWall.eFramingType;
-            EMATERIALTYPES material = IWall.eMaterial;
 
             //Find corner points of wall in RAM model
             SCoordinate TopstartPt = new SCoordinate();
@@ -517,8 +484,37 @@ namespace BH.Engine.RAM
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
 
+
+            //Extract properties
+            List<string> CustomProps = new List<string>();
+            EMATERIALTYPES material = IWall.eMaterial;
+
+            //Get wall section property
+            ConstantThickness wall2DProp = new ConstantThickness();
+            string wallLabel = "";
+            double wallThickness = IWall.dThickness;
+            Material Material = new Material();
+
+            if (IWall.eMaterial == EMATERIALTYPES.EWallPropConcreteMat)
+            {
+                wallLabel = "Concrete " + wallThickness.ToString();
+                Material.Name = "Concrete";
+                Material.Type = MaterialType.Concrete;
+            }
+            else
+            {
+                wallLabel = "Other " + wallThickness.ToString();
+                Material.Name = "Other";
+            }
+
+            wall2DProp.Name = wallLabel;
+            wall2DProp.Thickness = wallThickness;
+            wall2DProp.PanelType = PanelType.Wall;
+            wall2DProp.Material = Material;
+            bhomPanel.Property = wall2DProp;
+
             bhomPanel.Tags = tag;
-            bhomPanel.Name = thickness.ToString() + " " + material.ToString();
+            bhomPanel.Name = IWall.lLabel.ToString();
 
             return bhomPanel;
         }
@@ -733,8 +729,6 @@ namespace BH.Engine.RAM
             return myGrid;
 
         }
-
-
 
     } //Public Convert methods ends here 
 }
