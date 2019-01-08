@@ -9,6 +9,7 @@ using BH.oM.Structure.Properties.Constraint;
 using BH.oM.Structure.Properties;
 using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
+using BH.Engine.Common;
 using BH.oM.Structure.Properties.Surface;
 using BH.oM.Structure.Properties.Section;
 using BH.oM.Structure.Properties.Section.ShapeProfiles;
@@ -73,6 +74,105 @@ namespace BH.Engine.RAM
             return polyline;
         }
 
+        public static ISectionProperty ToBHoMSection(IBeam RAMBar)
+        {
+            //Create BHoM SectionProperty
+            IProfile sectionProfile = null;
+            ISectionProperty sectionProperty = new ExplicitSection();
+            Material Material = new Material();
+
+            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            {
+                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
+            }
+            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            {
+                Material = Common.Create.Material("Steel");
+                //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
+            }
+
+            sectionProperty.Material = Material;
+            sectionProperty.Name = RAMBar.strSectionLabel;
+
+            return sectionProperty;
+        }
+
+        public static ISectionProperty ToBHoMSection(IColumn RAMBar)
+        {
+            //Create BHoM SectionProperty
+            IProfile sectionProfile = null;
+            ISectionProperty sectionProperty = new ExplicitSection();
+
+            Material Material = new Material();
+
+            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            {
+                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
+            }
+            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            {
+                Material = Common.Create.Material("Steel");
+                //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
+            }
+
+            sectionProperty.Material = Material;
+            sectionProperty.Name = RAMBar.strSectionLabel;
+
+            return sectionProperty;
+        }
+
+        public static ISectionProperty ToBHoMSection(IVerticalBrace RAMBar)
+        {
+            //Create BHoM SectionProperty
+            IProfile sectionProfile = null;
+            ISectionProperty sectionProperty = new ExplicitSection();
+
+            Material Material = new Material();
+
+            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            {
+                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
+            }
+            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            {
+                Material = Common.Create.Material("Steel");
+                //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
+            }
+
+            sectionProperty.Material = Material;
+            sectionProperty.Name = RAMBar.strSectionLabel;
+
+            return sectionProperty;
+        }
+
+        public static ISectionProperty ToBHoMSection(IHorizBrace RAMBar)
+        {
+            //Create BHoM SectionProperty
+            IProfile sectionProfile = null;
+            ISectionProperty sectionProperty = new ExplicitSection();
+
+            Material Material = new Material();
+
+            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            {
+                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
+            }
+            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            {
+                Material = Common.Create.Material("Steel");
+                //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
+            }
+
+            sectionProperty.Material = Material;
+            sectionProperty.Name = RAMBar.strSectionLabel;
+
+            return sectionProperty;
+        }
+
         public static Bar ToBHoMObject(IColumn IColumn)
         {
 
@@ -88,8 +188,13 @@ namespace BH.Engine.RAM
             startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
             endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
 
+            //Assign section property per bar
+            string sectionName = IColumn.strSectionLabel;
 
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
+            ISectionProperty sectionProperty = ToBHoMSection(IColumn);
+
+            // Create bars with section properties
+            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
             // May be better to just do in custom data, although if we can do this mapping it may be useful
@@ -135,23 +240,7 @@ namespace BH.Engine.RAM
             //Assign section property per bar
             string sectionName = IBeam.strSectionLabel;
 
-            IProfile sectionProfile = null;
-            ISectionProperty sectionProperty = null;
-            
-            Material Material = new Material();
-
-            if (IBeam.eMaterial == EMATERIALTYPES.EConcreteMat)
-            {
-                Material.Name = "Concrete";
-                Material.Type = MaterialType.Concrete;
-                sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
-            }
-            else if (IBeam.eMaterial == EMATERIALTYPES.ESteelMat)
-            {
-                Material.Name = "Steel";
-                Material.Type = MaterialType.Steel;
-                sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
-            }
+            ISectionProperty sectionProperty = ToBHoMSection(IBeam);
 
             // Create bars with section properties
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
@@ -257,7 +346,9 @@ namespace BH.Engine.RAM
         {
 
             // Get the column name
-            string section = IVerticalBrace.strSectionLabel;
+            string sectionName = IVerticalBrace.strSectionLabel;
+
+            ISectionProperty sectionProperty = ToBHoMSection(IVerticalBrace);
 
             // Get the start and end pts of every column
             SCoordinate startPt = new SCoordinate();
@@ -269,7 +360,7 @@ namespace BH.Engine.RAM
             endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
 
 
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
+            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             bhomBar.OrientationAngle = 0;
 
@@ -286,7 +377,9 @@ namespace BH.Engine.RAM
         public static Bar ToBHoMObject(IHorizBrace IHorizBrace, ILayoutHorizBrace ILayoutHorizBrace, double dElevation)
         {
 
-            string section = IHorizBrace.strSectionLabel;
+            string sectionName = IHorizBrace.strSectionLabel;
+
+            ISectionProperty sectionProperty = ToBHoMSection(IHorizBrace);
 
             // Get the start and end pts of every brace
             double StartSupportX = new double();
@@ -305,7 +398,7 @@ namespace BH.Engine.RAM
             startNode.Position = new BH.oM.Geometry.Point() { X = StartSupportX, Y = StartSupportY, Z = StoryZ + StartSupportZOffset };
             endNode.Position = new BH.oM.Geometry.Point() { X = EndSupportX, Y = EndSupportY, Z = StoryZ + EndSupportZOffset };
 
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, Name = section };
+            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             bhomBar.OrientationAngle = 0;
 
@@ -363,7 +456,7 @@ namespace BH.Engine.RAM
             //Create panel per outline polylines
             List<Polyline> outlines = new List<Polyline>();
             outlines.Add(outline);
-            List<PanelPlanar> bhomPanels = Create.PanelPlanar(outlines);
+            List<PanelPlanar> bhomPanels = Structure.Create.PanelPlanar(outlines);
             //Create openings per openings polylines
             int numOpenings = openingPLs.Count();
 
@@ -371,7 +464,7 @@ namespace BH.Engine.RAM
             List<Opening> bhomOpenings = new List<Opening>();
             for (int i = 0; i < numOpenings; i++)
             {
-                Opening bhomOpening = Create.Opening(openingPLs[i]);
+                Opening bhomOpening = Structure.Create.Opening(openingPLs[i]);
                 bhomOpenings.Add(bhomOpening);
             }
 
@@ -474,12 +567,12 @@ namespace BH.Engine.RAM
 
                 ICurve wallOpeningOutline = ToPolyline(openingPts);
 
-                Opening bhomOpening = Create.Opening(wallOpeningOutline);
+                Opening bhomOpening = Structure.Create.Opening(wallOpeningOutline);
                 bhomWallOpenings.Add(bhomOpening);
             }
 
             //  Create wall
-            PanelPlanar bhomPanel = Create.PanelPlanar(outline,bhomWallOpenings);
+            PanelPlanar bhomPanel = Structure.Create.PanelPlanar(outline,bhomWallOpenings);
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
