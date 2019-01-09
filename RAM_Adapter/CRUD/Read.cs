@@ -256,7 +256,7 @@ namespace BH.Adapter.RAM
             List<LoadCombination> bhomLoadCombinations = new List<LoadCombination>();
 
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            ILoadCombinations ILoadCombinations = IModel.GetLoadCombinations(COMBO_MATERIAL_TYPE.GRAV_STEEL);
+            ILoadCombinations ILoadCombinations = IModel.GetLoadCombinations(COMBO_MATERIAL_TYPE.ANALYSIS_CUSTOM);
 
             for (int i = 0; i < ILoadCombinations.GetCount(); i++)
             {
