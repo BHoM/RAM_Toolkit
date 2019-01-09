@@ -682,10 +682,34 @@ namespace BH.Engine.RAM
 
             Loadcase Loadcase = new Loadcase();
             Loadcase.Name = ILoadCase.strTypeLabel;
+            Loadcase.Number = ILoadCase.lUID;
             string LoadType = ILoadCase.eLoadType.ToString();
             Loadcase.CustomData.Add("Type", LoadType);
 
             return Loadcase;
+        }
+
+
+        public static LoadCombination ToBHoMObject(IModel IModel,ILoadCombination ILoadCombination)
+        {
+
+            LoadCombination LoadCombination = new LoadCombination();
+
+            ILoadCombinationTerms ILoadCombinationTerms = ILoadCombination.GetLoadCombinationTerms();
+
+            for (int i = 0; i < ILoadCombinationTerms.GetCount(); i++)
+            {
+                //Get LoadCombination Cases and Factors
+                ILoadCombinationTerm ILoadCombinationTerm = ILoadCombinationTerms.GetAt(i);
+                int caseID = ILoadCombinationTerm.lLoadCaseID;
+                ILoadCases ILoadCases = IModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
+                ILoadCase ILoadCase = ILoadCases.Get(caseID);
+                Loadcase bhomLoadcase = ToBHoMObject(ILoadCase);
+                //Add dict for load factor and loadcase
+                LoadCombination.LoadCases.Add(new Tuple<double, ICase>(ILoadCombinationTerm.dFactor, bhomLoadcase));
+            }
+
+            return LoadCombination;
         }
 
         public static Grid ToBHoMObject(IGridSystem IGridSystem, IModelGrid IModelGrid, int counter)

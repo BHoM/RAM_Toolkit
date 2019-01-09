@@ -42,6 +42,8 @@ namespace BH.Adapter.RAM
                 return ReadPanels(ids as dynamic);
             else if (type == typeof(ISurfaceProperty))
                 return ReadISurfacePropertys(ids as dynamic);
+            else if (type == typeof(LoadCombination))
+                return ReadLoadCombination(ids as dynamic);
             else if (type == typeof(Loadcase))
                 return ReadLoadCase(ids as dynamic);
             if (type == typeof(Grid))
@@ -241,8 +243,30 @@ namespace BH.Adapter.RAM
                 bhomLoadCases.Add(bhomLoadcase);
             }
 
-
             return bhomLoadCases;
+
+        }
+
+
+        /***************************************************/
+
+        private List<LoadCombination> ReadLoadCombination(List<string> ids = null)
+        {
+            //Implement code for reading loadcombinations
+            List<LoadCombination> bhomLoadCombinations = new List<LoadCombination>();
+
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            ILoadCombinations ILoadCombinations = IModel.GetLoadCombinations(COMBO_MATERIAL_TYPE.GRAV_STEEL);
+
+            for (int i = 0; i < ILoadCombinations.GetCount(); i++)
+            {
+                //Get LoadCombinations
+                ILoadCombination ILoadCombination = ILoadCombinations.GetAt(i);
+                LoadCombination bhomLoadCombination = BH.Engine.RAM.Convert.ToBHoMObject(IModel, ILoadCombination);
+                bhomLoadCombinations.Add(bhomLoadCombination);
+            }
+
+            return bhomLoadCombinations;
 
         }
 
