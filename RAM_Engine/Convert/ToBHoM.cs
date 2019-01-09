@@ -681,10 +681,40 @@ namespace BH.Engine.RAM
         {
 
             Loadcase Loadcase = new Loadcase();
-            Loadcase.Name = ILoadCase.strTypeLabel;
+            Loadcase.Name = ILoadCase.strSymbol;
             Loadcase.Number = ILoadCase.lUID;
-            string LoadType = ILoadCase.eLoadType.ToString();
-            Loadcase.CustomData.Add("Type", LoadType);
+            ELoadCaseType LoadType = ILoadCase.eLoadType;
+            switch (LoadType)
+            {
+                case ELoadCaseType.NotionalDeadLCa:
+                case ELoadCaseType.DeadLCa:
+                case ELoadCaseType.ConstructionDeadLCa:
+                case ELoadCaseType.MassDeadLCa:
+                    Loadcase.Nature = LoadNature.Dead;
+                    break;
+                case ELoadCaseType.ConstructionLiveLCa:
+                case ELoadCaseType.LiveLCa:
+                case ELoadCaseType.LiveReducibleLCa:
+                case ELoadCaseType.LiveRoofLCa:
+                case ELoadCaseType.LiveStorageLCa:
+                case ELoadCaseType.LiveUnReducibleLCa:
+                case ELoadCaseType.NotionalLiveLCa:
+                case ELoadCaseType.PartitionLCa:
+                    Loadcase.Nature = LoadNature.Live;
+                    break;
+                case ELoadCaseType.SnowLCa:
+                    Loadcase.Nature = LoadNature.Snow;
+                    break;
+                case ELoadCaseType.SeismicLCa:
+                    Loadcase.Nature = LoadNature.Seismic;
+                    break;
+                case ELoadCaseType.WindLCa:
+                    Loadcase.Nature = LoadNature.Wind;
+                    break;
+                default:
+                    Loadcase.Nature = LoadNature.Other;
+                    break;
+            }
 
             return Loadcase;
         }
@@ -694,6 +724,8 @@ namespace BH.Engine.RAM
         {
 
             LoadCombination LoadCombination = new LoadCombination();
+            LoadCombination.Name = ILoadCombination.strDisplayString;
+            LoadCombination.Number = ILoadCombination.lLabelNo;
 
             ILoadCombinationTerms ILoadCombinationTerms = ILoadCombination.GetLoadCombinationTerms();
 
@@ -704,9 +736,12 @@ namespace BH.Engine.RAM
                 int caseID = ILoadCombinationTerm.lLoadCaseID;
                 ILoadCases ILoadCases = IModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
                 ILoadCase ILoadCase = ILoadCases.Get(caseID);
+
+                //Convert Loadcase from RAM to BHoM
                 Loadcase bhomLoadcase = ToBHoMObject(ILoadCase);
                 //Add dict for load factor and loadcase
                 LoadCombination.LoadCases.Add(new Tuple<double, ICase>(ILoadCombinationTerm.dFactor, bhomLoadcase));
+                
             }
 
             return LoadCombination;
