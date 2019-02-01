@@ -183,10 +183,8 @@ namespace BH.Engine.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             IColumn.GetEndCoordinates(ref startPt, ref endPt);
-            Node startNode = new Node();
-            Node endNode = new Node();
-            startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
-            endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
+            Node startNode = Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
+            Node endNode = Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
 
             //Assign section property per bar
             string sectionName = IColumn.strSectionLabel;
@@ -232,10 +230,8 @@ namespace BH.Engine.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             IBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
-            Node startNode = new Node();
-            Node endNode = new Node();
-            startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
-            endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
+            Node startNode = Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
+            Node endNode = Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
 
             //Assign section property per bar
             string sectionName = IBeam.strSectionLabel;
@@ -354,10 +350,8 @@ namespace BH.Engine.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             IVerticalBrace.GetEndCoordinates(ref startPt, ref endPt);
-            Node startNode = new Node();
-            Node endNode = new Node();
-            startNode.Position = new BH.oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc };
-            endNode.Position = new BH.oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc };
+            Node startNode = Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
+            Node endNode = Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
 
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
@@ -393,10 +387,8 @@ namespace BH.Engine.RAM
 
             // Get coordinates from ILayout Brace
             ILayoutHorizBrace.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
-            Node startNode = new Node();
-            Node endNode = new Node();
-            startNode.Position = new BH.oM.Geometry.Point() { X = StartSupportX, Y = StartSupportY, Z = StoryZ + StartSupportZOffset };
-            endNode.Position = new BH.oM.Geometry.Point() { X = EndSupportX, Y = EndSupportY, Z = StoryZ + EndSupportZOffset };
+            Node startNode = Structure.Create.Node(new oM.Geometry.Point() { X = StartSupportX, Y = StartSupportY, Z = StoryZ + StartSupportZOffset });
+            Node endNode = Structure.Create.Node(new oM.Geometry.Point() { X = EndSupportX, Y = EndSupportY, Z = StoryZ + EndSupportZOffset });
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
@@ -618,10 +610,8 @@ namespace BH.Engine.RAM
             // Get the location of the node
             SCoordinate Location = new SCoordinate();
             Location = INode.sLocation;
-
-            Node Node = new Node();
-
-            Node.Position = new BH.oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc };
+            
+            Node Node = Structure.Create.Node(new oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc });
 
             IDisplacements IDisplacements = INode.GetDisplacements();
             IMemberForces IMemberForces = INode.GetReactions();

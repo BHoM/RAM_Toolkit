@@ -15,6 +15,7 @@ using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
 using BH.Engine.Geometry;
+using BH.Engine.Structure;
 using BH.oM.Architecture.Elements;
 
 
@@ -76,7 +77,7 @@ namespace BH.Adapter.RAM
                     bar.SectionProperty = nullSectionProp;
                 }
 
-                if (bar.StartNode.Position.Z > bar.EndNode.Position.Z)
+                if (bar.StartNode.Position().Z > bar.EndNode.Position().Z)
                 {
                     Node LowNode = bar.EndNode;
                     Node HighNode = bar.StartNode;
@@ -84,16 +85,16 @@ namespace BH.Adapter.RAM
                     bar.EndNode = HighNode;
                 }
 
-                double rise = bar.EndNode.Position.Z - bar.StartNode.Position.Z;
+                double rise = bar.EndNode.Position().Z - bar.StartNode.Position().Z;
                 double length = Engine.Structure.Query.Length(bar);
-                double barRise = ((bar.EndNode.Position.Z - bar.StartNode.Position.Z) / Engine.Structure.Query.Length(bar));
+                double barRise = ((bar.EndNode.Position().Z - bar.StartNode.Position().Z) / Engine.Structure.Query.Length(bar));
 
                 //if altitude>0 degrees create as column
                 if (barRise>0.001)
                 {
                     columns.Add(bar);
-                    double zStart = bar.StartNode.Position.Z;
-                    double zEnd = bar.EndNode.Position.Z;
+                    double zStart = bar.StartNode.Position().Z;
+                    double zEnd = bar.EndNode.Position().Z;
                     beamHeights.Add(zStart);
                     beamHeights.Add(zEnd);
                     levelHeights.Add(Math.Round(zStart,0));
@@ -102,7 +103,7 @@ namespace BH.Adapter.RAM
                 else
                 {
                     beams.Add(bar);
-                    double z = bar.StartNode.Position.Z;
+                    double z = bar.StartNode.Position().Z;
                     beamHeights.Add(z);
                     levelHeights.Add(Math.Round(z,0));
                 }
@@ -132,12 +133,12 @@ namespace BH.Adapter.RAM
                     
                     Bar bar = beams[j];
 
-                    double xStart = bar.StartNode.Position.X;
-                    double yStart = bar.StartNode.Position.Y;
-                    double xEnd = bar.EndNode.Position.X;
-                    double yEnd = bar.EndNode.Position.Y;
-                    double zStart = Math.Round(bar.StartNode.Position.Z,0);
-                    double zEnd = Math.Round(bar.EndNode.Position.Z,0);
+                    double xStart = bar.StartNode.Position().X;
+                    double yStart = bar.StartNode.Position().Y;
+                    double xEnd = bar.EndNode.Position().X;
+                    double yEnd = bar.EndNode.Position().Y;
+                    double zStart = Math.Round(bar.StartNode.Position().Z,0);
+                    double zEnd = Math.Round(bar.EndNode.Position().Z,0);
 
                     //If bar is on level, add it during that iteration of the loop 
                     if (zStart == IStory.dElevation)
@@ -154,12 +155,12 @@ namespace BH.Adapter.RAM
                     Bar bar = columns[j];
                     
 
-                    double xStart = bar.StartNode.Position.X;
-                    double yStart = bar.StartNode.Position.Y;
-                    double zStart = Math.Round(bar.StartNode.Position.Z,0);
-                    double xEnd = bar.EndNode.Position.X;
-                    double yEnd = bar.EndNode.Position.Y;
-                    double zEnd = Math.Round(bar.EndNode.Position.Z,0);
+                    double xStart = bar.StartNode.Position().X;
+                    double yStart = bar.StartNode.Position().Y;
+                    double zStart = Math.Round(bar.StartNode.Position().Z,0);
+                    double xEnd = bar.EndNode.Position().X;
+                    double yEnd = bar.EndNode.Position().Y;
+                    double zEnd = Math.Round(bar.EndNode.Position().Z,0);
 
                     if (zEnd == IStory.dElevation)
                     {
@@ -409,7 +410,7 @@ namespace BH.Adapter.RAM
 
                     // Find outline of planar panel
                     PolyCurve outline = BH.Engine.Structure.Query.Outline(wallPanel);
-                    BoundingBox wallBounds = Query.Bounds(outline);
+                    BoundingBox wallBounds = BH.Engine.Geometry.Query.Bounds(outline);
                     Point wallMin = wallBounds.Min;
                     Point wallMax = wallBounds.Max;
 
