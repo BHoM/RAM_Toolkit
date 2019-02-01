@@ -39,10 +39,10 @@ namespace BH.Engine.RAM
         {
             ILayoutBeam ILayoutBeam = ILayoutBeams.GetAt(0);
 
-            double xStart = bar.StartNode.Position.X;
-            double yStart = bar.StartNode.Position.Y;
-            double xEnd = bar.EndNode.Position.X;
-            double yEnd = bar.EndNode.Position.Y;
+            double xStart = bar.StartNode.Position().X;
+            double yStart = bar.StartNode.Position().Y;
+            double xEnd = bar.EndNode.Position().X;
+            double yEnd = bar.EndNode.Position().Y;
 
             //Set support coordinates and name
             //CAUTION: different from actual end points and cantilevers hardcoded
