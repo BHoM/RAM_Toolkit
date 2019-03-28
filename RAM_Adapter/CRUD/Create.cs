@@ -363,38 +363,37 @@ namespace BH.Adapter.RAM
                 IStory = IStories.GetAt(i);
                 IFloorType = IStory.GetFloorType();
 
-                //Cycle through floors; if z of bar = the floor height, add it
+                //Cycle through floors; if z of panel = the floor height, add it
                 for (int j = 0; j < floors.Count(); j++)
                 {
 
                     PanelPlanar floor = floors[j];
 
-                    // Find outline of planar panel
-                    PolyCurve outline = BH.Engine.Structure.Query.Outline(floor);
+                    // Get coords of corner points of floor outline to check if floor elevation = panel elevation
+                    List<Point> ctrlPointsCheck = new List<Point>();
+                    ctrlPointsCheck = BH.Engine.Structure.Query.ControlPoints(floor, true);
 
-
-                    // Get coords of corner points
-                    List<Point> ctrlPoints = new List<Point>();
-                    ctrlPoints = BH.Engine.Geometry.Query.ControlPoints(outline);
-
-
-                    // Get list of coordinates
-                    List<SCoordinate> corners = new List<SCoordinate>();
-
-                    foreach (Point point in ctrlPoints)
-                    {
-                        SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
-                        corners.Add(corner);
-                    }
 
                     // If on level, add deck to IDecks for that level
-                    if (Math.Round(corners[0].dZLoc,0) == IStory.dElevation)
+                    if (Math.Round(ctrlPointsCheck[0].Z,0) == IStory.dElevation)
                     {
 
-                        IDecks IDecks = IFloorType.GetDecks();
-                        IDeck IDeck = null;
+                        // Get coords of corner points of floor outlines and openings
+                        List<Point> ctrlPoints = new List<Point>();
+                        List<Point> ctrlPointsExternal = new List<Point>();
+                        ctrlPoints = BH.Engine.Structure.Query.ControlPoints(floor, false);
+                        ctrlPointsExternal = BH.Engine.Structure.Query.ControlPoints(floor, true);
 
-                        // Set slab edges (required in addition to deck perimeter
+                        // Create list of SCoordinates for floor outlines
+                        List<SCoordinate> corners = new List<SCoordinate>();
+
+                        foreach (Point point in ctrlPoints)
+                        {
+                            SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
+                            corners.Add(corner);
+                        }
+
+                        // Set slab edges (required in addition to deck perimeter in RAM)
                         ISlabEdges ISlabEdges = IFloorType.GetAllSlabEdges();
 
                         for (int k = 0; k < corners.Count - 1; k++)
@@ -402,20 +401,33 @@ namespace BH.Adapter.RAM
                             ISlabEdges.Add(corners[k].dXLoc, corners[k].dYLoc, corners[k + 1].dXLoc, corners[k + 1].dYLoc, 0);
                         }
 
+
+                        //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
+
+                        //IDecks IDecks = IFloorType.GetDecks();
+                        //IDeck IDeck = null;
+
                         //// Default panel properties to apply to model
                         //string deckName = "Default RAM_Toolkit"; //pull deck name from decktable
                         //double thickness = 8;
                         //double selfweight = 150;
-
-                        //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now) 
                         //IConcSlabProp = IConcSlabProps.Add(deckName, thickness, selfweight);
-                        //IDeck = IDecks.Add(IConcSlabProp.lUID, ctrlPoints.Count); // This causes the read memory error crashing at save
+                        //IDeck = IDecks.Add(IConcSlabProp.lUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
                         //IPoints IPoints = IDeck.GetPoints();
 
-                        //for (int k = 0; k < corners.Count; k++)
+                        //// Create list of SCoordinates for floor outlines
+                        //List<SCoordinate> cornersExt = new List<SCoordinate>();
+
+                        //foreach (Point point in ctrlPointsExternal)
+                        //{
+                        //    SCoordinate cornerExt = BH.Engine.RAM.Convert.ToRAM(point);
+                        //    cornersExt.Add(corner);
+                        //}
+
+                        //for (int k = 0; k < cornersExt.Count; k++)
                         //{
                         //    IPoints.Delete(k);
-                        //    IPoints.InsertAt(k, corners[k]);
+                        //    IPoints.InsertAt(k, cornersExt[k]);
                         //}
 
                     }
