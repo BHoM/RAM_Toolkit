@@ -93,12 +93,6 @@ namespace BH.Engine.RAM
             return Material;
         }
 
-        public static string ToRAM(string BHoMSectionName)
-        {
-            string RAMSecName = BHoMSectionName;
-            return RAMSecName;
-        }
-
         /*
         public static EGridAxis ToRAM(ICurve curve)
         {
