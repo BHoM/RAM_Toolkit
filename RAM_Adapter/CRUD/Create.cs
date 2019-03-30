@@ -165,8 +165,11 @@ namespace BH.Adapter.RAM
                     //If bar is on level, add it during that iteration of the loop 
                     if (zStart == IStory.dElevation)
                     {
-                        ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd,5);
-                        ILayoutBeam.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
+                        ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd, 0); //toDelete was 5
+                        IBeams beamsOnStory = IStory.GetBeams();
+                        IBeam beam = beamsOnStory.Get(ILayoutBeam.lUID);
+                        ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+                        ILayoutBeam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
                     }
                 }
 
@@ -188,19 +191,23 @@ namespace BH.Adapter.RAM
                     {
                         IFloorType = IStory.GetFloorType();
                         ILayoutColumns = IFloorType.GetLayoutColumns();
+                        ILayoutColumn ILayoutColumn;
 
                         if (Engine.Structure.Query.IsVertical(bar))
                         {
                             //Failing if no section property is provided
-                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
-                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
+                            ILayoutColumn = ILayoutColumns.Add(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
                         }
                         else
                         {
-                            ILayoutColumn ILayoutColumn = ILayoutColumns.Add2(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, xStart, yStart, 0, 0);
-                            ILayoutColumn.strSectionLabel = Engine.RAM.Convert.ToRAM(bar.SectionProperty.Name);
+                            ILayoutColumn = ILayoutColumns.Add2(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, xStart, yStart, 0, 0);
                         }
-                        
+                        //Set column properties
+                        IColumns colsOnStory = IStory.GetColumns();
+                        IColumn column = colsOnStory.Get(ILayoutColumn.lUID);
+                        column.strSectionLabel = bar.SectionProperty.Name;
+                        column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+
                     }
                 }
 
@@ -359,46 +366,51 @@ namespace BH.Adapter.RAM
             // Cycle through floortypes, access appropriate story, place panels on those stories
             for (int i = 0; i < IStories.GetCount(); i++)
             {
-
                 IStory = IStories.GetAt(i);
                 IFloorType = IStory.GetFloorType();
-
                 //Cycle through floors; if z of panel = the floor height, add it
                 for (int j = 0; j < floors.Count(); j++)
                 {
-
                     PanelPlanar floor = floors[j];
 
                     // Get coords of corner points of floor outline to check if floor elevation = panel elevation
                     List<Point> ctrlPointsCheck = new List<Point>();
                     ctrlPointsCheck = BH.Engine.Structure.Query.ControlPoints(floor, true);
 
-
                     // If on level, add deck to IDecks for that level
                     if (Math.Round(ctrlPointsCheck[0].Z,0) == IStory.dElevation)
                     {
+                        //Create list of external and internal panel outlines
+                        List<PolyCurve> panelOutlines = new List<PolyCurve>();
 
-                        // Get coords of corner points of floor outlines and openings
-                        List<Point> ctrlPoints = new List<Point>();
-                        List<Point> ctrlPointsExternal = new List<Point>();
-                        ctrlPoints = BH.Engine.Structure.Query.ControlPoints(floor, false);
-                        ctrlPointsExternal = BH.Engine.Structure.Query.ControlPoints(floor, true);
+                        // Get external and internal adges of floor panel
+                        PolyCurve outlineExternal = floor.Outline();
+                        panelOutlines.Add(outlineExternal);
+                        List<Opening> panelOpenings = floor.Openings;
 
-                        // Create list of SCoordinates for floor outlines
-                        List<SCoordinate> corners = new List<SCoordinate>();
-
-                        foreach (Point point in ctrlPoints)
+                        foreach (Opening opening in panelOpenings)
                         {
-                            SCoordinate corner = BH.Engine.RAM.Convert.ToRAM(point);
-                            corners.Add(corner);
+                            PolyCurve outlineOpening = opening.Outline();
+                            panelOutlines.Add(outlineOpening);
                         }
 
-                        // Set slab edges (required in addition to deck perimeter in RAM)
+                        // Set slab edges on FloorType in RAM for external edges
                         ISlabEdges ISlabEdges = IFloorType.GetAllSlabEdges();
+                        Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
 
-                        for (int k = 0; k < corners.Count - 1; k++)
+                        foreach (PolyCurve outline in panelOutlines)
                         {
-                            ISlabEdges.Add(corners[k].dXLoc, corners[k].dYLoc, corners[k + 1].dXLoc, corners[k + 1].dYLoc, 0);
+                            // RAM requires edges clockwise, flip if counterclockwise
+                            PolyCurve cwOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
+
+                            List<ICurve> edgeCrvs = cwOutline.Curves;
+
+                            foreach (ICurve crv in edgeCrvs)
+                            {
+                                Point startPt = crv.IStartPoint();
+                                Point endPt = crv.IEndPoint();
+                                ISlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
+                            }
                         }
 
 
