@@ -609,11 +609,11 @@ namespace BH.Adapter.RAM
                 {
                     gridLine = Engine.Geometry.Modify.CollapseToPolyline(grid.Curve as dynamic, 10);
                     //add lines to corresponding lists (XGrids, YGrids) based on their  orientation
-                    if (gridLine.StartPoint().X == gridLine.EndPoint().X)
+                    if (Math.Abs(gridLine.StartPoint().X - gridLine.EndPoint().X) < 0.1)
                     {
                         YGrids.Add(grid);
                     }
-                    else if (gridLine.StartPoint().Y == gridLine.EndPoint().Y)
+                    else if (Math.Abs(gridLine.StartPoint().Y - gridLine.EndPoint().Y) < 0.1)
                     {
                         XGrids.Add(grid);
                     }
