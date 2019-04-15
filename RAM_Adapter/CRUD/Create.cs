@@ -217,17 +217,6 @@ namespace BH.Adapter.RAM
             return true;
         }
 
-        /***************************************************/
-
-
-        private bool CreateCollection(IEnumerable<Node> nodes)
-        {
-            //Code for creating a collection of nodes in the software
-
-            //Not yet implemented
-
-            return true;
-        }
 
         /***************************************************/
 
