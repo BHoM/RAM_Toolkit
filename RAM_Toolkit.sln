@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2020
+# Visual Studio Express 14 for Windows Desktop
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Adapter", "RAM_Adapter\RAM_Adapter.csproj", "{BAA1043A-A029-492C-A1C1-B42FF856E808}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Engine", "RAM_Engine\RAM_Engine.csproj", "{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Test_1", "RAM_Test_1\RAM_Test_1.csproj", "{D000D373-0F46-435D-BB79-5C667ED3A74A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,10 +21,6 @@ Global
 		{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D000D373-0F46-435D-BB79-5C667ED3A74A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D000D373-0F46-435D-BB79-5C667ED3A74A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D000D373-0F46-435D-BB79-5C667ED3A74A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D000D373-0F46-435D-BB79-5C667ED3A74A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
