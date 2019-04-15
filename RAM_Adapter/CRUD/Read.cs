@@ -24,20 +24,15 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BH.oM.Base;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.Properties;
 using BH.oM.Structure.Properties.Section;
-using BH.oM.Structure.Properties.Constraint;
 using BH.oM.Structure.Properties.Surface;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
 using System.IO;
-using BH.oM.Geometry;
-using BH.Engine;
 using BH.oM.Architecture.Elements;
 
 
@@ -375,26 +370,12 @@ namespace BH.Adapter.RAM
                 int numGridLines = IModelGrids.GetCount();
 
                 // Loop through all gridlines in the GridSystem and add a bhomGrid
-                 for (int j = 0; j < numGridLines; j++){
-
-                    IModelGrid IModelGrid = IModelGrids.GetAt(j);
-                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(myGridSystem, IModelGrid,j);
-                    bhomGrids.Add(bhomGrid);
-
-                }
-
-
-                /*
-                List<Grid> grids = Engine.RAM.Convert.ToBHoMObject(myGridSystem);
-                for (int j = 0; j < grids.Count; j++)
+                 for (int j = 0; j < numGridLines; j++)
                 {
-
-                    Grid bhomGrid = grids[i];
+                    IModelGrid IModelGrid = IModelGrids.GetAt(j);
+                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(IModelGrid, myGridSystem, j);
                     bhomGrids.Add(bhomGrid);
                 }
-                  */
-
-
             }
 
             return bhomGrids;

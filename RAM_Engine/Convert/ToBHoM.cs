@@ -28,10 +28,7 @@ using BH.oM.Common.Materials;
 using BH.oM.Architecture.Elements;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.Properties.Constraint;
-using BH.oM.Structure.Properties;
 using BH.oM.Structure.Loads;
-using BH.Engine.Structure;
-using BH.Engine.Common;
 using BH.oM.Structure.Properties.Surface;
 using BH.oM.Structure.Properties.Section;
 using BH.oM.Structure.Properties.Section.ShapeProfiles;
@@ -54,7 +51,7 @@ namespace BH.Engine.RAM
         /// <summary>
         /***************************************************/
 
-        public static List<double> ToLevelElevations(IModel IModel)
+        public static List<double> ToLevelElevations(this IModel IModel)
         {
             List<double> RAMLevelHeights = new List<double>();
 
@@ -77,7 +74,7 @@ namespace BH.Engine.RAM
             return RAMLevelHeights;
         }
             
-        public static Polyline ToPolyline(IPoints IPoints)
+        public static Polyline ToPolyline(this IPoints IPoints)
         {
             List<Point> controlPts = new List<Point>();
             SCoordinate SCoordPt = new SCoordinate();
@@ -96,7 +93,7 @@ namespace BH.Engine.RAM
             return polyline;
         }
 
-        public static ISectionProperty ToBHoMSection(IBeam RAMBar)
+        public static ISectionProperty ToBHoMSection(this IBeam RAMBar)
         {
             //Create BHoM SectionProperty
             IProfile sectionProfile = null;
@@ -120,32 +117,7 @@ namespace BH.Engine.RAM
             return sectionProperty;
         }
 
-        public static ISectionProperty ToBHoMSection(IColumn RAMBar)
-        {
-            //Create BHoM SectionProperty
-            IProfile sectionProfile = null;
-            ISectionProperty sectionProperty = new ExplicitSection();
-
-            Material Material = new Material();
-
-            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
-            {
-                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
-                //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
-            }
-            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
-            {
-                Material = Common.Create.Material("Steel");
-                //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
-            }
-
-            sectionProperty.Material = Material;
-            sectionProperty.Name = RAMBar.strSectionLabel;
-
-            return sectionProperty;
-        }
-
-        public static ISectionProperty ToBHoMSection(IVerticalBrace RAMBar)
+        public static ISectionProperty ToBHoMSection(this IColumn RAMBar)
         {
             //Create BHoM SectionProperty
             IProfile sectionProfile = null;
@@ -170,7 +142,7 @@ namespace BH.Engine.RAM
             return sectionProperty;
         }
 
-        public static ISectionProperty ToBHoMSection(IHorizBrace RAMBar)
+        public static ISectionProperty ToBHoMSection(this IVerticalBrace RAMBar)
         {
             //Create BHoM SectionProperty
             IProfile sectionProfile = null;
@@ -195,7 +167,32 @@ namespace BH.Engine.RAM
             return sectionProperty;
         }
 
-        public static Bar ToBHoMObject(IColumn IColumn)
+        public static ISectionProperty ToBHoMSection(this IHorizBrace RAMBar)
+        {
+            //Create BHoM SectionProperty
+            IProfile sectionProfile = null;
+            ISectionProperty sectionProperty = new ExplicitSection();
+
+            Material Material = new Material();
+
+            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            {
+                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
+            }
+            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            {
+                Material = Common.Create.Material("Steel");
+                //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
+            }
+
+            sectionProperty.Material = Material;
+            sectionProperty.Name = RAMBar.strSectionLabel;
+
+            return sectionProperty;
+        }
+
+        public static Bar ToBHoMObject(this IColumn IColumn)
         {
 
             // Get the column name
@@ -245,7 +242,7 @@ namespace BH.Engine.RAM
             return bhomBar;
         }
 
-        public static Bar ToBHoMObject(IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
+        public static Bar ToBHoMObject(this IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
         {
 
             // Get coordinates from IBeam
@@ -360,7 +357,7 @@ namespace BH.Engine.RAM
             return bhomBar;
         }
 
-        public static Bar ToBHoMObject(IVerticalBrace IVerticalBrace)
+        public static Bar ToBHoMObject(this IVerticalBrace IVerticalBrace)
         {
 
             // Get the column name
@@ -537,7 +534,7 @@ namespace BH.Engine.RAM
             return bhomPanel;
         }
     
-        public static PanelPlanar ToBHoMObject(IWall IWall)
+        public static PanelPlanar ToBHoMObject(this IWall IWall)
         {
 
             //Find corner points of wall in RAM model
@@ -626,7 +623,7 @@ namespace BH.Engine.RAM
             return bhomPanel;
         }
 
-        public static Node ToBHoMObject(INode INode)
+        public static Node ToBHoMObject(this INode INode)
         {
 
             // Get the location of the node
@@ -689,7 +686,7 @@ namespace BH.Engine.RAM
             return Node;
         }
 
-        public static Loadcase ToBHoMObject(ILoadCase ILoadCase)
+        public static Loadcase ToBHoMObject(this ILoadCase ILoadCase)
         {
 
             Loadcase Loadcase = new Loadcase();
@@ -759,7 +756,7 @@ namespace BH.Engine.RAM
             return LoadCombination;
         }
 
-        public static Grid ToBHoMObject(IGridSystem IGridSystem, IModelGrid IModelGrid, int counter)
+        public static Grid ToBHoMObject(this IModelGrid IModelGrid, IGridSystem IGridSystem, int counter)
         {
             Grid myGrid = new Grid();
             // Get the parameters of Gridsystem 
@@ -798,10 +795,6 @@ namespace BH.Engine.RAM
             //Set Grid start offset from system origin
             double spacing = 0;
             spacing = IModelGrid.dCoordinate_Angle;
-
-            //implement max grid length per bounds or max dCoord
-            //GridLengthX = spacingY;
-            //GridLengthY = spacingX;
 
             Point gridCoordPoint1 = new Point();
             Point gridCoordPoint2 = new Point();

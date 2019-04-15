@@ -23,16 +23,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using BH.oM.Structure.Elements;
 using BH.oM.Geometry;
-using BH.oM.Common;
-using BH.oM.Structure.Loads;
 using BH.Engine.Structure;
-using BH.oM.Structure.Properties;
 using RAMDATAACCESSLib;
-using BH.oM.Architecture.Elements;
 
 
 namespace BH.Engine.RAM
@@ -50,14 +44,7 @@ namespace BH.Engine.RAM
         //}
         /***************************************************/
 
-
-        //public static IBeam ToRAM(Bar bar)
-        //{
-        //    IBeam IBeam;
-        //    return IBeam;
-        //}
-
-        public static ILayoutBeam ToRAM(Bar bar, ILayoutBeams ILayoutBeams)
+        public static ILayoutBeam ToRAM(this Bar bar, ILayoutBeams ILayoutBeams)
         {
             ILayoutBeam ILayoutBeam = ILayoutBeams.GetAt(0);
 
@@ -74,7 +61,7 @@ namespace BH.Engine.RAM
             return ILayoutBeam;
         }
 
-        public static SCoordinate ToRAM(Point point)
+        public static SCoordinate ToRAM(this Point point)
         {
             SCoordinate Point = new SCoordinate();
             Point.dXLoc = point.X;
@@ -83,7 +70,7 @@ namespace BH.Engine.RAM
             return Point;
         }
 
-        public static EMATERIALTYPES ToRAM(oM.Common.Materials.Material material)
+        public static EMATERIALTYPES ToRAM(this oM.Common.Materials.Material material)
         {
             EMATERIALTYPES Material = new EMATERIALTYPES();
             
@@ -93,8 +80,8 @@ namespace BH.Engine.RAM
             return Material;
         }
 
-        /*
-        public static EGridAxis ToRAM(ICurve curve)
+        /* Note: 
+        public static EGridAxis ToRAM(this ICurve curve)
         {
             ICurve gridCrv = curve;
             // get the orintation of the curve
