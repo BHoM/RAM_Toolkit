@@ -24,14 +24,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BH.oM.Base;
 using BH.oM.Structure.Elements;
-using BH.oM.Structure.Properties;
 using BH.oM.Structure.Properties.Section;
 using BH.oM.Structure.Properties.Surface;
-using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
 using System.IO;
@@ -213,21 +208,6 @@ namespace BH.Adapter.RAM
 
             }
 
-
-            //////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-            //foreach (Bar bar in bars)
-            //{
-            //    //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
-            //    object barId = bar.CustomData[AdapterId];
-            //    //If also the default implmentation for the DependencyTypes is used,
-            //    //one can from here get the id's of the subobjects by calling (cast into applicable type used by the software): 
-            //    object startNodeId = bar.StartNode.CustomData[AdapterId];
-            //    object endNodeId = bar.EndNode.CustomData[AdapterId];
-            //    object SecPropId = bar.SectionProperty.CustomData[AdapterId];
-            //}
-
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
 
@@ -243,14 +223,10 @@ namespace BH.Adapter.RAM
         private bool CreateCollection(IEnumerable<Node> nodes)
         {
             //Code for creating a collection of nodes in the software
-          
-            foreach (Node node in nodes)
-            {
-                //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
-                object nodeId = node.CustomData[AdapterId];
-            }
 
-            throw new NotImplementedException();
+            //Not yet implemented
+
+            return true;
         }
 
         /***************************************************/
@@ -259,6 +235,7 @@ namespace BH.Adapter.RAM
         {
             //Code for creating a collection of section properties in the software
 
+            //Not yet implemented
 
             return true;
         }
@@ -269,17 +246,16 @@ namespace BH.Adapter.RAM
         {
             //Code for creating a collection of materials in the software
 
+            //Not yet implemented
 
-           return true;
+            return true;
         }
 
         /***************************************************/
 
         private bool CreateCollection(IEnumerable<ISurfaceProperty> ISurfaceProperties)
         {           
-            //TODO: DECK PROPERTY FUNCTIONALITY
-            
-            ////Code for creating a collection of deck properties in the software (DEFAULT FOR NOW)
+            //NOTE: Deck property functionality not resolved yet but code framework is below
 
             ////Access model
             //IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
@@ -290,7 +266,6 @@ namespace BH.Adapter.RAM
 
             //foreach (ISurfaceProperty iProp in ISurfaceProperties)
             //{
-            //    //Tip: if the NextId method has been implemented you can get the id to be used for the creation out as (cast into applicable type used by the software):
             //    string deckName = iProp.Name;
             //    double thickness = 6;
             //    double studLength = 4;
@@ -302,8 +277,6 @@ namespace BH.Adapter.RAM
 
             return true;
         }
-
-        //TODO: TEST METHOD AND RESOLVE NEW DECK ISSUE
 
         private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
         {
@@ -638,7 +611,7 @@ namespace BH.Adapter.RAM
             }
 
 
-            // Radial and Skewed Not Yet Implemented
+            // NOTE: Radial and Skewed Not Yet Implemented but code framework is below
 
             ////Radial Circular Grid
             //if (circGrids.Count() != 0)
@@ -702,14 +675,14 @@ namespace BH.Adapter.RAM
             {
 
                 IModelGridsRad.Add(cGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y);
-                // TODO: add code to impement circular grids
+                // TODO: add code to implement circular grids
                 // Create GridSystem in RAM for each unique centerpt of circGrids  
 
             }
 
             foreach (Grid skGrid in skewGrids)
             {
-                // TODO: add code to impement skewed grids
+                // TODO: add code to implement skewed grids
                 // Create GridSystem in RAM for each unique angle of skewGrids
 
             }
@@ -718,24 +691,22 @@ namespace BH.Adapter.RAM
             int gridSystemID = IGridSystemXY.lUID;
 
 
-            /* FOR now we are not creating not creating floor type up until we test the rest of the elements
-            //TODO: NEEDS TO BE TESTED
-            // Create a default floor type and assign the newly created gridsystem
+            //TODO: Assign grid system to all floor types
+            //Create a default floor type and assign the newly created gridsystem
             //string defFloorTypeName = "Default_floorType";
             //IFloorType myFloorType = myFloorTypes.Add(defFloorTypeName);
             //IStories myStories = IModel.GetStories();
 
 
-            //Cycle through floortypes, access the existing floortype/story, place grids on those stories
-            for (int i = 0; i < myFloorTypes.GetCount(); i++)
-                {
-                    myFloorType = myFloorTypes.GetAt(i);
-                    IStory myStory= myStories.GetAt(i);
-                    DAArray gsID = myFloorType.GetGridSystemIDArray();
-                    gsID.Add(IGridSystemXY.lUID, 0);
-                    myFloorType.SetGridSystemIDArray(gsID);
-                }
-                */
+            ////Cycle through floortypes, access the existing floortype/story, place grids on those stories
+            //for (int i = 0; i < myFloorTypes.GetCount(); i++)
+            //    {
+            //        myFloorType = myFloorTypes.GetAt(i);
+            //        IStory myStory= myStories.GetAt(i);
+            //        DAArray gsID = myFloorType.GetGridSystemIDArray();
+            //        gsID.Add(IGridSystemXY.lUID, 0);
+            //        myFloorType.SetGridSystemIDArray(gsID);
+            //    }
 
 
 
