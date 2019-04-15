@@ -47,9 +47,7 @@ namespace BH.Adapter.RAM
         protected override IEnumerable<IBHoMObject> Read(Type type, IList ids)
         {
             //Choose what to pull out depending on the type. Also see example methods below for pulling out bars and dependencies
-            if (type == typeof(Node))
-                return ReadNodes(ids as dynamic);
-            else if (type == typeof(Bar))
+            if (type == typeof(Bar))
                 return ReadBars(ids as dynamic);
             else if (type == typeof(ISectionProperty) || type.GetInterfaces().Contains(typeof(ISectionProperty)))
                 return ReadSectionProperties(ids as dynamic);
@@ -157,28 +155,6 @@ namespace BH.Adapter.RAM
 
         }
 
-        /***************************************/
-
-        private List<Node> ReadNodes(List<string> ids = null)
-        {
-            //Implement code for reading nodes
-            List<Node> bhomNodes = new List<Node>();
-
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-            INodes INodes = IModel.GetFrameAnalysisNodes();
-            int numNodes = INodes.GetCount();
-
-            for (int i = 0; i < numNodes; i++)
-            {
-                //Get Nodes
-                INode INode = INodes.GetAt(i);
-                Node bhomNode = BH.Engine.RAM.Convert.ToBHoMObject(INode);
-                bhomNodes.Add(bhomNode);
-            }
-
-                return bhomNodes;
-        }
 
         /***************************************/
 
