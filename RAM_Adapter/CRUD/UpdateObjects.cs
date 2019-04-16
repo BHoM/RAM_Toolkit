@@ -55,10 +55,14 @@ namespace BH.Adapter.RAM
             return success;
         }
 
+        /***************************************************/
+
         protected bool Update(IEnumerable<IBHoMObject> bhomObjects)
         {
             return true;
         }
+
+        /***************************************************/
 
         // Essentially the same as the create method; experimenting with when it gets called by the BHoM "push" component
         protected bool Update(IEnumerable<Bar> bars)

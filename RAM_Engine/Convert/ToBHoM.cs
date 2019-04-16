@@ -73,7 +73,9 @@ namespace BH.Engine.RAM
             }
             return RAMLevelHeights;
         }
-            
+
+        /***************************************************/
+        
         public static Polyline ToPolyline(this IPoints IPoints)
         {
             List<Point> controlPts = new List<Point>();
@@ -92,6 +94,8 @@ namespace BH.Engine.RAM
             polyline.ControlPoints = controlPts;
             return polyline;
         }
+
+        /***************************************************/
 
         public static ISectionProperty ToBHoMSection(this IBeam RAMBar)
         {
@@ -116,6 +120,8 @@ namespace BH.Engine.RAM
 
             return sectionProperty;
         }
+
+        /***************************************************/
 
         public static ISectionProperty ToBHoMSection(this IColumn RAMBar)
         {
@@ -142,6 +148,8 @@ namespace BH.Engine.RAM
             return sectionProperty;
         }
 
+        /***************************************************/
+
         public static ISectionProperty ToBHoMSection(this IVerticalBrace RAMBar)
         {
             //Create BHoM SectionProperty
@@ -167,6 +175,8 @@ namespace BH.Engine.RAM
             return sectionProperty;
         }
 
+        /***************************************************/
+
         public static ISectionProperty ToBHoMSection(this IHorizBrace RAMBar)
         {
             //Create BHoM SectionProperty
@@ -191,6 +201,8 @@ namespace BH.Engine.RAM
 
             return sectionProperty;
         }
+
+        /***************************************************/
 
         public static Bar ToBHoMObject(this IColumn IColumn)
         {
@@ -241,6 +253,8 @@ namespace BH.Engine.RAM
 
             return bhomBar;
         }
+
+        /***************************************************/
 
         public static Bar ToBHoMObject(this IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
         {
@@ -357,6 +371,8 @@ namespace BH.Engine.RAM
             return bhomBar;
         }
 
+        /***************************************************/
+
         public static Bar ToBHoMObject(this IVerticalBrace IVerticalBrace)
         {
 
@@ -386,7 +402,9 @@ namespace BH.Engine.RAM
 
             return bhomBar;
         }
-  
+
+        /***************************************************/
+
         public static Bar ToBHoMObject(IHorizBrace IHorizBrace, ILayoutHorizBrace ILayoutHorizBrace, double dElevation)
         {
 
@@ -421,6 +439,8 @@ namespace BH.Engine.RAM
 
             return bhomBar;
         }
+
+        /***************************************************/
 
         public static PanelPlanar ToBHoMObject(IDeck IDeck, IModel IModel, int IStoryUID)
         {
@@ -533,7 +553,9 @@ namespace BH.Engine.RAM
 
             return bhomPanel;
         }
-    
+
+        /***************************************************/
+
         public static PanelPlanar ToBHoMObject(this IWall IWall)
         {
 
@@ -623,6 +645,8 @@ namespace BH.Engine.RAM
             return bhomPanel;
         }
 
+        /***************************************************/
+
         public static Node ToBHoMObject(this INode INode)
         {
 
@@ -686,6 +710,8 @@ namespace BH.Engine.RAM
             return Node;
         }
 
+        /***************************************************/
+
         public static Loadcase ToBHoMObject(this ILoadCase ILoadCase)
         {
 
@@ -728,6 +754,7 @@ namespace BH.Engine.RAM
             return Loadcase;
         }
 
+        /***************************************************/
 
         public static LoadCombination ToBHoMObject(IModel IModel,ILoadCombination ILoadCombination)
         {
@@ -755,6 +782,8 @@ namespace BH.Engine.RAM
 
             return LoadCombination;
         }
+
+        /***************************************************/
 
         public static Grid ToBHoMObject(this IModelGrid IModelGrid, IGridSystem IGridSystem, int counter)
         {
@@ -887,5 +916,7 @@ namespace BH.Engine.RAM
 
         }
 
-    } //Public Convert methods ends here 
+        /***************************************************/
+
+    } 
 }
