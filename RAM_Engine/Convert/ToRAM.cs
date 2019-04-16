@@ -61,6 +61,8 @@ namespace BH.Engine.RAM
             return ILayoutBeam;
         }
 
+        /***************************************************/
+
         public static SCoordinate ToRAM(this Point point)
         {
             SCoordinate Point = new SCoordinate();
@@ -69,6 +71,8 @@ namespace BH.Engine.RAM
             Point.dZLoc = point.Z;
             return Point;
         }
+
+        /***************************************************/
 
         public static EMATERIALTYPES ToRAM(this oM.Common.Materials.Material material)
         {
@@ -80,19 +84,8 @@ namespace BH.Engine.RAM
             return Material;
         }
 
-        /* Note: 
-        public static EGridAxis ToRAM(this ICurve curve)
-        {
-            ICurve gridCrv = curve;
-            // get the orintation of the curve
-        
-            EGridAxis crvAxis = (0,1,0);  
-            return crvAxis; 
-        }
+        /***************************************************/
 
-        */
-
-           
     }
 
 }

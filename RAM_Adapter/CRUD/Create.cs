@@ -217,7 +217,6 @@ namespace BH.Adapter.RAM
             return true;
         }
 
-
         /***************************************************/
 
         private bool CreateCollection(IEnumerable<ISectionProperty> sectionProperties)
@@ -266,6 +265,8 @@ namespace BH.Adapter.RAM
 
             return true;
         }
+
+        /***************************************************/
 
         private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
         {
@@ -443,6 +444,8 @@ namespace BH.Adapter.RAM
             return true;
         }
 
+        /***************************************************/
+
         private bool CreateLevels(List<double> Elevations, IModel IModel)
         {
 
@@ -519,6 +522,7 @@ namespace BH.Adapter.RAM
             return true;
         }
 
+        /***************************************************/
 
         private bool CreateCollection(IEnumerable<Grid> bhomGrid)
         {

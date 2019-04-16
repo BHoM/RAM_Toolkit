@@ -183,9 +183,7 @@ namespace BH.Adapter.RAM
 
         private RamDataAccess1 m_RAMApplication;
 
-
         /***************************************************/
-
 
     }
 }

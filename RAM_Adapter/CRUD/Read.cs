@@ -56,7 +56,7 @@ namespace BH.Adapter.RAM
             else if (type == typeof(PanelPlanar))
                 return ReadPanels(ids as dynamic);
             else if (type == typeof(ISurfaceProperty))
-                return ReadISurfacePropertys(ids as dynamic);
+                return ReadISurfaceProperties(ids as dynamic);
             else if (type == typeof(LoadCombination))
                 return ReadLoadCombination(ids as dynamic);
             else if (type == typeof(Loadcase))
@@ -152,9 +152,7 @@ namespace BH.Adapter.RAM
 
             return bhomBars;
 
-
         }
-
 
         /***************************************/
 
@@ -180,11 +178,9 @@ namespace BH.Adapter.RAM
 
         private List<Material> ReadMaterials(List<string> ids = null)
         {
-            //Implement code for reading materials
+            //TODO: Implement code for reading materials from RAM if not handled per element
 
             List<Material> Materials = new List<Material>();
-
-            //Material steel = BMaterialType.Steel, 210000, 0.3, 0.00012, 78500);
 
             Material steel = new Material();
             steel.Name = "default";
@@ -194,11 +190,11 @@ namespace BH.Adapter.RAM
 
             return Materials;
 
-            //throw new NotImplementedException();
-
         }
 
-        private List<ISurfaceProperty> ReadISurfacePropertys(List<string> ids = null)
+        /***************************************************/
+
+        private List<ISurfaceProperty> ReadISurfaceProperties(List<string> ids = null)
         {
             //Implement code for reading materials
 
@@ -218,7 +214,7 @@ namespace BH.Adapter.RAM
 
         }
 
-        /***************************************/
+        /***************************************************/
 
         private List<Loadcase> ReadLoadCase(List<string> ids = null)
         {
@@ -239,7 +235,6 @@ namespace BH.Adapter.RAM
             return bhomLoadCases;
 
         }
-
 
         /***************************************************/
 
@@ -263,10 +258,8 @@ namespace BH.Adapter.RAM
 
         }
 
-
         /***************************************************/
 
-        // Read panels method
         private List<PanelPlanar> ReadPanels(List<string> ids = null)
         {
             //Implement code for reading panels
@@ -321,7 +314,7 @@ namespace BH.Adapter.RAM
             return bhomPanels;
         }
 
-
+        /***************************************************/
 
         private List<Grid> ReadGrid(List<string> ids = null)
         {
@@ -355,8 +348,9 @@ namespace BH.Adapter.RAM
             }
 
             return bhomGrids;
-            }
+        }
 
+        /***************************************************/
 
     }
 
