@@ -51,7 +51,7 @@ namespace BH.Engine.RAM
         /// <summary>
         /***************************************************/
 
-        public static List<double> ToLevelElevations(this IModel IModel)
+        public static List<double> ToLevelElevations(this IModel IModel) //This might go away.
         {
             List<double> RAMLevelHeights = new List<double>();
 
@@ -918,5 +918,18 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
-    } 
+        public static Level ToBHoMObject(this IStory story)
+        {
+            Level bhomLevel = new Level
+            {
+                Elevation = story.dElevation,
+                Name = story.strLabel
+            };
+
+            return bhomLevel;
+        }
+
+        /***************************************************/
+
+    }
 }

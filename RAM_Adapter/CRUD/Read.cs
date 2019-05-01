@@ -31,6 +31,7 @@ using BH.oM.Structure.Properties.Section;
 using BH.oM.Structure.Properties.Surface;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
+using BH.Engine.RAM;
 using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Architecture.Elements;
@@ -63,6 +64,8 @@ namespace BH.Adapter.RAM
                 return ReadLoadCase(ids as dynamic);
             if (type == typeof(Grid))
                 return ReadGrid(ids as dynamic);
+            if (type == typeof(Level))
+                return ReadLevel(ids as dynamic);
 
 
             return null;
@@ -342,12 +345,34 @@ namespace BH.Adapter.RAM
                  for (int j = 0; j < numGridLines; j++)
                 {
                     IModelGrid IModelGrid = IModelGrids.GetAt(j);
-                    Grid bhomGrid = Engine.RAM.Convert.ToBHoMObject(IModelGrid, myGridSystem, j);
+                    Grid bhomGrid = IModelGrid.ToBHoMObject(myGridSystem, j);
                     bhomGrids.Add(bhomGrid);
                 }
             }
 
             return bhomGrids;
+        }
+
+        /***************************************************/
+
+        private List<Level> ReadLevel(List<string> ids = null)
+        {
+            //Implement code for reading Levels
+            List<Level> bhomLevels = new List<Level>();
+
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            // Get the levels that are in the model
+
+            IStories stories = IModel.GetStories();
+            int numStories = stories.GetCount();
+
+            for (int i = 0; i < numStories; i++)
+            {
+                bhomLevels.Add(stories.GetAt(i).ToBHoMObject());
+            }
+
+            return bhomLevels;
         }
 
         /***************************************************/
