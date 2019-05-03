@@ -50,31 +50,6 @@ namespace BH.Engine.RAM
         //}
         /// <summary>
         /***************************************************/
-
-        public static List<double> ToLevelElevations(this IModel IModel) //This might go away.
-        {
-            List<double> RAMLevelHeights = new List<double>();
-
-            //Get existing levels
-            List<string> FloorTypeNames = new List<string>();
-            List<string> StoryNames = new List<string>();
-            string FloorTypeName;
-            double StoryElevation;
-            int FloorID;
-            IFloorTypes IFloorTypes = IModel.GetFloorTypes();
-            IStories IStories = IModel.GetStories();
-
-            double storyCount = IStories.GetCount();
-
-            for (int i = 0; i < storyCount; i++)
-            {
-                StoryElevation = IStories.GetAt(i).dElevation;
-                RAMLevelHeights.Add(StoryElevation);
-            }
-            return RAMLevelHeights;
-        }
-
-        /***************************************************/
         
         public static Polyline ToPolyline(this IPoints IPoints)
         {

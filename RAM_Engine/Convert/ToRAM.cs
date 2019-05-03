@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Structure.Elements;
+using BH.oM.Architecture.Elements;
 using BH.oM.Geometry;
 using BH.Engine.Structure;
 using RAMDATAACCESSLib;
@@ -82,6 +83,53 @@ namespace BH.Engine.RAM
             else if (material.Type == oM.Common.Materials.MaterialType.Steel) { Material = EMATERIALTYPES.ESteelMat; }
             else { Material = EMATERIALTYPES.ESteelMat; }
             return Material;
+        }
+
+        /***************************************************/
+
+        public static IStory GetStory(this Bar bar, StructuralUsage1D usage1D, IStories ramStories)
+        {
+            double elev;
+            switch (usage1D)
+            {
+                case StructuralUsage1D.Beam:
+                    //Use lowest end elevation
+                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    break;
+                case StructuralUsage1D.Column:
+                    //Column to be placed on the level it supports.
+                    elev = Math.Max(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    break;
+                default:
+                    //Use lowest end elevation
+                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    break;
+            }
+
+            //There must be a better way to iterate over IStories
+            List<IStory> storeys = new List<IStory>();
+            int numStories = ramStories.GetCount();
+            for (int i = 0; i < numStories; i++)
+            {
+                storeys.Add(ramStories.GetAt(i));
+            }
+            return storeys.OrderBy(x => Math.Abs(x.dElevation - elev)).First();
+        }
+
+        /***************************************************/
+
+        public static IStory GetStory(this Node node, IStories ramStories)
+        {
+            double elev = node.Position().Z;
+
+            //There must be a better way to iterate over IStories
+            List<IStory> storeys = new List<IStory>();
+            int numStories = ramStories.GetCount();
+            for (int i = 0; i < numStories; i++)
+            {
+                storeys.Add(ramStories.GetAt(i));
+            }
+            return storeys.OrderBy(x => Math.Abs(x.dElevation - elev)).First();
         }
 
         /***************************************************/
