@@ -124,6 +124,7 @@ namespace BH.Engine.RAM
 
             //There must be a better way to iterate over IStories
             List<IStory> storeys = new List<IStory>();
+
             int numStories = ramStories.GetCount();
             for (int i = 0; i < numStories; i++)
             {

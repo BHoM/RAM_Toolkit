@@ -37,6 +37,7 @@ using BH.oM.Architecture.Elements;
 using BH.Engine.RAM;
 
 
+
 namespace BH.Adapter.RAM
 {
     public partial class RAMAdapter
@@ -78,52 +79,59 @@ namespace BH.Adapter.RAM
             //Cycle through bars, add bar to appropriate story.
             foreach (Bar bar in bars)
             {
-                IStory startStory = bar.StartNode.GetStory(ramStories);
-                IStory endStory = bar.EndNode.GetStory(ramStories);
+                bool isBeam = Math.Abs(bar.Tangent(true).DotProduct(Vector.ZAxis)) < 0.5;
 
-                if (startStory == endStory)
+                if (isBeam) 
                 {
+                    IStory barStory = bar.GetStory(StructuralUsage1D.Beam, ramStories);
+
+
                     double xStart = bar.StartNode.Position().X;
                     double yStart = bar.StartNode.Position().Y;
-                    double zStart = bar.StartNode.Position().Z - startStory.dElevation;
+                    double zStart = bar.StartNode.Position().Z - barStory.dElevation;
                     double xEnd = bar.EndNode.Position().X;
                     double yEnd = bar.EndNode.Position().Y;
-                    double zEnd = bar.EndNode.Position().Z - endStory.dElevation;
+                    double zEnd = bar.EndNode.Position().Z - barStory.dElevation;
                     
-                    IFloorType ramFloorType = startStory.GetFloorType();
+                    IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
                     ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, zStart, xEnd, yEnd, zEnd); //toDelete was 5
 
-                    IBeams beamsOnStory = startStory.GetBeams();
+                    IBeams beamsOnStory = barStory.GetBeams();
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
                     beam.strSectionLabel = bar.SectionProperty.Name;
                     beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
                 }
                 else
                 {
-                    double xStart = bar.StartNode.Position().X;
-                    double yStart = bar.StartNode.Position().Y;
-                    double zStart = bar.StartNode.Position().Z - startStory.dElevation;
-                    double xEnd = bar.EndNode.Position().X;
-                    double yEnd = bar.EndNode.Position().Y;
-                    double zEnd = bar.EndNode.Position().Z - endStory.dElevation;
+                    IStory barStory = bar.GetStory(StructuralUsage1D.Column, ramStories);
 
-                    IFloorType ramFloorType = endStory.GetFloorType();
+                    List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
+                    colNodes.OrderBy(x => x.Position().Z);
+
+                    double xStart = colNodes[0].Position().X;
+                    double yStart = colNodes[0].Position().Y;
+                    double zStart = colNodes[0].Position().Z - barStory.dElevation + barStory.dFlrHeight;
+                    double xEnd = colNodes[1].Position().X;
+                    double yEnd = colNodes[1].Position().Y;
+                    double zEnd = colNodes[1].Position().Z - barStory.dElevation;
+
+                    IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
                     ILayoutColumn ramColumn;
 
                     if (bar.IsVertical())
                     {
                         //Failing if no section property is provided
-                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, zEnd, zStart);
+                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, zStart, zEnd);
                     }
                     else
                     {
-                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, xStart, yStart, zEnd, zStart);
+                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xStart, yStart, xEnd, yEnd, zStart, zEnd);
                     }
 
                     //Set column properties
-                    IColumns colsOnStory = endStory.GetColumns();
+                    IColumns colsOnStory = barStory.GetColumns();
                     IColumn column = colsOnStory.Get(ramColumn.lUID);
                     column.strSectionLabel = bar.SectionProperty.Name;
                     column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
