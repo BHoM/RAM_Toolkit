@@ -1,21 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BH.oM.Geometry;
-using BH.oM.Common.Materials;
-using BH.oM.Structure.Properties.Section;
-using BH.oM.Structure.Properties.Surface;
-using BH.oM.Structure.Properties.Constraint;
-using BH.oM.Structure.Elements;
+using BH.Adapter.FileAdapter;
+using BH.Adapter.RAM;
 using BH.oM.Architecture.Elements;
 using BH.oM.DataManipulation.Queries;
-using BH.Adapter;
-using BH.Adapter.RAM;
-using BH.Engine.Structure;
-using BH.Adapter.FileAdapter;
+using BH.oM.Structure.Elements;
 
 
-namespace SAP2000_Test
+
+namespace RAM_Test
 {
     class Program
     {
