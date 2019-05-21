@@ -24,16 +24,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using BH.oM.Architecture.Elements;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
-using BH.oM.Common.Materials;
+using BH.oM.Structure.Constraints;
+using BH.oM.Structure.MaterialFragments;
 using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
 using BH.Engine.Geometry;
 using BH.Engine.Structure;
-using BH.oM.Architecture.Elements;
+
 
 
 namespace BH.Adapter.RAM
@@ -230,7 +232,7 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<Material> materials)
+        private bool CreateCollection(IEnumerable<IMaterialFragment> materials)
         {
             //Code for creating a collection of materials in the software
 

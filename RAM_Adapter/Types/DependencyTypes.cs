@@ -24,6 +24,7 @@ using BH.oM.Common.Materials;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
+using BH.oM.Structure.MaterialFragments;
 using System;
 using System.Collections.Generic;
 
@@ -68,10 +69,10 @@ namespace BH.Adapter.RAM
         private static Dictionary<Type, List<Type>> m_DependencyTypes = new Dictionary<Type, List<Type>>
         {
             {typeof(Bar), new List<Type> { typeof(ISectionProperty) } },
-            {typeof(ISectionProperty), new List<Type> { typeof(Material) } },
+            {typeof(ISectionProperty), new List<Type> { typeof(IMaterialFragment) } },
             //{typeof(RigidLink), new List<Type> { typeof(LinkConstraint), typeof(Node) } },
             //{typeof(MeshFace), new List<Type> { typeof(ISurfaceProperty), typeof(Node) } },
-            {typeof(ISurfaceProperty), new List<Type> { typeof(Material) } },
+            {typeof(ISurfaceProperty), new List<Type> { typeof(IMaterialFragment) } },
             {typeof(Panel), new List<Type> { typeof(ISurfaceProperty) } }
         };
 
