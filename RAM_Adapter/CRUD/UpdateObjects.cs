@@ -28,7 +28,6 @@ using System.Text;
 using System.Threading.Tasks;
 using BH.oM.Base;
 using BH.oM.Structure.Elements;
-using BH.oM.Structure.Properties;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;

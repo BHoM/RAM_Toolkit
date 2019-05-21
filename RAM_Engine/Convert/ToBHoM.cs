@@ -29,9 +29,9 @@ using BH.oM.Architecture.Elements;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.Properties.Constraint;
 using BH.oM.Structure.Loads;
-using BH.oM.Structure.Properties.Surface;
-using BH.oM.Structure.Properties.Section;
-using BH.oM.Structure.Properties.Section.ShapeProfiles;
+using BH.oM.Structure.SurfaceProperties;
+using BH.oM.Structure.SectionProperties;
+using BH.oM.Structure.SectionProperties.ShapeProfiles;
 using RAMDATAACCESSLib;
 
 namespace BH.Engine.RAM
@@ -442,7 +442,7 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
-        public static PanelPlanar ToBHoMObject(IDeck IDeck, IModel IModel, int IStoryUID)
+        public static Panel ToBHoMObject(IDeck IDeck, IModel IModel, int IStoryUID)
         {
 
             //Get panel props
@@ -487,7 +487,7 @@ namespace BH.Engine.RAM
             //Create panel per outline polylines
             List<Polyline> outlines = new List<Polyline>();
             outlines.Add(outline);
-            List<PanelPlanar> bhomPanels = Structure.Create.PanelPlanar(outlines);
+            List<Panel> bhomPanels = Structure.Create.Panel(outlines);
             //Create openings per openings polylines
             int numOpenings = openingPLs.Count();
 
@@ -500,7 +500,7 @@ namespace BH.Engine.RAM
             }
 
             //Create panel and add attributes
-            PanelPlanar bhomPanel = bhomPanels[0];
+            Panel bhomPanel = bhomPanels[0];
             bhomPanel.Openings = bhomOpenings;
 
             HashSet<String> tag = new HashSet<string>();
@@ -556,7 +556,7 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
-        public static PanelPlanar ToBHoMObject(this IWall IWall)
+        public static Panel ToBHoMObject(this IWall IWall)
         {
 
             //Find corner points of wall in RAM model
@@ -605,7 +605,7 @@ namespace BH.Engine.RAM
             }
 
             //  Create wall
-            PanelPlanar bhomPanel = Structure.Create.PanelPlanar(outline,bhomWallOpenings);
+            Panel bhomPanel = Structure.Create.Panel(outline,bhomWallOpenings);
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");

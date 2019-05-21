@@ -25,8 +25,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Structure.Elements;
-using BH.oM.Structure.Properties.Section;
-using BH.oM.Structure.Properties.Surface;
+using BH.oM.Structure.SectionProperties;
+using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
 using System.IO;
@@ -268,11 +268,11 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<PanelPlanar> bhomPanels)
+        private bool CreateCollection(IEnumerable<Panel> bhomPanels)
         {
             //Code for creating a collection of floors and walls in the software
 
-            List<PanelPlanar> panels = bhomPanels.ToList();
+            List<Panel> panels = bhomPanels.ToList();
 
             // Register Floor types
             IFloorTypes IFloorTypes;
@@ -281,13 +281,13 @@ namespace BH.Adapter.RAM
             IStory IStory;
 
             //Create wall and floor lists with individual heights
-            List<PanelPlanar> wallPanels = new List<PanelPlanar>();
-            List<PanelPlanar> floors = new List<PanelPlanar>();
+            List<Panel> wallPanels = new List<Panel>();
+            List<Panel> floors = new List<Panel>();
             List<double> panelHeights = new List<double>();
             List<Point> panelPoints = new List<Point>();
 
             // Split walls and floors and get all elevations
-            foreach (PanelPlanar panel in panels)
+            foreach (Panel panel in panels)
             {
                 List<double> thisPanelHeights = new List<double>();
                 
@@ -334,7 +334,7 @@ namespace BH.Adapter.RAM
                 //Cycle through floors; if z of panel = the floor height, add it
                 for (int j = 0; j < floors.Count(); j++)
                 {
-                    PanelPlanar floor = floors[j];
+                    Panel floor = floors[j];
 
                     // Get coords of corner points of floor outline to check if floor elevation = panel elevation
                     List<Point> ctrlPointsCheck = new List<Point>();
@@ -412,7 +412,7 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j < wallPanels.Count(); j++)
                 {
 
-                    PanelPlanar wallPanel = wallPanels[j];
+                    Panel wallPanel = wallPanels[j];
 
                     // Default Thickness for now
                     double thickness = 6;
