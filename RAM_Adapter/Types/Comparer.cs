@@ -23,10 +23,9 @@
 using BH.Engine.Base.Objects;
 using BH.oM.Common.Materials;
 using BH.oM.Structure.Elements;
-using BH.oM.Structure.Properties;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
-using BH.oM.Structure.Properties.Constraint;
+using BH.oM.Structure.Constraints;
 using System;
 using System.Collections.Generic;
 

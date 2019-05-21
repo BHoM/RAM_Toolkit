@@ -30,6 +30,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Analytical_oM">
+      <HintPath>..\..\BHoM\Build\Analytical_oM.dll</HintPath>
+    </Reference>
     <Reference Include="Architecture_oM">
       <HintPath>..\..\BHoM\Build\Architecture_oM.dll</HintPath>
     </Reference>
@@ -56,6 +59,9 @@
     </Reference>
     <Reference Include="Geometry_oM">
       <HintPath>..\..\BHoM\Build\Geometry_oM.dll</HintPath>
+    </Reference>
+    <Reference Include="Physical_oM">
+      <HintPath>..\..\BHoM\Build\Physical_oM.dll</HintPath>
     </Reference>
     <Reference Include="Reflection_Engine">
       <HintPath>..\..\BHoM_Engine\Build\Reflection_Engine.dll</HintPath>
