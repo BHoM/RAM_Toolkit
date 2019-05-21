@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Structure.Elements;
 using BH.oM.Geometry;
+using BH.oM.Structure.MaterialFragments;
 using BH.Engine.Structure;
 using RAMDATAACCESSLib;
 
@@ -74,12 +75,12 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
-        public static EMATERIALTYPES ToRAM(this oM.Common.Materials.Material material)
+        public static EMATERIALTYPES ToRAM(this IMaterialFragment material)
         {
             EMATERIALTYPES Material = new EMATERIALTYPES();
             
-            if (material.Type == oM.Common.Materials.MaterialType.Concrete) { Material = EMATERIALTYPES.EConcreteMat; }
-            else if (material.Type == oM.Common.Materials.MaterialType.Steel) { Material = EMATERIALTYPES.ESteelMat; }
+            if (material.IMaterialType() == MaterialType.Concrete) { Material = EMATERIALTYPES.EConcreteMat; }
+            else if (material.IMaterialType() == MaterialType.Steel) { Material = EMATERIALTYPES.ESteelMat; }
             else { Material = EMATERIALTYPES.ESteelMat; }
             return Material;
         }

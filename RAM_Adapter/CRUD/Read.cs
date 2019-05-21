@@ -30,6 +30,7 @@ using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
+using BH.oM.Structure.MaterialFragments;
 using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Architecture.Elements;
@@ -50,7 +51,7 @@ namespace BH.Adapter.RAM
                 return ReadBars(ids as dynamic);
             else if (type == typeof(ISectionProperty) || type.GetInterfaces().Contains(typeof(ISectionProperty)))
                 return ReadSectionProperties(ids as dynamic);
-            else if (type == typeof(Material))
+            else if (type == typeof(IMaterialFragment))
                 return ReadMaterials(ids as dynamic);
             else if (type == typeof(Panel))
                 return ReadPanels(ids as dynamic);
@@ -175,20 +176,17 @@ namespace BH.Adapter.RAM
 
         /***************************************/
 
-        private List<Material> ReadMaterials(List<string> ids = null)
+        private List<IMaterialFragment> ReadMaterials(List<string> ids = null)
         {
             //TODO: Implement code for reading materials from RAM if not handled per element
 
-            List<Material> Materials = new List<Material>();
+            List<IMaterialFragment> Materials = new List<IMaterialFragment>();
 
-            Material steel = new Material();
-            steel.Name = "default";
-            steel.Type = MaterialType.Steel;
+            IMaterialFragment defaultMat = Engine.Structure.Create.Steel("Default");
 
-            Materials.Add(steel);
+            Materials.Add(defaultMat);
 
             return Materials;
-
         }
 
         /***************************************************/

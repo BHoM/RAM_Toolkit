@@ -24,14 +24,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Geometry;
-using BH.oM.Common.Materials;
+using BH.oM.Physical;
+using BH.oM.Geometry.ShapeProfiles;
+using BH.oM.Structure.MaterialFragments;
 using BH.oM.Architecture.Elements;
 using BH.oM.Structure.Elements;
-using BH.oM.Structure.Properties.Constraint;
 using BH.oM.Structure.Loads;
+using BH.oM.Structure.Constraints;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.SectionProperties;
-using BH.oM.Structure.SectionProperties.ShapeProfiles;
+using BH.oM.Geometry.ShapeProfiles;
+using BH.Engine.Structure;
 using RAMDATAACCESSLib;
 
 namespace BH.Engine.RAM
@@ -102,16 +105,16 @@ namespace BH.Engine.RAM
             //Create BHoM SectionProperty
             IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
-            Material Material = new Material();
+            IMaterialFragment Material = null;
 
             if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
-                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                Material = Engine.Structure.Create.Concrete("Concrete");
                 //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
             else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
-                Material = Common.Create.Material("Steel");
+                Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
 
@@ -129,16 +132,16 @@ namespace BH.Engine.RAM
             IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
 
-            Material Material = new Material();
+            IMaterialFragment Material = null;
 
             if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
-                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                Material = Engine.Structure.Create.Concrete("Concrete");
                 //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
             else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
-                Material = Common.Create.Material("Steel");
+                Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
 
@@ -156,16 +159,16 @@ namespace BH.Engine.RAM
             IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
 
-            Material Material = new Material();
+            IMaterialFragment Material = null;
 
             if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
-                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                Material = Engine.Structure.Create.Concrete("Concrete");
                 //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
             else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
-                Material = Common.Create.Material("Steel");
+                Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
 
@@ -183,16 +186,16 @@ namespace BH.Engine.RAM
             IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
 
-            Material Material = new Material();
+            IMaterialFragment Material = null;
 
             if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
-                Material = Common.Create.Material("Concrete", MaterialType.Concrete);
+                Material = Engine.Structure.Create.Concrete("Concrete");
                 //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
             else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
-                Material = Common.Create.Material("Steel");
+                Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
 
@@ -484,23 +487,20 @@ namespace BH.Engine.RAM
                 openingPLs.Add(openingOutline);
             }
 
-            //Create panel per outline polylines
-            List<Polyline> outlines = new List<Polyline>();
-            outlines.Add(outline);
-            List<Panel> bhomPanels = Structure.Create.Panel(outlines);
+            //Create panel per outline polyline
+            List<Opening> bhomOpenings = new List<Opening>();
+            Panel bhomPanel = Structure.Create.Panel(outline, bhomOpenings);
             //Create openings per openings polylines
             int numOpenings = openingPLs.Count();
 
             //Create openings
-            List<Opening> bhomOpenings = new List<Opening>();
             for (int i = 0; i < numOpenings; i++)
             {
                 Opening bhomOpening = Structure.Create.Opening(openingPLs[i]);
                 bhomOpenings.Add(bhomOpening);
             }
 
-            //Create panel and add attributes
-            Panel bhomPanel = bhomPanels[0];
+            //Create panel and add attributes;
             bhomPanel.Openings = bhomOpenings;
 
             HashSet<String> tag = new HashSet<string>();
@@ -520,29 +520,29 @@ namespace BH.Engine.RAM
             double deckThickness = 0;
             string deckLabel = "";
             int deckID = IDeck.lPropID;
-            Material Material = new Material();
+            IMaterialFragment Material = null;
 
             if (type == EDeckType.eDeckType_Composite)
             {
                 ICompDeckProp DeckProp = ICompDeckProps.Get(deckID);
                 deckThickness = DeckProp.dThickAboveFlutes;
                 deckLabel = DeckProp.strLabel + " " + deckThickness.ToString();
-                Material.Name = "Composite";
+                Material = Engine.Structure.Create.Concrete("Composite");
+
             }
             else if (type == EDeckType.eDeckType_Concrete)
             {
                 IConcSlabProp DeckProp = IConcSlabProps.Get(deckID);
                 deckThickness = DeckProp.dThickness;
                 deckLabel = DeckProp.strLabel;
-                Material.Name = "Concrete";
-                Material.Type = MaterialType.Concrete;
+                Material = Engine.Structure.Create.Concrete("Concrete"); ; ;
             }
             else if (type == EDeckType.eDeckType_NonComposite)
             {
                 INonCompDeckProp DeckProp = INonCompDeckProps.Get(deckID);
                 deckThickness = DeckProp.dEffectiveThickness;
                 deckLabel = DeckProp.strLabel;
-                Material.Name = "NonComposite";
+                Material = Engine.Structure.Create.Concrete("NonComposite"); ; ;
             }
 
             deck2DProp.Name = deckLabel;
@@ -619,18 +619,17 @@ namespace BH.Engine.RAM
             ConstantThickness wall2DProp = new ConstantThickness();
             string wallLabel = "";
             double wallThickness = IWall.dThickness;
-            Material Material = new Material();
+            IMaterialFragment Material = null;
 
             if (IWall.eMaterial == EMATERIALTYPES.EWallPropConcreteMat)
             {
                 wallLabel = "Concrete " + wallThickness.ToString();
-                Material.Name = "Concrete";
-                Material.Type = MaterialType.Concrete;
+                Material = Engine.Structure.Create.Concrete("Concrete");
             }
             else
             {
                 wallLabel = "Other " + wallThickness.ToString();
-                Material.Name = "Other";
+                Material = Engine.Structure.Create.Concrete("Other");
             }
 
             wall2DProp.Name = wallLabel;
