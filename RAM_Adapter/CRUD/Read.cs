@@ -26,9 +26,8 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Base;
 using BH.oM.Structure.Elements;
-using BH.oM.Structure.Properties;
-using BH.oM.Structure.Properties.Section;
-using BH.oM.Structure.Properties.Surface;
+using BH.oM.Structure.SectionProperties;
+using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
 using RAMDATAACCESSLib;
@@ -53,7 +52,7 @@ namespace BH.Adapter.RAM
                 return ReadSectionProperties(ids as dynamic);
             else if (type == typeof(Material))
                 return ReadMaterials(ids as dynamic);
-            else if (type == typeof(PanelPlanar))
+            else if (type == typeof(Panel))
                 return ReadPanels(ids as dynamic);
             else if (type == typeof(ISurfaceProperty))
                 return ReadISurfaceProperties(ids as dynamic);
@@ -260,10 +259,10 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private List<PanelPlanar> ReadPanels(List<string> ids = null)
+        private List<Panel> ReadPanels(List<string> ids = null)
         {
             //Implement code for reading panels
-            List<PanelPlanar> bhomPanels = new List<PanelPlanar>();
+            List<Panel> bhomPanels = new List<Panel>();
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             //Get stories
@@ -282,7 +281,7 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j < numWalls; j++)
                 {
                     IWall IWall = IWalls.GetAt(j);
-                    PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
+                    Panel Panel = BH.Engine.RAM.Convert.ToBHoMObject(IWall);
                     bhomPanels.Add(Panel);
                 }
 
@@ -301,7 +300,7 @@ namespace BH.Adapter.RAM
                     IDeck IDeck = IDecks.GetAt(j);
                     try
                     {
-                        PanelPlanar Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
+                        Panel Panel = BH.Engine.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
                         bhomPanels.Add(Panel);
                     }
                     catch
