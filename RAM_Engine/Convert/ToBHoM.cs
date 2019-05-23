@@ -119,7 +119,7 @@ namespace BH.Engine.RAM
             }
             else
             {
-                Material = Engine.Structure.Create.Steel{("Other")}
+                Material = Engine.Structure.Create.Steel("Other");
             }
             sectionProperty.Material = Material;
             sectionProperty.Name = RAMBar.strSectionLabel;
