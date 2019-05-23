@@ -902,5 +902,19 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
-    } 
+        public static Level ToBHoMObject(this IStory story)
+        {
+            Level bhomLevel = new Level
+            {
+                Elevation = story.dElevation,
+                Name = story.strLabel
+            };
+
+            return bhomLevel;
+        }
+
+        /***************************************************/
+
+
+    }
 }
