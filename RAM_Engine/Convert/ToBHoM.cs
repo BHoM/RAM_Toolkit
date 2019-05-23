@@ -33,8 +33,6 @@ using BH.oM.Structure.Loads;
 using BH.oM.Structure.Constraints;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.SectionProperties;
-using BH.oM.Geometry.ShapeProfiles;
-using BH.Engine.Structure;
 using RAMDATAACCESSLib;
 
 namespace BH.Engine.RAM
@@ -61,9 +59,7 @@ namespace BH.Engine.RAM
             //Get existing levels
             List<string> FloorTypeNames = new List<string>();
             List<string> StoryNames = new List<string>();
-            string FloorTypeName;
             double StoryElevation;
-            int FloorID;
             IFloorTypes IFloorTypes = IModel.GetFloorTypes();
             IStories IStories = IModel.GetStories();
 
@@ -103,19 +99,16 @@ namespace BH.Engine.RAM
         public static ISectionProperty ToBHoMSection(this IBeam RAMBar)
         {
             //Create BHoM SectionProperty
-            IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
             IMaterialFragment Material = null;
 
             if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
                 Material = Engine.Structure.Create.Concrete("Concrete");
-                //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
             else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
                 Material = Engine.Structure.Create.Steel("Steel");
-                //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
             else
             {
@@ -132,7 +125,6 @@ namespace BH.Engine.RAM
         public static ISectionProperty ToBHoMSection(this IColumn RAMBar)
         {
             //Create BHoM SectionProperty
-            IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
 
             IMaterialFragment Material = null;
@@ -159,7 +151,6 @@ namespace BH.Engine.RAM
         public static ISectionProperty ToBHoMSection(this IVerticalBrace RAMBar)
         {
             //Create BHoM SectionProperty
-            IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
 
             IMaterialFragment Material = null;
@@ -186,7 +177,6 @@ namespace BH.Engine.RAM
         public static ISectionProperty ToBHoMSection(this IHorizBrace RAMBar)
         {
             //Create BHoM SectionProperty
-            IProfile sectionProfile = null;
             ISectionProperty sectionProperty = new ExplicitSection();
 
             IMaterialFragment Material = null;
@@ -518,7 +508,6 @@ namespace BH.Engine.RAM
             IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
 
             // Get deck section property
-            ISurfaceProperty bh2DProp = null;
             ConstantThickness deck2DProp = new ConstantThickness();
             double deckThickness = 0;
             string deckLabel = "";
@@ -583,7 +572,6 @@ namespace BH.Engine.RAM
             outline.ControlPoints = corners;
 
             // Create openings
-            List<ICurve> wallOpenings = null;
             IFinalWallOpenings IFinalWallOpenings = IWall.GetFinalOpenings();
 
             //Create opening outlines
@@ -830,13 +818,8 @@ namespace BH.Engine.RAM
             Point gridCoordPoint1 = new Point();
             Point gridCoordPoint2 = new Point();
 
-            //check if what type is the GridSystem : orthogonal or radial ?? 
-            Boolean gridIsOrtho = false;
-            Boolean gridIsRadial = false;
-
             if (gridSystemType == "eGridOrthogonal")   // code to place grids in orthogonal X and Y
             {
-                gridIsOrtho = true;
                 //check the orientation to place grides accordingly
                 if (gridLineAxis == "eGridXorRadialAxis")
                 {
@@ -873,7 +856,6 @@ namespace BH.Engine.RAM
             }
             else if (gridSystemType == "eGridRadial")  //code to place grids radially
             {
-                gridIsRadial = true;
                 gridRotAngle = (Math.PI / 180) * (gridLineCoord_Angle + gridSystemRotation);
                 if (gridLineAxis == "eGridXorRadialAxis")
                 {
