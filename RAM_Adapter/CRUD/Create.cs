@@ -71,7 +71,6 @@ namespace BH.Adapter.RAM
             List<Bar> bars = bhomBars.ToList();
 
             // Register Floor types
-            IFloorTypes IFloorTypes;
             IFloorType IFloorType;
             IStories IStories;
             IStory IStory;
@@ -277,7 +276,6 @@ namespace BH.Adapter.RAM
             List<Panel> panels = bhomPanels.ToList();
 
             // Register Floor types
-            IFloorTypes IFloorTypes;
             IFloorType IFloorType;
             IStories IStories;
             IStory IStory;
@@ -326,7 +324,6 @@ namespace BH.Adapter.RAM
 
             //Get concrete deck properties
             IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
-            IConcSlabProp IConcSlabProp;
 
             // Cycle through floortypes, access appropriate story, place panels on those stories
             for (int i = 0; i < IStories.GetCount(); i++)
