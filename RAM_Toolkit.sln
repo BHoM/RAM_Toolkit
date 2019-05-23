@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Adapter", "RAM_Adapter\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Engine", "RAM_Engine\RAM_Engine.csproj", "{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Test", "RAM_Test\RAM_Test.csproj", "{408439F7-7C15-4732-AFB9-09099B4FD08A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{408439F7-7C15-4732-AFB9-09099B4FD08A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{408439F7-7C15-4732-AFB9-09099B4FD08A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{408439F7-7C15-4732-AFB9-09099B4FD08A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{408439F7-7C15-4732-AFB9-09099B4FD08A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
