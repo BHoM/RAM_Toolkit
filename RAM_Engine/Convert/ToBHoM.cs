@@ -117,7 +117,10 @@ namespace BH.Engine.RAM
                 Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
-
+            else
+            {
+                Material = Engine.Structure.Create.Steel{("Other")}
+            }
             sectionProperty.Material = Material;
             sectionProperty.Name = RAMBar.strSectionLabel;
 
@@ -289,7 +292,7 @@ namespace BH.Engine.RAM
             bhomBar.Tags.Add("Beam");
 
 
-            // Get Steel beam results **STILL IN PROGRESS
+            // Get Steel beam results
             ISteelBeamDesignResult Result = IBeam.GetSteelDesignResult();
             DAArray ppalNumStuds = Result.GetNumStudsInSegments();
 
