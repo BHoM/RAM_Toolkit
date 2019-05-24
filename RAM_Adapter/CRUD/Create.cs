@@ -538,7 +538,7 @@ namespace BH.Adapter.RAM
 
             // Register Floor types
             IFloorTypes ramFloorTypes;
-            IFloorType ramFloorType;
+            IFloorType ramFloorType = null;
             IStories ramStories;
 
             //Access model
@@ -546,42 +546,79 @@ namespace BH.Adapter.RAM
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             //Create floor type at each level
-
             for (int i = 0; i < sortedBhomLevels.Count(); i++)
             {
-                    Level level = sortedBhomLevels.ElementAt(i);
+                Level level = sortedBhomLevels.ElementAt(i);
 
-                    double height;
-                    // Ground floor ht = 0 for RAM
-                    if (i == 0) { height = level.Elevation; }
-                    else
+                double height;
+                // Ground floor ht = 0 for RAM
+                if (i == 0)
+                {
+                    height = level.Elevation;
+                }
+                else
+                {
+                    Level lastLevel = sortedBhomLevels.ElementAt(i - 1);
+                    height = level.Elevation - lastLevel.Elevation;
+                }
+
+                ramStories = IModel.GetStories();
+                List<double> ramElevs = new List<double>();
+                for (int j = 0; j < ramStories.GetCount(); j++)
+                {
+                    ramElevs.Add(ramStories.GetAt(j).dElevation);
+                }
+
+                int newIndex;
+                if (ramElevs.FindIndex(x => x > level.Elevation) == -1)
+                {
+                    newIndex = ramElevs.Count();
+                }
+                else
+                {
+                    newIndex = ramElevs.FindIndex(x => x > level.Elevation);
+                }
+
+                List<string> ramFloorTypeNames = new List<string>();
+                ramFloorTypes = IModel.GetFloorTypes();
+                Boolean floorTypeExists = false;
+                for (int j = 0; j < ramFloorTypes.GetCount(); j++)
+                {
+                    if (ramFloorTypes.GetAt(j).strLabel == level.Name)
                     {
-                        Level lastLevel = sortedBhomLevels.ElementAt(i - 1);
-                        height = level.Elevation - lastLevel.Elevation;
+                        ramFloorType = ramFloorTypes.GetAt(j);
+                        floorTypeExists = true;
                     }
+                }
 
-                    ramStories = IModel.GetStories();
-                    List<double> ramElevs = new List<double>();
-                    for (int j = 0; j < ramStories.GetCount(); j++)
-                    {
-                        ramElevs.Add(ramStories.GetAt(j).dElevation);
-                    }
-
-                    int newIndex = Math.Max(ramElevs.Count(), ramElevs.FindIndex(x => x > level.Elevation));
-
-                    ramFloorTypes = IModel.GetFloorTypes();
+                if (floorTypeExists == false)
+                {
                     ramFloorType = ramFloorTypes.Add(level.Name);
+                }
 
-                    // Insert story at index
-                    ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
+                // Modify story above if not top floor
+                if (newIndex < ramStories.GetCount())
+                {
+                    IStory ramStoryAbove = ramStories.GetAt(newIndex);
+                    ramStoryAbove.dFlrHeight = ramStoryAbove.dElevation - level.Elevation;
+                }
+                if (newIndex > 0 && ramStories.GetCount() > 0)
+                {
+                    IStory ramStoryBelow = ramStories.GetAt(newIndex-1);
+                    height = level.Elevation - ramStoryBelow.dElevation;
 
                 }
+
+                // Insert story at index
+                ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
+            }
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
             // Release main interface and delete user file
             RAMDataAccIDBIO = null;
             return true;
+
         }
 
         /***************************************************/
