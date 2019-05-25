@@ -51,11 +51,21 @@ namespace BH.Adapter.RAM
 
         protected override bool Create<T>(IEnumerable<T> objects, bool replaceAll = true)
         {
-            bool success = true;        //boolean returning if the creation was successfull or not
+            bool success = true;        //boolean returning if the creation was successful or not
 
             // Create objects per type
-            success = CreateCollection(objects as dynamic);
+            if (objects.Count() > 0)
+            {
+                if (objects.First() is Level)
+                {
+                    success = CreateCollection(objects as IEnumerable<Level>);
+                }
 
+                else
+                {
+                    success = CreateCollection(objects as dynamic);
+                }
+            }
             return success;             //Finally return if the creation was successful or not
 
         }
@@ -67,147 +77,87 @@ namespace BH.Adapter.RAM
 
         private bool CreateCollection(IEnumerable<Bar> bhomBars)
         {
+
             //Code for creating a collection of bars in the software
-
             List<Bar> bars = bhomBars.ToList();
-
-            // Register Floor types
-            IFloorType IFloorType;
-            IStories IStories;
-            IStory IStory;
-            ILayoutColumns ILayoutColumns;
-            ILayoutBeams ILayoutBeams;
-
-            //Split nodes into beams and colummns
-            List<Bar> columns = new List<Bar>();
-            List<Bar> beams = new List<Bar>();
-            List<double> beamHeights = new List<double>();
-            List<double> levelHeights = new List<double>();
-
-            //Create null section property
-            ISectionProperty nullSectionProp = Engine.Structure.Create.SteelTubeSection(10, 1, null, "unassigned");
-
-            // Find all level heights present
-            foreach (Bar bar in bars)
-            {
-                //Assign null section property
-                if (bar.SectionProperty == null)
-                {
-                    bar.SectionProperty = nullSectionProp;
-                }
-
-                if (bar.StartNode.Position().Z > bar.EndNode.Position().Z)
-                {
-                    Node LowNode = bar.EndNode;
-                    Node HighNode = bar.StartNode;
-                    bar.StartNode = LowNode;
-                    bar.EndNode = HighNode;
-                }
-
-                double rise = bar.EndNode.Position().Z - bar.StartNode.Position().Z;
-                double length = Engine.Structure.Query.Length(bar);
-                double barRise = ((bar.EndNode.Position().Z - bar.StartNode.Position().Z) / Engine.Structure.Query.Length(bar));
-
-                //if altitude>0 degrees create as column
-                if (barRise>0.001)
-                {
-                    columns.Add(bar);
-                    double zStart = bar.StartNode.Position().Z;
-                    double zEnd = bar.EndNode.Position().Z;
-                    beamHeights.Add(zStart);
-                    beamHeights.Add(zEnd);
-                    levelHeights.Add(Math.Round(zStart,0));
-                    levelHeights.Add(Math.Round(zEnd,0));
-                }
-                else
-                {
-                    beams.Add(bar);
-                    double z = bar.StartNode.Position().Z;
-                    beamHeights.Add(z);
-                    levelHeights.Add(Math.Round(z,0));
-                }
-            }
 
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            //Create new levels in RAM per unique z values
-            CreateLevels(levelHeights,IModel);
-            
-            // Cycle through floortypes, access appropriate story, place beams on those stories
-            IStories = IModel.GetStories();
+            //Get the stories in the model
+            IStories ramStories = IModel.GetStories();
 
-            for (int i = 0; i < IStories.GetCount(); i++)
+            //Cycle through bars, add bar to appropriate story.
+            foreach (Bar bar in bars)
             {
-                IStory = IStories.GetAt(i);
-                IFloorType = IStory.GetFloorType();
-                ILayoutBeams = IFloorType.GetLayoutBeams();
-                ILayoutColumns = IFloorType.GetLayoutColumns();
+                bool isBeam = Math.Abs(bar.Tangent(true).DotProduct(Vector.ZAxis)) < 0.5;
 
-
-                //Cycle through bars; if z of bar = the floor height, add it
-                for (int j = 0; j < beams.Count(); j++)
+                if (isBeam)
                 {
-                    
-                    Bar bar = beams[j];
+                    IStory barStory = bar.GetStory(StructuralUsage1D.Beam, ramStories);
+
 
                     double xStart = bar.StartNode.Position().X;
                     double yStart = bar.StartNode.Position().Y;
+                    double zStart = bar.StartNode.Position().Z - barStory.dElevation;
                     double xEnd = bar.EndNode.Position().X;
                     double yEnd = bar.EndNode.Position().Y;
-                    double zStart = Math.Round(bar.StartNode.Position().Z,0);
-                    double zEnd = Math.Round(bar.EndNode.Position().Z,0);
+                    double zEnd = bar.EndNode.Position().Z - barStory.dElevation;
 
-                    //If bar is on level, add it during that iteration of the loop 
-                    if (zStart == IStory.dElevation)
-                    {
-                        ILayoutBeam ILayoutBeam = ILayoutBeams.Add(EMATERIALTYPES.ESteelMat, xStart, yStart, 0, xEnd, yEnd, 0); //toDelete was 5
-                        IBeams beamsOnStory = IStory.GetBeams();
-                        IBeam beam = beamsOnStory.Get(ILayoutBeam.lUID);
-                        ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
-                        ILayoutBeam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
-                    }
+                    IFloorType ramFloorType = barStory.GetFloorType();
+                    ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
+                    ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, zStart, xEnd, yEnd, zEnd);
+
+                    IBeams beamsOnStory = barStory.GetBeams();
+                    IBeam beam = beamsOnStory.Get(ramBeam.lUID);
+                    double sx;
+                    double sy;
+                    double sz;
+                    double ex;
+                    double ey;
+                    double ez;
+                    SCoordinate outStart = new SCoordinate();
+                    SCoordinate outEnd = new SCoordinate();
+
+                    beam.strSectionLabel = bar.SectionProperty.Name;
+                    beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                    beam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref outStart, ref outEnd);
                 }
-
-                //Cycle through columns; if z of column = the floor height, add it
-                for (int j = 0; j < columns.Count(); j++)
+                else
                 {
-                    //If bar is on level, add it during that iteration of the loop 
-                    Bar bar = columns[j];
-                    
+                    IStory barStory = bar.GetStory(StructuralUsage1D.Column, ramStories);
 
-                    double xStart = bar.StartNode.Position().X;
-                    double yStart = bar.StartNode.Position().Y;
-                    double zStart = Math.Round(bar.StartNode.Position().Z,0);
-                    double xEnd = bar.EndNode.Position().X;
-                    double yEnd = bar.EndNode.Position().Y;
-                    double zEnd = Math.Round(bar.EndNode.Position().Z,0);
+                    List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
+                    colNodes.OrderBy(x => x.Position().Z);
 
-                    if (zEnd == IStory.dElevation)
+                    double xStart = colNodes[0].Position().X;
+                    double yStart = colNodes[0].Position().Y;
+                    double zStart = colNodes[0].Position().Z - barStory.dElevation + barStory.dFlrHeight;
+                    double xEnd = colNodes[1].Position().X;
+                    double yEnd = colNodes[1].Position().Y;
+                    double zEnd = colNodes[1].Position().Z - barStory.dElevation;
+
+                    IFloorType ramFloorType = barStory.GetFloorType();
+                    ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
+                    ILayoutColumn ramColumn;
+
+                    if (bar.IsVertical())
                     {
-                        IFloorType = IStory.GetFloorType();
-                        ILayoutColumns = IFloorType.GetLayoutColumns();
-                        ILayoutColumn ILayoutColumn;
-
-                        if (Engine.Structure.Query.IsVertical(bar))
-                        {
-                            //Failing if no section property is provided
-                            ILayoutColumn = ILayoutColumns.Add(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, 0, 0);
-                        }
-                        else
-                        {
-                            ILayoutColumn = ILayoutColumns.Add2(Engine.RAM.Convert.ToRAM(bar.SectionProperty.Material), xEnd, yEnd, xStart, yStart, 0, 0);
-                        }
-                        //Set column properties
-                        IColumns colsOnStory = IStory.GetColumns();
-                        IColumn column = colsOnStory.Get(ILayoutColumn.lUID);
-                        column.strSectionLabel = bar.SectionProperty.Name;
-                        column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
-
+                        //Failing if no section property is provided
+                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, zStart, zEnd);
                     }
-                }
+                    else
+                    {
+                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xStart, yStart, xEnd, yEnd, zStart, zEnd);
+                    }
 
+                    //Set column properties
+                    IColumns colsOnStory = barStory.GetColumns();
+                    IColumn column = colsOnStory.Get(ramColumn.lUID);
+                    column.strSectionLabel = bar.SectionProperty.Name;
+                    column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                }
             }
 
             //Save file
@@ -220,6 +170,7 @@ namespace BH.Adapter.RAM
         }
 
         /***************************************************/
+
 
         private bool CreateCollection(IEnumerable<ISectionProperty> sectionProperties)
         {
@@ -550,18 +501,7 @@ namespace BH.Adapter.RAM
             {
                 Level level = sortedBhomLevels.ElementAt(i);
 
-                double height;
-                // Ground floor ht = 0 for RAM
-                if (i == 0)
-                {
-                    height = level.Elevation;
-                }
-                else
-                {
-                    Level lastLevel = sortedBhomLevels.ElementAt(i - 1);
-                    height = level.Elevation - lastLevel.Elevation;
-                }
-
+                // Get elevations and skip if level elevation already in RAM
                 ramStories = IModel.GetStories();
                 List<double> ramElevs = new List<double>();
                 for (int j = 0; j < ramStories.GetCount(); j++)
@@ -569,48 +509,66 @@ namespace BH.Adapter.RAM
                     ramElevs.Add(ramStories.GetAt(j).dElevation);
                 }
 
-                int newIndex;
-                if (ramElevs.FindIndex(x => x > level.Elevation) == -1)
+                if (ramElevs.Contains(level.Elevation) != true)
                 {
-                    newIndex = ramElevs.Count();
-                }
-                else
-                {
-                    newIndex = ramElevs.FindIndex(x => x > level.Elevation);
-                }
-
-                List<string> ramFloorTypeNames = new List<string>();
-                ramFloorTypes = IModel.GetFloorTypes();
-                Boolean floorTypeExists = false;
-                for (int j = 0; j < ramFloorTypes.GetCount(); j++)
-                {
-                    if (ramFloorTypes.GetAt(j).strLabel == level.Name)
+                    double height;
+                    // Ground floor ht = 0 for RAM
+                    if (i == 0)
                     {
-                        ramFloorType = ramFloorTypes.GetAt(j);
-                        floorTypeExists = true;
+                        height = level.Elevation;
                     }
+                    else
+                    {
+                        Level lastLevel = sortedBhomLevels.ElementAt(i - 1);
+                        height = level.Elevation - lastLevel.Elevation;
+                    }
+
+                    int newIndex;
+                    if (ramElevs.FindIndex(x => x > level.Elevation) == -1)
+                    {
+                        newIndex = ramElevs.Count();
+                    }
+                    else
+                    {
+                        newIndex = ramElevs.FindIndex(x => x > level.Elevation);
+                    }
+
+                    List<string> ramFloorTypeNames = new List<string>();
+                    ramFloorTypes = IModel.GetFloorTypes();
+                    Boolean floorTypeExists = false;
+                    for (int j = 0; j < ramFloorTypes.GetCount(); j++)
+                    {
+                        if (ramFloorTypes.GetAt(j).strLabel == level.Name)
+                        {
+                            ramFloorType = ramFloorTypes.GetAt(j);
+                            floorTypeExists = true;
+                        }
+                    }
+
+                    if (floorTypeExists == false)
+                    {
+                        ramFloorType = ramFloorTypes.Add(level.Name);
+                    }
+
+                    // Modify story above if not top floor
+                    if (newIndex < ramStories.GetCount())
+                    {
+                        IStory ramStoryAbove = ramStories.GetAt(newIndex);
+                        ramStoryAbove.dFlrHeight = ramStoryAbove.dElevation - level.Elevation;
+                    }
+                    if (newIndex > 0 && ramStories.GetCount() > 0)
+                    {
+                        IStory ramStoryBelow = ramStories.GetAt(newIndex - 1);
+                        height = level.Elevation - ramStoryBelow.dElevation;
+
+                    }
+
+                    // Insert story at index
+                    ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
                 }
 
-                if (floorTypeExists == false)
-                {
-                    ramFloorType = ramFloorTypes.Add(level.Name);
-                }
 
-                // Modify story above if not top floor
-                if (newIndex < ramStories.GetCount())
-                {
-                    IStory ramStoryAbove = ramStories.GetAt(newIndex);
-                    ramStoryAbove.dFlrHeight = ramStoryAbove.dElevation - level.Elevation;
-                }
-                if (newIndex > 0 && ramStories.GetCount() > 0)
-                {
-                    IStory ramStoryBelow = ramStories.GetAt(newIndex-1);
-                    height = level.Elevation - ramStoryBelow.dElevation;
-
-                }
-
-                // Insert story at index
-                ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
+                
             }
 
             //Save file
