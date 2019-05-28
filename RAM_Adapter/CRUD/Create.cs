@@ -171,7 +171,6 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-
         private bool CreateCollection(IEnumerable<ISectionProperty> sectionProperties)
         {
             //Code for creating a collection of section properties in the software
@@ -228,9 +227,9 @@ namespace BH.Adapter.RAM
             List<Panel> panels = bhomPanels.ToList();
 
             // Register Floor types
-            IFloorType IFloorType;
-            IStories IStories;
-            IStory IStory;
+            IFloorType ramFloorType;
+            IStories ramStories;
+            IStory ramStory;
 
             //Create wall and floor lists with individual heights
             List<Panel> wallPanels = new List<Panel>();
@@ -241,22 +240,10 @@ namespace BH.Adapter.RAM
             // Split walls and floors and get all elevations
             foreach (Panel panel in panels)
             {
-                List<double> thisPanelHeights = new List<double>();
-                
-                // Get heights of wall and floor corners to create levels
-                PolyCurve panelOutline = Engine.Structure.Query.Outline(panel);
-                panelPoints = panelOutline.DiscontinuityPoints();
+                double panelNormZ = panel.Normal().Z;
 
-                foreach (Point pt in panelPoints)
-                {
-                    panelHeights.Add(Math.Round(pt.Z, 0));
-                    thisPanelHeights.Add(Math.Round(pt.Z, 0));
-                }
-
-                double panelHeight = thisPanelHeights.Max() - thisPanelHeights.Min();
-                
                 //Split walls and floors
-                if (panelHeight>0.1)
+                if (Math.Abs(panelNormZ)<0.707) // check normal against 45 degree slope
                 {
                     wallPanels.Add(panel);
                 }
@@ -268,102 +255,85 @@ namespace BH.Adapter.RAM
 
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            CreateLevels(panelHeights, IModel);
-
-            IStories = IModel.GetStories();
+            ramStories = ramModel.GetStories();
 
             //Get concrete deck properties
-            IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
+            IConcSlabProps ramConcSlabProps = ramModel.GetConcreteSlabProps();
 
-            // Cycle through floortypes, access appropriate story, place panels on those stories
-            for (int i = 0; i < IStories.GetCount(); i++)
+            // Cycle through floors and create on story
+            foreach (Panel panel in floors)
             {
-                IStory = IStories.GetAt(i);
-                IFloorType = IStory.GetFloorType();
-                //Cycle through floors; if z of panel = the floor height, add it
-                for (int j = 0; j < floors.Count(); j++)
+                ramStory = panel.GetStory(ramStories);
+                ramFloorType = ramStory.GetFloorType();
+
+                // Set slab edges on FloorType in RAM for external edges
+                ISlabEdges ramSlabEdges = ramFloorType.GetAllSlabEdges();
+
+                //Create list of external and internal panel outlines
+                List<PolyCurve> panelOutlines = new List<PolyCurve>();
+
+                // Get external and internal adges of floor panel
+                PolyCurve outlineExternal = panel.Outline();
+                panelOutlines.Add(outlineExternal);
+                List<Opening> panelOpenings = panel.Openings;
+
+                foreach (Opening opening in panelOpenings)
                 {
-                    Panel floor = floors[j];
+                    PolyCurve outlineOpening = opening.Outline();
+                    panelOutlines.Add(outlineOpening);
+                }
 
-                    // Get coords of corner points of floor outline to check if floor elevation = panel elevation
-                    List<Point> ctrlPointsCheck = new List<Point>();
-                    ctrlPointsCheck = BH.Engine.Structure.Query.ControlPoints(floor, true);
+                Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
 
-                    // If on level, add deck to IDecks for that level
-                    if (Math.Round(ctrlPointsCheck[0].Z,0) == IStory.dElevation)
+                foreach (PolyCurve outline in panelOutlines)
+                {
+                    // RAM requires edges clockwise, flip if counterclockwise
+                    PolyCurve cwOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
+
+                    List<ICurve> edgeCrvs = cwOutline.Curves;
+
+                    foreach (ICurve crv in edgeCrvs)
                     {
-                        //Create list of external and internal panel outlines
-                        List<PolyCurve> panelOutlines = new List<PolyCurve>();
-
-                        // Get external and internal adges of floor panel
-                        PolyCurve outlineExternal = floor.Outline();
-                        panelOutlines.Add(outlineExternal);
-                        List<Opening> panelOpenings = floor.Openings;
-
-                        foreach (Opening opening in panelOpenings)
-                        {
-                            PolyCurve outlineOpening = opening.Outline();
-                            panelOutlines.Add(outlineOpening);
-                        }
-
-                        // Set slab edges on FloorType in RAM for external edges
-                        ISlabEdges ISlabEdges = IFloorType.GetAllSlabEdges();
-                        Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
-
-                        foreach (PolyCurve outline in panelOutlines)
-                        {
-                            // RAM requires edges clockwise, flip if counterclockwise
-                            PolyCurve cwOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
-
-                            List<ICurve> edgeCrvs = cwOutline.Curves;
-
-                            foreach (ICurve crv in edgeCrvs)
-                            {
-                                Point startPt = crv.IStartPoint();
-                                Point endPt = crv.IEndPoint();
-                                ISlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
-                            }
-                        }
-
-
-                        //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
-
-                        //IDecks IDecks = IFloorType.GetDecks();
-                        //IDeck IDeck = null;
-
-                        //// Default panel properties to apply to model
-                        //string deckName = "Default RAM_Toolkit"; //pull deck name from decktable
-                        //double thickness = 8;
-                        //double selfweight = 150;
-                        //IConcSlabProp = IConcSlabProps.Add(deckName, thickness, selfweight);
-                        //IDeck = IDecks.Add(IConcSlabProp.lUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
-                        //IPoints IPoints = IDeck.GetPoints();
-
-                        //// Create list of SCoordinates for floor outlines
-                        //List<SCoordinate> cornersExt = new List<SCoordinate>();
-
-                        //foreach (Point point in ctrlPointsExternal)
-                        //{
-                        //    SCoordinate cornerExt = BH.Engine.RAM.Convert.ToRAM(point);
-                        //    cornersExt.Add(corner);
-                        //}
-
-                        //for (int k = 0; k < cornersExt.Count; k++)
-                        //{
-                        //    IPoints.Delete(k);
-                        //    IPoints.InsertAt(k, cornersExt[k]);
-                        //}
-
+                        Point startPt = crv.IStartPoint();
+                        Point endPt = crv.IEndPoint();
+                        ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
                     }
                 }
 
-                //Cycle through walls; if top of wall is at floor height add wall to FloorType
-                for (int j = 0; j < wallPanels.Count(); j++)
-                {
 
-                    Panel wallPanel = wallPanels[j];
+                //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
+
+                //IDecks IDecks = IFloorType.GetDecks();
+                //IDeck IDeck = null;
+
+                //// Default panel properties to apply to model
+                //string deckName = "Default RAM_Toolkit"; //pull deck name from decktable
+                //double thickness = 8;
+                //double selfweight = 150;
+                //IConcSlabProp = IConcSlabProps.Add(deckName, thickness, selfweight);
+                //IDeck = IDecks.Add(IConcSlabProp.lUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
+                //IPoints IPoints = IDeck.GetPoints();
+
+                //// Create list of SCoordinates for floor outlines
+                //List<SCoordinate> cornersExt = new List<SCoordinate>();
+
+                //foreach (Point point in ctrlPointsExternal)
+                //{
+                //    SCoordinate cornerExt = BH.Engine.RAM.Convert.ToRAM(point);
+                //    cornersExt.Add(corner);
+                //}
+
+                //for (int k = 0; k < cornersExt.Count; k++)
+                //{
+                //    IPoints.Delete(k);
+                //    IPoints.InsertAt(k, cornersExt[k]);
+                //}
+
+                //Cycle through walls; if wall crosses level place at level
+                foreach (Panel wallPanel in wallPanels)
+                {
 
                     // Default Thickness for now
                     double thickness = 6;
@@ -374,13 +344,19 @@ namespace BH.Adapter.RAM
                     Point wallMin = wallBounds.Min;
                     Point wallMax = wallBounds.Max;
 
-                    // If wall crosses level, add wall to ILayoutWalls for that level
-                    if (Math.Round(wallMax.Z, 0) >= IStory.dElevation && Math.Round(wallMin.Z, 0) <= IStory.dElevation)
+                    for (int i = 0; i < ramStories.GetCount(); i++)
                     {
-                        //Get ILayoutWalls of FloorType
-                        ILayoutWalls ILayoutWalls = IFloorType.GetLayoutWalls();
+                        ramStory = ramStories.GetAt(i);
+                        // If wall crosses level, add wall to ILayoutWalls for that level
+                        if (Math.Round(wallMax.Z, 0) >= ramStory.dElevation && Math.Round(wallMin.Z, 0) < ramStory.dElevation)
+                        {
+                            ramFloorType = ramStory.GetFloorType();
+                            //Get ILayoutWalls of FloorType
+                            ILayoutWalls ramLayoutWalls = ramFloorType.GetLayoutWalls();
 
-                        ILayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
+                            ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
+                        }
+
                     }
                 }
             }

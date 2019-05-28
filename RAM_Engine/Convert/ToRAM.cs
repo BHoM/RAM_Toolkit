@@ -27,6 +27,7 @@ using BH.oM.Structure.Elements;
 using BH.oM.Geometry;
 using BH.oM.Structure.MaterialFragments;
 using BH.Engine.Structure;
+using BH.Engine.Geometry;
 using RAMDATAACCESSLib;
 
 
@@ -134,6 +135,37 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
-    }
+        public static IStory GetStory(this Panel panel, IStories ramStories)
+        {
+            double elev;
+
+            List<double> panelHeights = new List<double>();
+            List<Point> panelPoints = new List<Point>();
+            
+            // Get heights of wall and floor corners to create levels
+            PolyCurve panelOutline = Engine.Structure.Query.Outline(panel);
+            panelPoints = panelOutline.DiscontinuityPoints();
+
+            foreach (Point pt in panelPoints)
+            {
+                panelHeights.Add(Math.Round(pt.Z, 0));
+            }
+
+            // Get elevation of panel per max elevation
+            elev = panelHeights.Max();
+
+            //There must be a better way to iterate over IStories
+            List<IStory> storeys = new List<IStory>();
+            int numStories = ramStories.GetCount();
+            for (int i = 0; i < numStories; i++)
+            {
+                storeys.Add(ramStories.GetAt(i));
+            }
+            return storeys.OrderBy(x => Math.Abs(x.dElevation - elev)).First();
+        }
+
+        /***************************************************/
+
+}
 
 }
