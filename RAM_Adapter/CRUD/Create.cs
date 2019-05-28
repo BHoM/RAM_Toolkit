@@ -115,7 +115,7 @@ namespace BH.Adapter.RAM
 
                 IFloorType ramFloorType = barStory.GetFloorType();
                 ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
-                ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0);
+                ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
 
                 IBeams beamsOnStory = barStory.GetBeams();
                 IBeam beam = beamsOnStory.Get(ramBeam.lUID);
@@ -146,11 +146,11 @@ namespace BH.Adapter.RAM
                 if (bar.IsVertical())
                 {
                     //Failing if no section property is provided
-                    ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, zStart, zEnd);
+                    ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
                 }
                 else
                 {
-                    ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xStart, yStart, xEnd, yEnd, zStart, zEnd);
+                    ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xStart, yStart, xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
                 }
 
                 //Set column properties
