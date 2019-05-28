@@ -134,10 +134,10 @@ namespace BH.Adapter.RAM
 
                 double xStart = colNodes[0].Position().X;
                 double yStart = colNodes[0].Position().Y;
-                double zStart = colNodes[0].Position().Z - barStory.dElevation + barStory.dFlrHeight;
+                double zStart = colNodes[0].Position().Z - barStory.dElevation;
                 double xEnd = colNodes[1].Position().X;
                 double yEnd = colNodes[1].Position().Y;
-                double zEnd = colNodes[1].Position().Z - barStory.dElevation;
+                double zEnd = colNodes[1].Position().Z - barStory.dElevation + barStory.dFlrHeight;
 
                 IFloorType ramFloorType = barStory.GetFloorType();
                 ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
