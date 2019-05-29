@@ -301,7 +301,7 @@ namespace BH.Adapter.RAM
                         ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
                     }
                 }
-
+            }
 
                 //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
 
@@ -355,8 +355,6 @@ namespace BH.Adapter.RAM
                             ILayoutWalls ramLayoutWalls = ramFloorType.GetLayoutWalls();
 
                             ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
-                        }
-
                     }
                 }
             }
