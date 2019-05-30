@@ -56,15 +56,10 @@ namespace BH.Adapter.RAM
             // Create objects per type
             if (objects.Count() > 0)
             {
-                if (objects.First() is Level)
-                {
-                    success = CreateCollection(objects as IEnumerable<Level>);
-                }
+                success = CreateCollection(objects as IEnumerable<Level>);
 
-                else
-                {
-                    success = CreateCollection(objects as dynamic);
-                }
+                success = CreateCollection(objects as dynamic);
+
             }
             return success;             //Finally return if the creation was successful or not
 
@@ -451,104 +446,119 @@ namespace BH.Adapter.RAM
 
         private bool CreateCollection(IEnumerable<Level> bhomLevels)
         {
-
-            //sort levels by elevation
-            IOrderedEnumerable<Level> sortedBhomLevels = bhomLevels.OrderBy(o => o.Elevation);
-
-            //Check levels for negatives
-            if (sortedBhomLevels.First().Elevation < 0)
+            if (bhomLevels.Count() != 0)
             {
-                throw new Exception("Base level can not be negative for RAM. Please move model origin point to set all geometry and levels at 0 or greater.");
-            }
+                //sort levels by elevation
+                IOrderedEnumerable<Level> orderedBhomLevels = bhomLevels.OrderBy(o => o.Elevation);
+                List<Level> sortedBhomLevels = new List<Level>();
 
-            // Register Floor types
-            IFloorTypes ramFloorTypes;
-            IFloorType ramFloorType = null;
-            IStories ramStories;
-
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-            //Create floor type at each level
-            for (int i = 0; i < sortedBhomLevels.Count(); i++)
-            {
-                Level level = sortedBhomLevels.ElementAt(i);
-
-                // Get elevations and skip if level elevation already in RAM
-                ramStories = IModel.GetStories();
-                List<double> ramElevs = new List<double>();
-                for (int j = 0; j < ramStories.GetCount(); j++)
+                //Check levels for negatives
+                if (orderedBhomLevels.First().Elevation < 0)
                 {
-                    ramElevs.Add(ramStories.GetAt(j).dElevation);
+                    throw new Exception("Base level can not be negative for RAM. Please move model origin point to set all geometry and levels at 0 or greater.");
                 }
 
-                if (ramElevs.Contains(level.Elevation) != true)
+                //Check levels for base 0
+                if (orderedBhomLevels.First().Elevation == 0)
                 {
-                    double height;
-                    // Ground floor ht = 0 for RAM
-                    if (i == 0)
+                    sortedBhomLevels = orderedBhomLevels.Where(level => level.Elevation != 0).ToList();
+                }
+                else
+                {
+                    sortedBhomLevels = orderedBhomLevels.Where(level => level.Elevation != 0).ToList();
+                }
+
+                // Register Floor types
+                IFloorTypes ramFloorTypes;
+                IFloorType ramFloorType = null;
+                IStories ramStories;
+
+                //Access model
+                IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+                //Create floor type at each level
+                for (int i = 0; i < sortedBhomLevels.Count(); i++)
+                {
+                    Level level = sortedBhomLevels.ElementAt(i);
+
+                    // Get elevations and skip if level elevation already in RAM
+                    ramStories = IModel.GetStories();
+                    List<double> ramElevs = new List<double>();
+                    for (int j = 0; j < ramStories.GetCount(); j++)
                     {
-                        height = level.Elevation;
-                    }
-                    else
-                    {
-                        Level lastLevel = sortedBhomLevels.ElementAt(i - 1);
-                        height = level.Elevation - lastLevel.Elevation;
+                        ramElevs.Add(ramStories.GetAt(j).dElevation);
                     }
 
-                    int newIndex;
-                    if (ramElevs.FindIndex(x => x > level.Elevation) == -1)
+                    if (ramElevs.Contains(level.Elevation) != true)
                     {
-                        newIndex = ramElevs.Count();
-                    }
-                    else
-                    {
-                        newIndex = ramElevs.FindIndex(x => x > level.Elevation);
-                    }
-
-                    List<string> ramFloorTypeNames = new List<string>();
-                    ramFloorTypes = IModel.GetFloorTypes();
-                    Boolean floorTypeExists = false;
-                    for (int j = 0; j < ramFloorTypes.GetCount(); j++)
-                    {
-                        if (ramFloorTypes.GetAt(j).strLabel == level.Name)
+                        double height;
+                        // Ground floor ht = 0 for RAM
+                        if (i == 0)
                         {
-                            ramFloorType = ramFloorTypes.GetAt(j);
-                            floorTypeExists = true;
+                            height = level.Elevation;
                         }
+                        else
+                        {
+                            Level lastLevel = sortedBhomLevels.ElementAt(i - 1);
+                            height = level.Elevation - lastLevel.Elevation;
+                        }
+
+                        int newIndex;
+                        if (ramElevs.FindIndex(x => x > level.Elevation) == -1)
+                        {
+                            newIndex = ramElevs.Count();
+                        }
+                        else
+                        {
+                            newIndex = ramElevs.FindIndex(x => x > level.Elevation);
+                        }
+
+                        List<string> ramFloorTypeNames = new List<string>();
+                        ramFloorTypes = IModel.GetFloorTypes();
+                        Boolean floorTypeExists = false;
+                        for (int j = 0; j < ramFloorTypes.GetCount(); j++)
+                        {
+                            if (ramFloorTypes.GetAt(j).strLabel == level.Name)
+                            {
+                                ramFloorType = ramFloorTypes.GetAt(j);
+                                floorTypeExists = true;
+                            }
+                        }
+
+                        if (floorTypeExists == false)
+                        {
+                            ramFloorType = ramFloorTypes.Add(level.Name);
+                        }
+
+                        // Modify story above if not top floor
+                        if (newIndex < ramStories.GetCount())
+                        {
+                            IStory ramStoryAbove = ramStories.GetAt(newIndex);
+                            ramStoryAbove.dFlrHeight = ramStoryAbove.dElevation - level.Elevation;
+                        }
+                        if (newIndex > 0 && ramStories.GetCount() > 0)
+                        {
+                            IStory ramStoryBelow = ramStories.GetAt(newIndex - 1);
+                            height = level.Elevation - ramStoryBelow.dElevation;
+
+                        }
+
+                        // Insert story at index
+                        ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
                     }
 
-                    if (floorTypeExists == false)
-                    {
-                        ramFloorType = ramFloorTypes.Add(level.Name);
-                    }
 
-                    // Modify story above if not top floor
-                    if (newIndex < ramStories.GetCount())
-                    {
-                        IStory ramStoryAbove = ramStories.GetAt(newIndex);
-                        ramStoryAbove.dFlrHeight = ramStoryAbove.dElevation - level.Elevation;
-                    }
-                    if (newIndex > 0 && ramStories.GetCount() > 0)
-                    {
-                        IStory ramStoryBelow = ramStories.GetAt(newIndex - 1);
-                        height = level.Elevation - ramStoryBelow.dElevation;
 
-                    }
-
-                    // Insert story at index
-                    ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
                 }
 
+                //Save file
+                RAMDataAccIDBIO.SaveDatabase();
+                // Release main interface and delete user file
+                RAMDataAccIDBIO = null;
 
-                
             }
 
-            //Save file
-            RAMDataAccIDBIO.SaveDatabase();
-            // Release main interface and delete user file
-            RAMDataAccIDBIO = null;
             return true;
 
         }
