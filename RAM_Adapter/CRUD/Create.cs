@@ -56,7 +56,6 @@ namespace BH.Adapter.RAM
             // Create objects per type
             if (objects.Count() > 0)
             {
-                success = CreateCollection(objects as IEnumerable<Level>);
 
                 success = CreateCollection(objects as dynamic);
 
@@ -265,11 +264,12 @@ namespace BH.Adapter.RAM
 
                 // Set slab edges on FloorType in RAM for external edges
                 ISlabEdges ramSlabEdges = ramFloorType.GetAllSlabEdges();
+                ISlabEdges ramOpeningEdges = ramFloorType.GetAllSlabOpenings();
 
-                //Create list of external and internal panel outlines
+                // Get external and internal edges of floor panel
                 List<PolyCurve> panelOutlines = new List<PolyCurve>();
+                List<PolyCurve> openingOutlines = new List<PolyCurve>();
 
-                // Get external and internal adges of floor panel
                 PolyCurve outlineExternal = panel.Outline();
                 panelOutlines.Add(outlineExternal);
                 List<Opening> panelOpenings = panel.Openings;
@@ -277,7 +277,7 @@ namespace BH.Adapter.RAM
                 foreach (Opening opening in panelOpenings)
                 {
                     PolyCurve outlineOpening = opening.Outline();
-                    panelOutlines.Add(outlineOpening);
+                    openingOutlines.Add(outlineOpening);
                 }
 
                 Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
@@ -294,6 +294,21 @@ namespace BH.Adapter.RAM
                         Point startPt = crv.IStartPoint();
                         Point endPt = crv.IEndPoint();
                         ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
+                    }
+                }
+
+                foreach (PolyCurve outline in openingOutlines)
+                {
+                    // RAM requires edges clockwise, flip if counterclockwise
+                    PolyCurve cwOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
+
+                    List<ICurve> edgeCrvs = cwOutline.Curves;
+
+                    foreach (ICurve crv in edgeCrvs)
+                    {
+                        Point startPt = crv.IStartPoint();
+                        Point endPt = crv.IEndPoint();
+                        ramOpeningEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
                     }
                 }
             }
@@ -458,7 +473,7 @@ namespace BH.Adapter.RAM
                     throw new Exception("Base level can not be negative for RAM. Please move model origin point to set all geometry and levels at 0 or greater.");
                 }
 
-                //Check levels for base 0
+                //Check levels for base level = 0, remove if occurs
                 if (orderedBhomLevels.First().Elevation == 0)
                 {
                     sortedBhomLevels = orderedBhomLevels.Where(level => level.Elevation != 0).ToList();
