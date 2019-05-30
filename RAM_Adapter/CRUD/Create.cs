@@ -561,14 +561,14 @@ namespace BH.Adapter.RAM
 
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
 
             // Register GridSystems
-            IGridSystems IGridSystems = IModel.GetGridSystems();
+            IGridSystems ramGridSystems = ramModel.GetGridSystems();
 
             // Register FloorTypes
-            IFloorTypes myFloorTypes = IModel.GetFloorTypes();
+            IFloorTypes ramFloorTypes = ramModel.GetFloorTypes();
 
             // initializa a BhoM grid
             List<Grid> Grids = bhomGrid.ToList();
@@ -584,12 +584,12 @@ namespace BH.Adapter.RAM
             //create different names for the gridSystem based on if there are items in the list
             double gridSystemRotation = 0;
             string gridSystemLabel = "";
-            IGridSystem IGridSystemXY = null;
-            IGridSystem IGridSystemRad = null;
-            IGridSystem IGridSystemSk = null;
-            IModelGrids IModelGridsXY = null;
-            IModelGrids IModelGridsRad = null;
-            IModelGrids IModelGridsSk = null;
+            IGridSystem ramGridSystemXY = null;
+            IGridSystem ramGridSystemRad = null;
+            IGridSystem ramGridSystemSk = null;
+            IModelGrids ramModelGridsXY = null;
+            IModelGrids ramModelGridsRad = null;
+            IModelGrids ramModelGridsSk = null;
 
 
 
@@ -628,10 +628,10 @@ namespace BH.Adapter.RAM
             if (YGrids.Count() != 0 || XGrids.Count() != 0)
             {
                  gridSystemLabel = "XY_grid";
-                 IGridSystemXY = IGridSystems.Add(gridSystemLabel);
-                 IGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
-                 IGridSystemXY.dRotation = gridSystemRotation;
-                 IModelGridsXY = IGridSystemXY.GetGrids();
+                 ramGridSystemXY = ramGridSystems.Add(gridSystemLabel);
+                 ramGridSystemXY.eOrientationType = SGridSysType.eGridOrthogonal;
+                 ramGridSystemXY.dRotation = gridSystemRotation;
+                 ramModelGridsXY = ramGridSystemXY.GetGrids();
             }
 
 
@@ -641,22 +641,22 @@ namespace BH.Adapter.RAM
             //if (circGrids.Count() != 0)
             //{
             //    gridSystemLabel = "Radial_grid";
-            //    IGridSystemRad = IGridSystems.Add(gridSystemLabel);
-            //    IGridSystemRad.dXOffset = gridOffsetX;
-            //    IGridSystemRad.dYOffset = gridOffsetY;
-            //    IGridSystemRad.eOrientationType = SGridSysType.eGridRadial;
-            //    IGridSystemRad.dRotation = gridSystemRotation;
-            //    IModelGridsRad = IGridSystemRad.GetGrids();
+            //    ramGridSystemRad = ramGridSystems.Add(gridSystemLabel);
+            //    ramGridSystemRad.dXOffset = gridOffsetX;
+            //    ramGridSystemRad.dYOffset = gridOffsetY;
+            //    ramGridSystemRad.eOrientationType = SGridSysType.eGridRadial;
+            //    ramGridSystemRad.dRotation = gridSystemRotation;
+            //    ramModelGridsRad = ramGridSystemRad.GetGrids();
             //}
             //// Skewed grid
             //if (skewGrids.Count() != 0) {
             //    gridSystemLabel = "Skew_gird";
-            //    IGridSystemSk = IGridSystems.Add(gridSystemLabel);
-            //    IGridSystemSk.dXOffset = 0;
-            //    IGridSystemSk.dYOffset = 0;
-            //    IGridSystemSk.eOrientationType = SGridSysType.eGridSkewed;
-            //    IGridSystemSk.dRotation = gridSystemRotation;
-            //    IModelGridsSk = IGridSystemSk.GetGrids();
+            //    ramGridSystemSk = ramGridSystems.Add(gridSystemLabel);
+            //    ramGridSystemSk.dXOffset = 0;
+            //    ramGridSystemSk.dYOffset = 0;
+            //    ramGridSystemSk.eOrientationType = SGridSysType.eGridSkewed;
+            //    ramGridSystemSk.dRotation = gridSystemRotation;
+            //    ramModelGridsSk = ramGridSystemSk.GetGrids();
 
             //}
 
@@ -678,61 +678,46 @@ namespace BH.Adapter.RAM
                 if (gridX < minX)
                     minX = gridX;
             }
-            IGridSystemXY.dXOffset = minX;
-            IGridSystemXY.dYOffset = minY;
+            ramGridSystemXY.dXOffset = minX;
+            ramGridSystemXY.dYOffset = minY;
 
 
             // Create Grids in GridSystem
             foreach (Grid XGrid in XGrids)
             {
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(XGrid.Curve as dynamic, 10);
-                IModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y-minY);
+                ramModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y-minY);
             }
 
             foreach (Grid YGrid in YGrids)
             {
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(YGrid.Curve as dynamic, 10);
-                IModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X-minX);
+                ramModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X-minX);
             }
 
             foreach (Grid cGrid in circGrids)
             {
-
-                IModelGridsRad.Add(cGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y);
                 // TODO: add code to implement circular grids
                 // Create GridSystem in RAM for each unique centerpt of circGrids  
-
             }
 
             foreach (Grid skGrid in skewGrids)
             {
                 // TODO: add code to implement skewed grids
                 // Create GridSystem in RAM for each unique angle of skewGrids
-
             }
 
             //get the ID of the gridsystem
-            int gridSystemID = IGridSystemXY.lUID;
+            int gridSystemID = ramGridSystemXY.lUID;
 
-
-            //TODO: Assign grid system to all floor types
-            //Create a default floor type and assign the newly created gridsystem
-            //string defFloorTypeName = "Default_floorType";
-            //IFloorType myFloorType = myFloorTypes.Add(defFloorTypeName);
-            //IStories myStories = IModel.GetStories();
-
-
-            ////Cycle through floortypes, access the existing floortype/story, place grids on those stories
-            //for (int i = 0; i < myFloorTypes.GetCount(); i++)
-            //    {
-            //        myFloorType = myFloorTypes.GetAt(i);
-            //        IStory myStory= myStories.GetAt(i);
-            //        DAArray gsID = myFloorType.GetGridSystemIDArray();
-            //        gsID.Add(IGridSystemXY.lUID, 0);
-            //        myFloorType.SetGridSystemIDArray(gsID);
-            //    }
-
-
+            //Cycle through floortypes, access the existing floortype/story, place grids on those stories
+            for (int i = 0; i < ramFloorTypes.GetCount(); i++)
+            {
+                IFloorType ramFloorType = ramFloorTypes.GetAt(i);
+                DAArray gsID = ramFloorType.GetGridSystemIDArray();
+                gsID.Add(ramGridSystemXY.lUID, 0);
+                ramFloorType.SetGridSystemIDArray(gsID);
+            }
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
