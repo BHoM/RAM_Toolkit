@@ -271,7 +271,6 @@ namespace BH.Adapter.RAM
                 List<PolyCurve> openingOutlines = new List<PolyCurve>();
 
                 PolyCurve outlineExternal = panel.Outline();
-                panelOutlines.Add(outlineExternal);
                 List<Opening> panelOpenings = panel.Openings;
 
                 foreach (Opening opening in panelOpenings)
@@ -282,67 +281,67 @@ namespace BH.Adapter.RAM
 
                 Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
 
-                foreach (PolyCurve outline in panelOutlines)
+                // RAM requires edges clockwise, flip if counterclockwise
+                PolyCurve cwOutline = (outlineExternal.IsClockwise(zDown) == false) ? outlineExternal.Flip() : outlineExternal;
+
+                List<ICurve> edgeCrvs = cwOutline.Curves;
+
+                foreach (ICurve crv in edgeCrvs)
                 {
-                    // RAM requires edges clockwise, flip if counterclockwise
-                    PolyCurve cwOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
-
-                    List<ICurve> edgeCrvs = cwOutline.Curves;
-
-                    foreach (ICurve crv in edgeCrvs)
-                    {
-                        Point startPt = crv.IStartPoint();
-                        Point endPt = crv.IEndPoint();
-                        ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
-                    }
+                    Point startPt = crv.IStartPoint();
+                    Point endPt = crv.IEndPoint();
+                    ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
                 }
 
                 foreach (PolyCurve outline in openingOutlines)
                 {
                     // RAM requires edges clockwise, flip if counterclockwise
-                    PolyCurve cwOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
+                    PolyCurve cwOpenOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
 
-                    List<ICurve> edgeCrvs = cwOutline.Curves;
+                    List<ICurve> openEdgeCrvs = cwOpenOutline.Curves;
 
-                    foreach (ICurve crv in edgeCrvs)
+                    foreach (ICurve crv in openEdgeCrvs)
                     {
                         Point startPt = crv.IStartPoint();
                         Point endPt = crv.IEndPoint();
                         ramOpeningEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
                     }
                 }
-            }
+
 
                 //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
 
-                //IDecks IDecks = IFloorType.GetDecks();
-                //IDeck IDeck = null;
+                //IDecks ramDecks = ramFloorType.GetDecks();
+                //IDeck ramDeck = null;
 
                 //// Default panel properties to apply to model
-                //string deckName = "Default RAM_Toolkit"; //pull deck name from decktable
-                //double thickness = 8;
+                //string deckName = "Default RAM_Toolkit Deck"; //pull deck name from decktable
+                //double deckThk = 6.5;
                 //double selfweight = 150;
-                //IConcSlabProp = IConcSlabProps.Add(deckName, thickness, selfweight);
-                //IDeck = IDecks.Add(IConcSlabProp.lUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
-                //IPoints IPoints = IDeck.GetPoints();
+                //IConcSlabProp ramConcSlabProp = ramConcSlabProps.Add(deckName, deckThk, selfweight);
+                //List<Point> ctrlPoints = outlineExternal.ControlPoints();
+                //ramDeck = ramDecks.Add(ramConcSlabProp.lUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
+                //IPoints ramPoints = ramDeck.GetPoints();
 
                 //// Create list of SCoordinates for floor outlines
                 //List<SCoordinate> cornersExt = new List<SCoordinate>();
 
-                //foreach (Point point in ctrlPointsExternal)
+                //foreach (Point point in ctrlPoints)
                 //{
                 //    SCoordinate cornerExt = BH.Engine.RAM.Convert.ToRAM(point);
-                //    cornersExt.Add(corner);
+                //    cornersExt.Add(cornerExt);
                 //}
 
                 //for (int k = 0; k < cornersExt.Count; k++)
                 //{
-                //    IPoints.Delete(k);
-                //    IPoints.InsertAt(k, cornersExt[k]);
+                //    ramPoints.Delete(k);
+                //    ramPoints.InsertAt(k, cornersExt[k]);
                 //}
+            }
+            
 
-                //Cycle through walls; if wall crosses level place at level
-                foreach (Panel wallPanel in wallPanels)
+            //Cycle through walls; if wall crosses level place at level
+            foreach (Panel wallPanel in wallPanels)
                 {
 
                     // Default Thickness for now
