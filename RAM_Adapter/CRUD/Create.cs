@@ -43,8 +43,7 @@ namespace BH.Adapter.RAM
 {
     public partial class RAMAdapter
     {
-        private object get;
-
+      
         /***************************************************/
         /**** Adapter overload method                   ****/
         /***************************************************/
