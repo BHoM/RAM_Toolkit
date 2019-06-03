@@ -88,6 +88,7 @@
   <ItemGroup>
     <Compile Include="CRUD\Create.cs" />
     <Compile Include="CRUD\Delete.cs" />
+    <Compile Include="CRUD\Push.cs" />
     <Compile Include="CRUD\Read.cs" />
     <Compile Include="CRUD\UpdateObjects.cs" />
     <Compile Include="RAMAdapter.cs" />
