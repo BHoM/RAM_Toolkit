@@ -379,84 +379,6 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private bool CreateLevels(List<double> Elevations, IModel IModel)
-        {
-
-            Elevations.Sort();
-
-            List<double> levelHeights = Elevations.Distinct().ToList();
-
-            //RAM requires positive levels. Added logic allows for throwing negative level exception.
-
-            if (levelHeights[0] < 0)
-            {
-                throw new Exception("Base level can not be negative for RAM. Please move model origin point to set all geometry and levels at 0 or greater.");
-            }
-
-            // Register Floor types
-            IFloorTypes IFloorTypes;
-            IFloorType IFloorType;
-            IStories IStories;
-            IStory IStory;
-            List<double> levelHeightsInRam = new List<double>();
-            List<double> allUniqueLevels = new List<double>();
-
-            // Get all levels already in RAM
-            IStories = IModel.GetStories();
-            double storyCount = IStories.GetCount();
-            for (int i = 0; i < storyCount; i++)
-            {
-                IStory = IStories.GetAt(i);
-                double elev = IStory.dElevation;
-                levelHeightsInRam.Add(elev);
-            }
-
-            levelHeights.AddRange(levelHeightsInRam);
-            levelHeights.Sort();
-
-            List<double> sortedLevelHeights = levelHeights.Distinct().ToList();
-
-
-            //Create floor type at each level
-
-            for (int i = 0; i < sortedLevelHeights.Count(); i++)
-            {
-                string LevelName = "Level " + sortedLevelHeights[i].ToString();
-                string StoryName = "Story " + i.ToString();
-
-                // Find floor heights from z-elevations
-                double height;
-                // Ground floor ht = 0 for RAM
-                if (i == 0) { height = sortedLevelHeights[i]; }
-                else { height = sortedLevelHeights[i] - sortedLevelHeights[i - 1]; }
-
-                IStories = IModel.GetStories();
-
-                if (!levelHeightsInRam.Contains(sortedLevelHeights[i]))
-                {
-                    IFloorTypes = IModel.GetFloorTypes();
-                    IFloorType = IFloorTypes.Add(LevelName);
-
-                    // Insert story at index
-                    IStories.InsertAt(i,IFloorType.lUID, StoryName, height);
-                }
-                else
-                {
-                    //Set story and floor type data to sync with added levels
-                    IStory = IStories.GetAt(i);
-                    IStory.dFlrHeight = height;
-                    IStory.strLabel = StoryName;
-                    IFloorType = IStory.GetFloorType();
-                    IFloorType.strLabel = LevelName;
-                }
-                
-
-            }
-            return true;
-        }
-
-        /***************************************************/
-
         private bool CreateCollection(IEnumerable<Level> bhomLevels)
         {
             if (bhomLevels.Count() != 0)
@@ -560,8 +482,6 @@ namespace BH.Adapter.RAM
                         // Insert story at index
                         ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
                     }
-
-
 
                 }
 

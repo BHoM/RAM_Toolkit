@@ -29,6 +29,7 @@ using BH.oM.Base;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
+using BH.oM.Structure.Results;
 using BH.oM.Structure.Loads;
 using BH.oM.Common.Materials;
 using BH.oM.Structure.MaterialFragments;
@@ -64,6 +65,8 @@ namespace BH.Adapter.RAM
                 return ReadLoadCase(ids as dynamic);
             else if (type == typeof(Level))
                 return ReadLevel(ids as dynamic);
+            else if (type == typeof(NodeReaction))
+                return ReadNodeReaction(ids as dynamic);
             if (type == typeof(Grid))
                 return ReadGrid(ids as dynamic);
 
@@ -370,6 +373,59 @@ namespace BH.Adapter.RAM
             }
 
             return bhomLevels;
+        }
+
+        /***************************************************/
+
+        private List<NodeReaction> ReadNodeReaction(List<string> ids = null)
+        {
+            //Implement code for reading Node Reactions
+            List<NodeReaction> bhomNodeReactions = new List<NodeReaction>();
+
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            ILoadCases ramLoadCases = ramModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
+
+            //Get stories
+            IStories ramStories = ramModel.GetStories();
+            int numStories = ramStories.GetCount();
+            List<IWall> allRamWalls = new List<IWall>(); 
+
+            // Get all walls on each story
+            for (int i = 0; i < numStories; i++)
+            {
+                //Get Walls
+                IWalls ramWalls = ramStories.GetAt(i).GetWalls();
+                int numWalls = ramWalls.GetCount();
+
+                // Convert Walls
+                for (int j = 0; j < numWalls; j++)
+                {
+                    IWall ramWall = ramWalls.GetAt(j);
+                    allRamWalls.Add(ramWall);
+                }
+            }
+
+            // Adding node reactions for Walls per wall per loadcase
+            foreach (IWall wall in allRamWalls)
+            {
+
+                for (int i = 0; i < ramLoadCases.GetCount(); i++)
+                {
+                    //Get Loadcases
+                    ILoadCase ramLoadCase = ramLoadCases.GetAt(i);
+                    IPointLoads wallNodeForces = wall.GetNodeForcesAtEdge(EAnalysisResultType.RAMFrameResultType, ramLoadCase.lUID, EEdge.eBottomEdge);
+
+                    for (int j = 0; j < wallNodeForces.GetCount(); j++)
+                    {
+                        //Get Node Forces
+                        IPointLoad wallNodeForce = wallNodeForces.GetAt(j);
+                        NodeReaction bhomNodeReaction = wallNodeForce.ToBHoMObject(ramLoadCase);
+                        bhomNodeReactions.Add(bhomNodeReaction);
+                    }
+                }
+            }
+
+            return bhomNodeReactions;
         }
 
         /***************************************************/
