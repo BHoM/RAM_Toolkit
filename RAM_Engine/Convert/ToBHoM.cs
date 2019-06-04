@@ -33,6 +33,7 @@ using BH.oM.Structure.Loads;
 using BH.oM.Structure.Constraints;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.SectionProperties;
+using BH.oM.Structure.Results;
 using RAMDATAACCESSLib;
 
 namespace BH.Engine.RAM
@@ -548,7 +549,7 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
-        public static Panel ToBHoMObject(this IWall IWall)
+        public static Panel ToBHoMObject(this IWall ramWall)
         {
 
             //Find corner points of wall in RAM model
@@ -557,7 +558,7 @@ namespace BH.Engine.RAM
             SCoordinate BottomstartPt = new SCoordinate();
             SCoordinate BottomendPt = new SCoordinate();
 
-            IWall.GetEndCoordinates(ref TopstartPt, ref TopendPt, ref BottomstartPt, ref BottomendPt);
+            ramWall.GetEndCoordinates(ref TopstartPt, ref TopendPt, ref BottomstartPt, ref BottomendPt);
 
             // Create list of points
             List<Point> corners = new List<Point>();
@@ -572,7 +573,7 @@ namespace BH.Engine.RAM
             outline.ControlPoints = corners;
 
             // Create openings
-            IFinalWallOpenings IFinalWallOpenings = IWall.GetFinalOpenings();
+            IFinalWallOpenings IFinalWallOpenings = ramWall.GetFinalOpenings();
 
             //Create opening outlines
             List<ICurve> wallOpeningPLs = new List<ICurve>();
@@ -604,15 +605,15 @@ namespace BH.Engine.RAM
 
             //Extract properties
             List<string> CustomProps = new List<string>();
-            EMATERIALTYPES material = IWall.eMaterial;
+            EMATERIALTYPES material = ramWall.eMaterial;
 
             //Get wall section property
             ConstantThickness wall2DProp = new ConstantThickness();
             string wallLabel = "";
-            double wallThickness = IWall.dThickness;
+            double wallThickness = ramWall.dThickness;
             IMaterialFragment Material = null;
 
-            if (IWall.eMaterial == EMATERIALTYPES.EWallPropConcreteMat)
+            if (ramWall.eMaterial == EMATERIALTYPES.EWallPropConcreteMat)
             {
                 wallLabel = "Concrete " + wallThickness.ToString();
                 Material = Engine.Structure.Create.Concrete("Concrete");
@@ -627,10 +628,14 @@ namespace BH.Engine.RAM
             wall2DProp.Thickness = wallThickness;
             wall2DProp.PanelType = PanelType.Wall;
             wall2DProp.Material = Material;
-            bhomPanel.Property = wall2DProp;
 
+            bhomPanel.Property = wall2DProp;
             bhomPanel.Tags = tag;
-            bhomPanel.Name = IWall.lLabel.ToString();
+            bhomPanel.Name = ramWall.lLabel.ToString();
+
+            // Add custom data
+            bhomPanel.CustomData["lUID"] = ramWall.lUID;
+            bhomPanel.Tags.Add("Wall");
 
             return bhomPanel;
         }
@@ -775,6 +780,29 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
+        public static NodeReaction ToBHoMObject(this IPointLoad ramPointLoad, ILoadCase ramLoadCase)
+        {
+            SCoordinate ramPoint;
+            ramPointLoad.GetCoordinate(out ramPoint);
+
+            string ramPointID = ramPoint.dXLoc.ToString() + ", " + ramPoint.dYLoc.ToString() + ", " + ramPoint.dZLoc.ToString() + ", "; // no object id option for RAM nodes, id by coordinates instead
+            NodeReaction bhomNodeReaction = new NodeReaction
+            {
+                ResultCase = ramLoadCase.strLoadCaseGroupLabel + ramLoadCase.strTypeLabel,
+                ObjectId = ramPointID,
+                FX = ramPointLoad.dFx,
+                FY = ramPointLoad.dFy,
+                FZ = ramPointLoad.dFz,
+                MX = ramPointLoad.dMxx,
+                MY = ramPointLoad.dMyy,
+                MZ = ramPointLoad.dMzz
+            };
+
+            return bhomNodeReaction;
+        }
+
+        /***************************************************/
+
         public static Grid ToBHoMObject(this IModelGrid IModelGrid, IGridSystem IGridSystem, int counter)
         {
             Grid myGrid = new Grid();
@@ -914,7 +942,6 @@ namespace BH.Engine.RAM
         }
 
         /***************************************************/
-
 
     }
 }

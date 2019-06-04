@@ -25,17 +25,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Architecture.Elements;
-using BH.oM.Structure.Elements;
-using BH.oM.Structure.SectionProperties;
-using BH.oM.Structure.SurfaceProperties;
-using BH.oM.Structure.Constraints;
-using BH.oM.Structure.MaterialFragments;
-using RAMDATAACCESSLib;
-using System.IO;
-using BH.oM.Geometry;
-using BH.Engine.Geometry;
-using BH.Engine.Structure;
-using BH.Engine.RAM;
 using BH.oM.Base;
 
 namespace BH.Adapter.RAM
@@ -50,8 +39,8 @@ namespace BH.Adapter.RAM
         public override List<IObject> Push(IEnumerable<IObject> objects, string tag = "", Dictionary<string, object> config = null)
         {
             //Filter out levels for others
-            IEnumerable<IObject> levels = objects.Where(x => x is BH.oM.Architecture.Elements.Level);
-            IEnumerable<IObject> notLevels = objects.Where(x => !(x is BH.oM.Architecture.Elements.Level));
+            IEnumerable<IObject> levels = objects.Where(x => x is Level);
+            IEnumerable<IObject> notLevels = objects.Where(x => !(x is Level));
 
             //Add the levels to a new list. This is to ensure that they are first and therebe pushed before the other objects
             List<IObject> sortedObjects = new List<IObject>();
