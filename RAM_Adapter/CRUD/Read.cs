@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.Engine.RAM;
 using BH.oM.Base;
+using BH.oM.Common;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
@@ -65,14 +66,25 @@ namespace BH.Adapter.RAM
                 return ReadLoadCase(ids as dynamic);
             else if (type == typeof(Level))
                 return ReadLevel(ids as dynamic);
-            else if (type == typeof(NodeReaction))
-                return ReadNodeReaction(ids as dynamic);
-            if (type == typeof(Grid))
+            else if (type == typeof(Grid))
                 return ReadGrid(ids as dynamic);
 
 
             return null;
         }
+
+        /***************************************************/
+
+        protected override IEnumerable<IResult> ReadResults(Type type, IList ids = null, IList cases = null, int divisions = 5)
+        {
+
+            if (type == typeof(NodeReaction))
+                return ReadNodeReaction(ids as dynamic);
+
+            return null;
+        }
+
+        /***************************************************/
 
         /***************************************************/
         /**** Private specific read methods             ****/
@@ -383,8 +395,9 @@ namespace BH.Adapter.RAM
             List<NodeReaction> bhomNodeReactions = new List<NodeReaction>();
 
             IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            ILoadCases ramLoadCases = ramModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
+            IGravityLoads1 ramGravityLoads = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
 
+            ILoadCases ramLoadCases = ramModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
             //Get stories
             IStories ramStories = ramModel.GetStories();
             int numStories = ramStories.GetCount();
@@ -405,25 +418,56 @@ namespace BH.Adapter.RAM
                 }
             }
 
-            // Adding node reactions for Walls per wall per loadcase
+            // Adding node reactions per wall per gravity loads (point and line)
             foreach (IWall wall in allRamWalls)
             {
+                int ramWallID = wall.lUID;
+                int numLineLoads = 0;
+                int numPointLoads = 0;
 
-                for (int i = 0; i < ramLoadCases.GetCount(); i++)
+                double pdDist, pdDL, pdCDL, pdCLL, pdLLPosRed, pdLLNegRed, pdLLPosNonRed, pdLLNegNonRed, pdLLPosStorage, pdLLNegStorage,
+                pdLLPosRoof, pdLLNegRoof, pdPosPL, pdNegPL, pdAxDL, pdAxCDL, pdAxCLL, pdAxNedRefLL, pdAxPosRedLL, pdAxNegNonRedLL, pdAxPosNonRedLL,
+                pdAxNegStorageLL, pdAxPosStorageLL, pdAxNegRoofLL, pdAxPosRoofLL, pdAxNegPL, pdAxPosPL, pdPosLLRF, pdNegLLRF,
+                pdPosStorageLLRF, pdNegStorageLLRF, pdPosRoofLLRF, pdNegRoofLLRF;
+
+                pdDist = pdDL = pdCDL = pdCLL = pdLLPosRed = pdLLNegRed = pdLLPosNonRed = pdLLNegNonRed = pdLLPosStorage = pdLLNegStorage =
+                pdLLPosRoof = pdLLNegRoof = pdPosPL = pdNegPL = pdAxDL = pdAxCDL = pdAxCLL = pdAxNedRefLL = pdAxPosRedLL = pdAxNegNonRedLL = pdAxPosNonRedLL =
+                pdAxNegStorageLL = pdAxPosStorageLL = pdAxNegRoofLL = pdAxPosRoofLL = pdAxNegPL = pdAxPosPL = pdPosLLRF = pdNegLLRF =
+                pdPosStorageLLRF = pdNegStorageLLRF = pdPosRoofLLRF = pdNegRoofLLRF = 0;
+
+                EGRAVPTLOADSOURCE peLoadType = EGRAVPTLOADSOURCE.EPtLoadFromGravBmReact;
+
+                ramGravityLoads.GetNumWallLoads(ramWallID, ref numLineLoads, ref numPointLoads);
+
+                for (int i = 0; i < numPointLoads; i++)
                 {
-                    //Get Loadcases
-                    ILoadCase ramLoadCase = ramLoadCases.GetAt(i);
-                    IPointLoads wallNodeForces = wall.GetNodeForcesAtEdge(EAnalysisResultType.RAMFrameResultType, ramLoadCase.lUID, EEdge.eBottomEdge);
-
-                    for (int j = 0; j < wallNodeForces.GetCount(); j++)
-                    {
-                        //Get Node Forces
-                        IPointLoad wallNodeForce = wallNodeForces.GetAt(j);
-                        NodeReaction bhomNodeReaction = wallNodeForce.ToBHoMObject(ramLoadCase);
-                        bhomNodeReactions.Add(bhomNodeReaction);
-                    }
+                    ramGravityLoads.GetWallPointLoad2(ramWallID, i, ref pdDist, ref pdDL, ref pdCDL, ref pdCLL, ref pdLLPosRed, ref pdLLNegRed, ref pdLLPosNonRed, ref pdLLNegNonRed, ref pdLLPosStorage, ref pdLLNegStorage,
+                    ref pdLLPosRoof, ref pdLLNegRoof, ref pdPosPL, ref pdNegPL, ref pdAxDL, ref pdAxCDL, ref pdAxCLL, ref pdAxNedRefLL, ref pdAxPosRedLL, ref pdAxNegNonRedLL, ref pdAxPosNonRedLL,
+                    ref pdAxNegStorageLL, ref pdAxPosStorageLL, ref pdAxNegRoofLL, ref pdAxPosRoofLL, ref pdAxNegPL, ref pdAxPosPL, ref pdPosLLRF, ref pdNegLLRF,
+                    ref pdPosStorageLLRF, ref pdNegStorageLLRF, ref pdPosRoofLLRF, ref pdNegRoofLLRF, ref peLoadType);
                 }
+
+
             }
+
+            //// Adding node reactions per wall per loadcase, this is node reactions at btm of wall
+            //foreach (IWall wall in allRamWalls)
+            //{
+
+            //    for (int i = 0; i < ramLoadCases.GetCount(); i++)
+            //    {
+            //        //Get Loadcases
+            //        ILoadCase ramLoadCase = ramLoadCases.GetAt(i);
+            //        IPointLoads wallNodeForces = wall.GetNodeForcesAtEdge(EAnalysisResultType.RAMGravityResultType, ramLoadCase.lUID, EEdge.eBottomEdge);
+            //        for (int j = 0; j < wallNodeForces.GetCount(); j++)
+            //        {
+            //            //Get Node Forces
+            //            IPointLoad wallNodeForce = wallNodeForces.GetAt(j);
+            //            NodeReaction bhomNodeReaction = wallNodeForce.ToBHoMObject(ramLoadCase);
+            //            bhomNodeReactions.Add(bhomNodeReaction);
+            //        }
+            //    }
+            //}
 
             return bhomNodeReactions;
         }
