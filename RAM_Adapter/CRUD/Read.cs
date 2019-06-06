@@ -39,7 +39,6 @@ using System.IO;
 using BH.oM.Architecture.Elements;
 
 
-
 namespace BH.Adapter.RAM
 {
     public partial class RAMAdapter
@@ -391,6 +390,7 @@ namespace BH.Adapter.RAM
 
         private List<NodeReaction> ReadNodeReaction(List<string> ids = null)
         {
+
             //Implement code for reading Node Reactions
             List<NodeReaction> bhomNodeReactions = new List<NodeReaction>();
 
