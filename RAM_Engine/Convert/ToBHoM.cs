@@ -528,14 +528,14 @@ namespace BH.Engine.RAM
                 IConcSlabProp DeckProp = IConcSlabProps.Get(deckID);
                 deckThickness = DeckProp.dThickness;
                 deckLabel = DeckProp.strLabel;
-                Material = Engine.Structure.Create.Concrete("Concrete"); ; ;
+                Material = Engine.Structure.Create.Concrete("Concrete");
             }
             else if (type == EDeckType.eDeckType_NonComposite)
             {
                 INonCompDeckProp DeckProp = INonCompDeckProps.Get(deckID);
                 deckThickness = DeckProp.dEffectiveThickness;
                 deckLabel = DeckProp.strLabel;
-                Material = Engine.Structure.Create.Concrete("NonComposite"); ; ;
+                Material = Engine.Structure.Create.Concrete("NonComposite");
             }
 
             deck2DProp.Name = deckLabel;
@@ -543,6 +543,7 @@ namespace BH.Engine.RAM
             deck2DProp.PanelType = PanelType.Slab;
             deck2DProp.Material = Material;
             bhomPanel.Property = deck2DProp;
+            bhomPanel.CustomData["lUID"] = IDeck.lUID;
 
             return bhomPanel;
         }

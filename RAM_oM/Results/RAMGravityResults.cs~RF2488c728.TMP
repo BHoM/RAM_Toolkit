@@ -15,7 +15,7 @@ namespace BH.oM.Structure.Results
         /**** Properties                                ****/
         /***************************************************/
 
-        public int ObjectId { get; set; } = 0;
+        public double objectId { get; set; } = 0;
         public double dist { get; set; } = 0;
         public double DL { get; set; } = 0;
         public double RedLL { get; set; } = 0;
@@ -32,16 +32,14 @@ namespace BH.oM.Structure.Results
         /**** Properties                                ****/
         /***************************************************/
 
-        public int ObjectId { get; set; } = 0;
-        public double dist1 { get; set; } = 0;
-        public double dist2 { get; set; } = 0;
-        public double DL1 { get; set; } = 0;
-        public double DL2 { get; set; } = 0;
-        public double LL1 { get; set; } = 0;
-        public double LL2 { get; set; } = 0;
-        public double PL1 { get; set; } = 0;
-        public double PL2 { get; set; } = 0;
-        public string type { get; set; } = "";
+        public double objectId { get; set; } = 0;
+        public double distStart { get; set; } = 0;
+        public double distEnd { get; set; } = 0;
+        public double DL { get; set; } = 0;
+        public double RedLL { get; set; } = 0;
+        public double NonRLL { get; set; } = 0;
+        public double StorLL { get; set; } = 0;
+        public double RoofLL { get; set; } = 0;
 
         /***************************************************/
     }
