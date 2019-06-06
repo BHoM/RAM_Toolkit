@@ -67,7 +67,10 @@ namespace BH.Adapter.RAM
                 return ReadLevel(ids as dynamic);
             else if (type == typeof(Grid))
                 return ReadGrid(ids as dynamic);
-
+            else if (type == typeof(RAMPointGravityLoad))
+                return ReadPointGravityLoad(ids as dynamic);
+            else if (type == typeof(RAMLineGravityLoad))
+                return ReadLineGravityLoad(ids as dynamic);
 
             return null;
         }
@@ -388,35 +391,17 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private List<NodeReaction> ReadNodeReaction(List<string> ids = null)
+        private List<RAMPointGravityLoad> ReadPointGravityLoad(List<string> ids = null)
         {
 
-            //Implement code for reading Node Reactions
-            List<NodeReaction> bhomNodeReactions = new List<NodeReaction>();
+            //Implement code for reading Gravity Loads
+            List<RAMPointGravityLoad> bhomPtGravLoads = new List<RAMPointGravityLoad>();
 
             IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
             IGravityLoads1 ramGravityLoads = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
-
-            ILoadCases ramLoadCases = ramModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
-            //Get stories
-            IStories ramStories = ramModel.GetStories();
-            int numStories = ramStories.GetCount();
-            List<IWall> allRamWalls = new List<IWall>(); 
-
-            // Get all walls on each story
-            for (int i = 0; i < numStories; i++)
-            {
-                //Get Walls
-                IWalls ramWalls = ramStories.GetAt(i).GetWalls();
-                int numWalls = ramWalls.GetCount();
-
-                // Convert Walls
-                for (int j = 0; j < numWalls; j++)
-                {
-                    IWall ramWall = ramWalls.GetAt(j);
-                    allRamWalls.Add(ramWall);
-                }
-            }
+            
+            // Get all IWalls
+            List<IWall> allRamWalls = ReadRamWalls(ramModel);
 
             // Adding node reactions per wall per gravity loads (point and line)
             foreach (IWall wall in allRamWalls)
@@ -445,31 +430,139 @@ namespace BH.Adapter.RAM
                     ref pdLLPosRoof, ref pdLLNegRoof, ref pdPosPL, ref pdNegPL, ref pdAxDL, ref pdAxCDL, ref pdAxCLL, ref pdAxNedRefLL, ref pdAxPosRedLL, ref pdAxNegNonRedLL, ref pdAxPosNonRedLL,
                     ref pdAxNegStorageLL, ref pdAxPosStorageLL, ref pdAxNegRoofLL, ref pdAxPosRoofLL, ref pdAxNegPL, ref pdAxPosPL, ref pdPosLLRF, ref pdNegLLRF,
                     ref pdPosStorageLLRF, ref pdNegStorageLLRF, ref pdPosRoofLLRF, ref pdNegRoofLLRF, ref peLoadType);
+                    RAMPointGravityLoad bhomPtGravLoad = new RAMPointGravityLoad
+                    {
+                        ObjectId = wall.lUID,
+                        dist = pdDist,
+                        DL = pdDL,
+                        NonRLL = pdLLPosNonRed,
+                        RedLL = pdLLPosRed,
+                        RoofLL = pdLLPosRoof,
+                        StorLL = pdLLPosStorage
+                    };
+                    bhomPtGravLoads.Add(bhomPtGravLoad);
                 }
-
-
             }
 
-            //// Adding node reactions per wall per loadcase, this is node reactions at btm of wall
-            //foreach (IWall wall in allRamWalls)
-            //{
+            return bhomPtGravLoads;
+        }
 
-            //    for (int i = 0; i < ramLoadCases.GetCount(); i++)
-            //    {
-            //        //Get Loadcases
-            //        ILoadCase ramLoadCase = ramLoadCases.GetAt(i);
-            //        IPointLoads wallNodeForces = wall.GetNodeForcesAtEdge(EAnalysisResultType.RAMGravityResultType, ramLoadCase.lUID, EEdge.eBottomEdge);
-            //        for (int j = 0; j < wallNodeForces.GetCount(); j++)
-            //        {
-            //            //Get Node Forces
-            //            IPointLoad wallNodeForce = wallNodeForces.GetAt(j);
-            //            NodeReaction bhomNodeReaction = wallNodeForce.ToBHoMObject(ramLoadCase);
-            //            bhomNodeReactions.Add(bhomNodeReaction);
-            //        }
-            //    }
-            //}
+        /***************************************************/
+
+        private List<RAMLineGravityLoad> ReadLineGravityLoad(List<string> ids = null)
+        {
+
+            //Implement code for reading Gravity Loads
+            List<RAMLineGravityLoad> bhomLineGravLoads = new List<RAMLineGravityLoad>();
+
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IGravityLoads1 ramGravityLoads = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
+
+            // Get all IWalls
+            List<IWall> allRamWalls = ReadRamWalls(ramModel);
+
+            // Adding node reactions per wall per gravity loads (point and line)
+            foreach (IWall wall in allRamWalls)
+            {
+                int ramWallID = wall.lUID;
+                int numLineLoads = 0;
+                int numPointLoads = 0;
+
+                double pdDistL, pdDistR, pdDLL, pdDLR, pdCDLL, pdCDLR, pdLLL, pdLLR, pdPLL, pdPLR, pdCLLL, pdCLLR,
+                    pdAxDLL, pdAxDLR, AxCDLL, pdAxCDLR, pdAxCLLL, pdAxCLLR, pdAxLLL, pdAxLLR, pdAxPLL, pdAxPLR, pdRfactor;
+
+                pdDistL = pdDistR = pdDLL = pdDLR = pdCDLL = pdCDLR = pdLLL = pdLLR = pdPLL = pdPLR = pdCLLL = pdCLLR =
+                    pdAxDLL = pdAxDLR = AxCDLL = pdAxCDLR = pdAxCLLL = pdAxCLLR = pdAxLLL = pdAxLLR = pdAxPLL = pdAxPLR = pdRfactor = 0;
+
+                EGRAVLOADTYPE peLoadType = EGRAVLOADTYPE.ENonRedLoad;
+
+                ramGravityLoads.GetNumWallLoads(ramWallID, ref numLineLoads, ref numPointLoads);
+
+                for (int i = 0; i < numLineLoads; i++)
+                {
+                    ramGravityLoads.GetWallLineLoad2(ramWallID, i, ref pdDistL, ref pdDistR, ref pdDLL, ref pdDLR, ref pdCDLL, ref pdCDLR, ref pdLLL, ref pdLLR, ref pdPLL, ref pdPLR, ref pdCLLL, ref pdCLLR,
+                    ref pdAxDLL, ref pdAxDLR, ref AxCDLL, ref pdAxCDLR, ref pdAxCLLL, ref pdAxCLLR, ref pdAxLLL, ref pdAxLLR, ref pdAxPLL, ref pdAxPLR, ref peLoadType, ref pdRfactor);
+                    RAMLineGravityLoad bhomLineGravLoad = new RAMLineGravityLoad
+                    {
+                        ObjectId = wall.lUID,
+                        dist1 = pdDistL,
+                        dist2 = pdDistR,
+                        DL1 = pdDLL,
+                        DL2 = pdDLR,
+                        LL1 = pdLLL,
+                        LL2 = pdLLR,
+                        PL1 = pdPLL,
+                        PL2 = pdPLR,
+                        type = peLoadType.ToString()
+                    };
+                    bhomLineGravLoads.Add(bhomLineGravLoad);
+                }
+            }
+
+            return bhomLineGravLoads;
+        }
+
+        /***************************************************/
+
+        private List<NodeReaction> ReadNodeReaction(List<string> ids = null)
+        {
+
+            //Implement code for reading Node Reactions
+            List<NodeReaction> bhomNodeReactions = new List<NodeReaction>();
+
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            ILoadCases ramLoadCases = ramModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
+            //Get IWalls
+            List<IWall> allRamWalls = ReadRamWalls(ramModel);
+
+            // Adding node reactions per wall per loadcase, this is node reactions at btm of wall
+            foreach (IWall wall in allRamWalls)
+            {
+
+                for (int i = 0; i < ramLoadCases.GetCount(); i++)
+                {
+                    //Get Loadcases
+                    ILoadCase ramLoadCase = ramLoadCases.GetAt(i);
+                    IPointLoads wallNodeForces = wall.GetNodeForcesAtEdge(EAnalysisResultType.RAMGravityResultType, ramLoadCase.lUID, EEdge.eBottomEdge);
+                    for (int j = 0; j < wallNodeForces.GetCount(); j++)
+                    {
+                        //Get Node Forces
+                        IPointLoad wallNodeForce = wallNodeForces.GetAt(j);
+                        NodeReaction bhomNodeReaction = wallNodeForce.ToBHoMObject(ramLoadCase);
+                        bhomNodeReactions.Add(bhomNodeReaction);
+                    }
+                }
+            }
 
             return bhomNodeReactions;
+        }
+
+        /***************************************************/
+
+        private List<IWall> ReadRamWalls(IModel ramModel)
+        {
+            //Get stories
+            IStories ramStories = ramModel.GetStories();
+            int numStories = ramStories.GetCount();
+            List<IWall> allRamWalls = new List<IWall>();
+
+            // Get all walls on each story
+            for (int i = 0; i < numStories; i++)
+            {
+                //Get Walls
+                IWalls ramWalls = ramStories.GetAt(i).GetWalls();
+                int numWalls = ramWalls.GetCount();
+
+                // Convert Walls
+                for (int j = 0; j < numWalls; j++)
+                {
+                    IWall ramWall = ramWalls.GetAt(j);
+                    allRamWalls.Add(ramWall);
+                }
+            }
+
+            return allRamWalls;
         }
 
         /***************************************************/
