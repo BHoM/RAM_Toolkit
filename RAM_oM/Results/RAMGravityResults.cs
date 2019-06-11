@@ -22,6 +22,7 @@ namespace BH.oM.Structure.Results
         public double NonRLL { get; set; } = 0;
         public double StorLL { get; set; } = 0;
         public double RoofLL { get; set; } = 0;
+        public string type { get; set; } = "";
 
         /***************************************************/
     }

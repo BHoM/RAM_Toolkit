@@ -438,7 +438,8 @@ namespace BH.Adapter.RAM
                         NonRLL = pdLLPosNonRed,
                         RedLL = pdLLPosRed,
                         RoofLL = pdLLPosRoof,
-                        StorLL = pdLLPosStorage
+                        StorLL = pdLLPosStorage,
+                        type = peLoadType.ToString()
                     };
                     bhomPtGravLoads.Add(bhomPtGravLoad);
                 }
