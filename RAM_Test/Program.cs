@@ -4,7 +4,7 @@ using System.Linq;
 using BH.Adapter.FileAdapter;
 using BH.Adapter.RAM;
 using BH.oM.Architecture.Elements;
-using BH.oM.DataManipulation.Queries;
+using BH.oM.Data.Requests;
 using BH.oM.Structure.Elements;
 
 
@@ -19,9 +19,9 @@ namespace RAM_Test
             RAMAdapter app = new RAMAdapter(@"C:\Users\jtaylor\OneDrive - BuroHappold\Tools in Progress\BHoM Tests\RAM\RAM Copy Out 3.rss", true);
             FileAdapter doc = new FileAdapter("C:/Users/jtaylor/GitHub/RAM_Toolkit/RAM_Test", "Test_Structure", true);
 
-            FilterQuery levelQuery = new FilterQuery { Type = typeof(Level) };
-            FilterQuery barQuery = new FilterQuery { Type = typeof(Bar) };
-            FilterQuery panelQuery = new FilterQuery { Type = typeof(Panel) };
+            FilterRequest levelQuery = new FilterRequest { Type = typeof(Level) };
+            FilterRequest barQuery = new FilterRequest { Type = typeof(Bar) };
+            FilterRequest panelQuery = new FilterRequest { Type = typeof(Panel) };
 
             IEnumerable<object> levels = doc.Pull(levelQuery);
             IEnumerable<object> bars = doc.Pull(barQuery);
