@@ -137,16 +137,16 @@ namespace BH.Adapter.RAM
                 try
                 {
                     IStory barStory = bar.GetStory(StructuralUsage1D.Column, ramStories);
-
+                    
                     List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
-                    colNodes.OrderBy(x => x.Position().Z);
+                    colNodes.Sort((x, y) => x.Position.Z.CompareTo(y.Position.Z));
 
-                    double xStart = colNodes[0].Position().X;
-                    double yStart = colNodes[0].Position().Y;
-                    double zStart = colNodes[0].Position().Z - barStory.dElevation;
-                    double xEnd = colNodes[1].Position().X;
-                    double yEnd = colNodes[1].Position().Y;
-                    double zEnd = colNodes[1].Position().Z - barStory.dElevation + barStory.dFlrHeight;
+                    double xBtm = colNodes[0].Position.X;
+                    double yBtm = colNodes[0].Position.Y;
+                    double zBtm = colNodes[0].Position.Z - barStory.dElevation;
+                    double xTop = colNodes[1].Position.X;
+                    double yTop = colNodes[1].Position.Y;
+                    double zTop = colNodes[1].Position.Z - barStory.dElevation + barStory.dFlrHeight;
 
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
@@ -155,11 +155,11 @@ namespace BH.Adapter.RAM
                     if (bar.IsVertical())
                     {
                         //Failing if no section property is provided
-                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
+                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xTop, yTop, 0, 0); //No Z offsets, cols start and end at stories
                     }
                     else
                     {
-                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xStart, yStart, xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
+                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xTop, yTop, xBtm, yBtm, 0, 0); //No Z offsets, cols start and end at stories
                     }
 
                     //Set column properties
