@@ -331,6 +331,10 @@ namespace BH.Adapter.RAM
                             ramOpeningEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
                         }
                     }
+
+                    // Add warning to report floors flattened to level as required for RAM
+                    if (Math.Abs(panel.Normal().Z) < 1)
+                    { Engine.Reflection.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
                 }
                 catch (Exception ex)
                 {
