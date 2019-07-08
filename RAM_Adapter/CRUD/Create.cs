@@ -113,6 +113,10 @@ namespace BH.Adapter.RAM
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
                     ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
 
+                    // Add warning to report distance of snapping to level as required for RAM
+                    if (zStart != 0 || zEnd != 0)
+                    {Engine.Reflection.Compute.RecordWarning("Bar " + name + " snapped to level " + barStory.strLabel + ". Bar moved " + Math.Round(zStart,2).ToString() + " at start and " + Math.Round(zEnd,2).ToString() + " at end."); }
+
                     IBeams beamsOnStory = barStory.GetBeams();
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
 

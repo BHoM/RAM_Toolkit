@@ -42,7 +42,7 @@ namespace BH.Adapter.RAM
             IEnumerable<IObject> levels = objects.Where(x => x is Level);
             IEnumerable<IObject> notLevels = objects.Where(x => !(x is Level));
 
-            //Add the levels to a new list. This is to ensure that they are first and therebe pushed before the other objects
+            //Add the levels to a new list. This is to ensure that they are first and thereby pushed before the other objects
             List<IObject> sortedObjects = new List<IObject>();
             sortedObjects.AddRange(levels);
             sortedObjects.AddRange(notLevels);
