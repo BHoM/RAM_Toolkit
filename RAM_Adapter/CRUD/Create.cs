@@ -96,61 +96,78 @@ namespace BH.Adapter.RAM
             //Create beams per story, flat
             foreach (Bar bar in barBeams)
             {
-                IStory barStory = bar.GetStory(StructuralUsage1D.Beam, ramStories);
+                string name = bar.Name;
 
+                try
+                {
+                    IStory barStory = bar.GetStory(StructuralUsage1D.Beam, ramStories);
 
-                double xStart = bar.StartNode.Position().X;
-                double yStart = bar.StartNode.Position().Y;
-                double zStart = bar.StartNode.Position().Z - barStory.dElevation;
-                double xEnd = bar.EndNode.Position().X;
-                double yEnd = bar.EndNode.Position().Y;
-                double zEnd = bar.EndNode.Position().Z - barStory.dElevation;
+                    double xStart = bar.StartNode.Position().X;
+                    double yStart = bar.StartNode.Position().Y;
+                    double zStart = bar.StartNode.Position().Z - barStory.dElevation;
+                    double xEnd = bar.EndNode.Position().X;
+                    double yEnd = bar.EndNode.Position().Y;
+                    double zEnd = bar.EndNode.Position().Z - barStory.dElevation;
 
-                IFloorType ramFloorType = barStory.GetFloorType();
-                ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
-                ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
+                    IFloorType ramFloorType = barStory.GetFloorType();
+                    ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
+                    ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
 
-                IBeams beamsOnStory = barStory.GetBeams();
-                IBeam beam = beamsOnStory.Get(ramBeam.lUID);
+                    IBeams beamsOnStory = barStory.GetBeams();
+                    IBeam beam = beamsOnStory.Get(ramBeam.lUID);
 
-                beam.strSectionLabel = bar.SectionProperty.Name;
-                beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                    beam.strSectionLabel = bar.SectionProperty.Name;
+                    beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                }
+                catch (Exception ex)
+                {
+                    CreateElementError("bar", name);
+                }
             }
 
             //Create columns at each story with offset per actual height
             foreach (Bar bar in barCols)
             {
-                IStory barStory = bar.GetStory(StructuralUsage1D.Column, ramStories);
+                string name = bar.Name;
 
-                List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
-                colNodes.OrderBy(x => x.Position().Z);
-
-                double xStart = colNodes[0].Position().X;
-                double yStart = colNodes[0].Position().Y;
-                double zStart = colNodes[0].Position().Z - barStory.dElevation;
-                double xEnd = colNodes[1].Position().X;
-                double yEnd = colNodes[1].Position().Y;
-                double zEnd = colNodes[1].Position().Z - barStory.dElevation + barStory.dFlrHeight;
-
-                IFloorType ramFloorType = barStory.GetFloorType();
-                ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
-                ILayoutColumn ramColumn;
-
-                if (bar.IsVertical())
+                try
                 {
-                    //Failing if no section property is provided
-                    ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
-                }
-                else
-                {
-                    ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xStart, yStart, xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
-                }
+                    IStory barStory = bar.GetStory(StructuralUsage1D.Column, ramStories);
 
-                //Set column properties
-                IColumns colsOnStory = barStory.GetColumns();
-                IColumn column = colsOnStory.Get(ramColumn.lUID);
-                column.strSectionLabel = bar.SectionProperty.Name;
-                column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                    List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
+                    colNodes.OrderBy(x => x.Position().Z);
+
+                    double xStart = colNodes[0].Position().X;
+                    double yStart = colNodes[0].Position().Y;
+                    double zStart = colNodes[0].Position().Z - barStory.dElevation;
+                    double xEnd = colNodes[1].Position().X;
+                    double yEnd = colNodes[1].Position().Y;
+                    double zEnd = colNodes[1].Position().Z - barStory.dElevation + barStory.dFlrHeight;
+
+                    IFloorType ramFloorType = barStory.GetFloorType();
+                    ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
+                    ILayoutColumn ramColumn;
+
+                    if (bar.IsVertical())
+                    {
+                        //Failing if no section property is provided
+                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
+                    }
+                    else
+                    {
+                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), xStart, yStart, xEnd, yEnd, 0, 0); //No Z offsets, cols start and end at stories
+                    }
+
+                    //Set column properties
+                    IColumns colsOnStory = barStory.GetColumns();
+                    IColumn column = colsOnStory.Get(ramColumn.lUID);
+                    column.strSectionLabel = bar.SectionProperty.Name;
+                    column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                }
+                catch (Exception ex)
+                {
+                    CreateElementError("bar", name);
+                }
             }
 
             //Save file
@@ -258,53 +275,62 @@ namespace BH.Adapter.RAM
             // Cycle through floors and create on story
             foreach (Panel panel in floors)
             {
-                ramStory = panel.GetStory(ramStories);
-                ramFloorType = ramStory.GetFloorType();
+                string name = panel.Name;
 
-                // Set slab edges on FloorType in RAM for external edges
-                ISlabEdges ramSlabEdges = ramFloorType.GetAllSlabEdges();
-                ISlabEdges ramOpeningEdges = ramFloorType.GetAllSlabOpenings();
-
-                // Get external and internal edges of floor panel
-                List<PolyCurve> panelOutlines = new List<PolyCurve>();
-                List<PolyCurve> openingOutlines = new List<PolyCurve>();
-
-                PolyCurve outlineExternal = panel.Outline();
-                List<Opening> panelOpenings = panel.Openings;
-
-                foreach (Opening opening in panelOpenings)
+                try
                 {
-                    PolyCurve outlineOpening = opening.Outline();
-                    openingOutlines.Add(outlineOpening);
-                }
+                    ramStory = panel.GetStory(ramStories);
+                    ramFloorType = ramStory.GetFloorType();
 
-                Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
+                    // Set slab edges on FloorType in RAM for external edges
+                    ISlabEdges ramSlabEdges = ramFloorType.GetAllSlabEdges();
+                    ISlabEdges ramOpeningEdges = ramFloorType.GetAllSlabOpenings();
 
-                // RAM requires edges clockwise, flip if counterclockwise
-                PolyCurve cwOutline = (outlineExternal.IsClockwise(zDown) == false) ? outlineExternal.Flip() : outlineExternal;
+                    // Get external and internal edges of floor panel
+                    List<PolyCurve> panelOutlines = new List<PolyCurve>();
+                    List<PolyCurve> openingOutlines = new List<PolyCurve>();
 
-                List<ICurve> edgeCrvs = cwOutline.Curves;
+                    PolyCurve outlineExternal = panel.Outline();
+                    List<Opening> panelOpenings = panel.Openings;
 
-                foreach (ICurve crv in edgeCrvs)
-                {
-                    Point startPt = crv.IStartPoint();
-                    Point endPt = crv.IEndPoint();
-                    ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
-                }
+                    foreach (Opening opening in panelOpenings)
+                    {
+                        PolyCurve outlineOpening = opening.Outline();
+                        openingOutlines.Add(outlineOpening);
+                    }
 
-                foreach (PolyCurve outline in openingOutlines)
-                {
+                    Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
+
                     // RAM requires edges clockwise, flip if counterclockwise
-                    PolyCurve cwOpenOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
+                    PolyCurve cwOutline = (outlineExternal.IsClockwise(zDown) == false) ? outlineExternal.Flip() : outlineExternal;
 
-                    List<ICurve> openEdgeCrvs = cwOpenOutline.Curves;
+                    List<ICurve> edgeCrvs = cwOutline.Curves;
 
-                    foreach (ICurve crv in openEdgeCrvs)
+                    foreach (ICurve crv in edgeCrvs)
                     {
                         Point startPt = crv.IStartPoint();
                         Point endPt = crv.IEndPoint();
-                        ramOpeningEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
+                        ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
                     }
+
+                    foreach (PolyCurve outline in openingOutlines)
+                    {
+                        // RAM requires edges clockwise, flip if counterclockwise
+                        PolyCurve cwOpenOutline = (outline.IsClockwise(zDown) == false) ? outline.Flip() : outline;
+
+                        List<ICurve> openEdgeCrvs = cwOpenOutline.Curves;
+
+                        foreach (ICurve crv in openEdgeCrvs)
+                        {
+                            Point startPt = crv.IStartPoint();
+                            Point endPt = crv.IEndPoint();
+                            ramOpeningEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CreateElementError("panel", name);
                 }
 
 
@@ -342,7 +368,10 @@ namespace BH.Adapter.RAM
             //Cycle through walls; if wall crosses level place at level
             foreach (Panel wallPanel in wallPanels)
                 {
+                string name = wallPanel.Name;
 
+                try
+                {
                     // Default Thickness for now
                     double thickness = 6;
 
@@ -363,7 +392,12 @@ namespace BH.Adapter.RAM
                             ILayoutWalls ramLayoutWalls = ramFloorType.GetLayoutWalls();
 
                             ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    CreateElementError("panel", name);
                 }
             }
 
@@ -667,6 +701,34 @@ namespace BH.Adapter.RAM
             // Release main interface and delete user file
             RAMDataAccIDBIO = null;
             return true;
+        }
+
+        /***************************************************/
+
+        private void CreateElementError(string elemType, string elemName)
+        {
+            Engine.Reflection.Compute.RecordError("Failed to create the element of type " + elemType + ", with id: " + elemName);
+        }
+
+        /***************************************************/
+
+        private void CreatePropertyError(string failedProperty, string elemType, string elemName)
+        {
+            CreatePropertyEvent(failedProperty, elemType, elemName, oM.Reflection.Debugging.EventType.Error);
+        }
+
+        /***************************************************/
+
+        private void CreatePropertyWarning(string failedProperty, string elemType, string elemName)
+        {
+            CreatePropertyEvent(failedProperty, elemType, elemName, oM.Reflection.Debugging.EventType.Warning);
+        }
+
+        /***************************************************/
+
+        private void CreatePropertyEvent(string failedProperty, string elemType, string elemName, oM.Reflection.Debugging.EventType eventType)
+        {
+            Engine.Reflection.Compute.RecordEvent("Failed to set property " + failedProperty + " for the " + elemType + " with id: " + elemName, eventType);
         }
 
         /***************************************************/
