@@ -119,9 +119,8 @@ namespace BH.Adapter.RAM
 
                     IBeams beamsOnStory = barStory.GetBeams();
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
-
                     beam.strSectionLabel = bar.SectionProperty.Name;
-                    beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                    // beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze; deprecated in API
                 }
                 catch (Exception ex)
                 {
