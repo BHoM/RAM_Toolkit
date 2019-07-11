@@ -652,32 +652,7 @@ namespace BH.Engine.RAM
             
             Node Node = Structure.Create.Node(new oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc });
 
-            IDisplacements IDisplacements = INode.GetDisplacements();
             IMemberForces IMemberForces = INode.GetReactions();
-
-
-            for (int i = 0; i < IDisplacements.GetCount(); i++)
-            {
-                IDisplacement IDisplacement = IDisplacements.GetAt(i);
-
-                double x = IDisplacement.dDispX;
-                double y = IDisplacement.dDispY;
-                double z = IDisplacement.dDispZ;
-                double thetax = IDisplacement.dThetaX;
-                double thetay = IDisplacement.dThetaY;
-                double thetaz = IDisplacement.dThetaZ;
-
-                // Unique RAM ID
-                Node.CustomData["lUID"] = INode.lUniqueID;
-
-                Node.CustomData["dX"] = x;
-                Node.CustomData["dY"] = y;
-                Node.CustomData["dZ"] = z;
-                Node.CustomData["dthetaX"] = thetax;
-                Node.CustomData["dthetaY"] = thetay;
-                Node.CustomData["dthetaZ"] = thetaz;
-
-            }
 
             // Collect all member forces at node, tracked by index; should these be combined?
             for (int i = 0; i < IMemberForces.GetCount(); i++)
