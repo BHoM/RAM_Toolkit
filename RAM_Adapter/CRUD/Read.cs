@@ -445,6 +445,51 @@ namespace BH.Adapter.RAM
                 }
             }
 
+            // Get all IBeams
+            List<IBeam> allRamBeams = ReadRamBeams(ramModel);
+
+            // Adding node reactions per beam per gravity loads (point and line)
+            foreach (IBeam beam in allRamBeams)
+            {
+                int ramBeamID = beam.lUID;
+                int numLineLoads = 0;
+                int numPointLoads = 0;
+
+                double pdDist, pdDL, pdCDL, pdCLL, pdLLPosRed, pdLLNegRed, pdLLPosNonRed, pdLLNegNonRed, pdLLPosStorage, pdLLNegStorage,
+                pdLLPosRoof, pdLLNegRoof, pdPosPL, pdNegPL, pdAxDL, pdAxCDL, pdAxCLL, pdAxNegRedLL, pdAxPosRedLL, pdAxNegNonRedLL, pdAxPosNonRedLL,
+                pdAxNegStorageLL, pdAxPosStorageLL, pdAxNegRoofLL, pdAxPosRoofLL, pdAxNegPL, pdAxPosPL, pdPosLLRF, pdNegLLRF,
+                pdPosStorageLLRF, pdNegStorageLLRF, pdPosRoofLLRF, pdNegRoofLLRF;
+
+                pdDist = pdDL = pdCDL = pdCLL = pdLLPosRed = pdLLNegRed = pdLLPosNonRed = pdLLNegNonRed = pdLLPosStorage = pdLLNegStorage =
+                pdLLPosRoof = pdLLNegRoof = pdPosPL = pdNegPL = pdAxDL = pdAxCDL = pdAxCLL = pdAxNegRedLL = pdAxPosRedLL = pdAxNegNonRedLL = pdAxPosNonRedLL =
+                pdAxNegStorageLL = pdAxPosStorageLL = pdAxNegRoofLL = pdAxPosRoofLL = pdAxNegPL = pdAxPosPL = pdPosLLRF = pdNegLLRF =
+                pdPosStorageLLRF = pdNegStorageLLRF = pdPosRoofLLRF = pdNegRoofLLRF = 0;
+
+                EGRAVPTLOADSOURCE peLoadSource = EGRAVPTLOADSOURCE.EPtLoadFromGravBmReact;
+
+                ramGravityLoads.GetNumBeamLoads(ramBeamID, ref numLineLoads, ref numPointLoads);
+
+                for (int i = 0; i < numPointLoads; i++)
+                {
+                    ramGravityLoads.GetBeamPointLoad(ramBeamID, i, ref pdDist, ref pdDL, ref pdCDL, ref pdCLL, ref pdLLPosRed, ref pdLLNegRed, ref pdLLPosNonRed, 
+                        ref pdLLNegNonRed, ref pdLLPosStorage, ref pdLLNegStorage, ref pdLLPosRoof, ref pdLLNegRoof, ref pdAxDL, ref pdAxCDL, ref pdAxCLL, 
+                        ref pdAxNegRedLL, ref pdAxPosRedLL, ref pdAxNegNonRedLL, ref pdAxPosNonRedLL, ref pdAxNegStorageLL, ref pdAxPosStorageLL, ref pdAxNegRoofLL, 
+                        ref pdAxPosRoofLL, ref pdPosLLRF, ref pdNegLLRF, ref pdPosStorageLLRF, ref pdNegStorageLLRF, ref pdPosRoofLLRF, ref pdNegRoofLLRF, ref peLoadSource);
+                    RAMPointGravityLoad bhomPtGravLoad = new RAMPointGravityLoad
+                    {
+                        ObjectId = ramBeamID,
+                        dist = pdDist,
+                        DL = pdDL,
+                        NonRLL = pdLLPosNonRed,
+                        RedLL = pdLLPosRed,
+                        RoofLL = pdLLPosRoof,
+                        StorLL = pdLLPosStorage,
+                        type = peLoadSource.ToString()
+                    };
+                    bhomPtGravLoads.Add(bhomPtGravLoad);
+                }
+            }
+
             return bhomPtGravLoads;
         }
 
@@ -458,7 +503,7 @@ namespace BH.Adapter.RAM
 
             IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
             IGravityLoads1 ramGravityLoads = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
-
+           
             // Get all IWalls
             List<IWall> allRamWalls = ReadRamWalls(ramModel);
 
@@ -486,6 +531,48 @@ namespace BH.Adapter.RAM
                     RAMLineGravityLoad bhomLineGravLoad = new RAMLineGravityLoad
                     {
                         ObjectId = wall.lUID,
+                        dist1 = pdDistL,
+                        dist2 = pdDistR,
+                        DL1 = pdDLL,
+                        DL2 = pdDLR,
+                        LL1 = pdLLL,
+                        LL2 = pdLLR,
+                        PL1 = pdPLL,
+                        PL2 = pdPLR,
+                        type = peLoadType.ToString()
+                    };
+                    bhomLineGravLoads.Add(bhomLineGravLoad);
+                }
+            }
+
+            // Get all IBeams
+            List<IBeam> allRamBeams = ReadRamBeams(ramModel);
+
+            // Adding node reactions per Beam per gravity loads (point and line)
+            foreach (IBeam beam in allRamBeams)
+            {
+                int ramBeamID = beam.lUID;
+                int numLineLoads = 0;
+                int numPointLoads = 0;
+
+                double pdDistL, pdDistR, pdDLL, pdDLR, pdCDLL, pdCDLR, pdLLL, pdLLR, pdPLL, pdPLR, pdCLLL, pdCLLR,
+                    pdAxDLL, pdAxDLR, pdAxCDLL, pdAxCDLR, pdAxCLLL, pdAxCLLR, pdAxLLL, pdAxLLR, pdAxPLL, pdAxPLR, pdRfactor;
+
+                pdDistL = pdDistR = pdDLL = pdDLR = pdCDLL = pdCDLR = pdLLL = pdLLR = pdPLL = pdPLR = pdCLLL = pdCLLR =
+                    pdAxDLL = pdAxDLR = pdAxCDLL = pdAxCDLR = pdAxCLLL = pdAxCLLR = pdAxLLL = pdAxLLR = pdAxPLL = pdAxPLR = pdRfactor = 0;
+
+                EGRAVLOADTYPE peLoadType = EGRAVLOADTYPE.ENonRedLoad;
+
+                ramGravityLoads.GetNumBeamLoads(ramBeamID, ref numLineLoads, ref numPointLoads);
+
+                for (int i = 0; i < numLineLoads; i++)
+                {
+                    ramGravityLoads.GetBeamLineLoad(ramBeamID, i, ref pdDistL, ref pdDistR, ref pdDLL, ref pdDLR, ref pdCDLL, ref pdCDLR, 
+                        ref pdLLL, ref pdLLR, ref pdCLLL, ref pdCLLR, ref pdAxDLL, ref pdAxDLR, ref pdAxCDLL, ref pdAxCDLR, ref pdAxCLLL, 
+                        ref pdAxCLLR, ref pdAxLLL, ref pdAxLLR, ref peLoadType, ref pdRfactor);
+                    RAMLineGravityLoad bhomLineGravLoad = new RAMLineGravityLoad
+                    {
+                        ObjectId = ramBeamID,
                         dist1 = pdDistL,
                         dist2 = pdDistR,
                         DL1 = pdDLL,
@@ -541,6 +628,41 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
+        private List<Tuple<NodeReaction, NodeReaction>> ReadBeamEndReactions(List<string> ids = null)
+        {
+            List<Tuple<NodeReaction, NodeReaction>> barEndReactions = new List<Tuple<NodeReaction, NodeReaction>>();
+
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            List<IBeam> ramBeams = ReadRamBeams(ramModel);
+
+            foreach ( IBeam beam in ramBeams)
+            {
+                int beamID = beam.lUID;
+
+                IAnalyticalResult result = beam.GetAnalyticalResult();
+
+                IMemberForces forces = result.GetMaximumComboReactions(COMBO_MATERIAL_TYPE.GRAV_STEEL);
+
+                IMemberForce startForce = forces.GetAt(0);
+                IMemberForce endForce = forces.GetAt(1);
+
+                NodeReaction startReaction = startForce.ToBHoMObject();
+                startReaction.ObjectId = beamID;
+                NodeReaction endReaction = startForce.ToBHoMObject();
+                endReaction.ObjectId = beamID;
+
+                Tuple<NodeReaction, NodeReaction> bhomEndReactions = Tuple.Create(startReaction, endReaction);
+
+                barEndReactions.Add(bhomEndReactions);
+
+            }
+
+            return barEndReactions;
+        }
+
+        /***************************************************/
+
         private List<IWall> ReadRamWalls(IModel ramModel)
         {
             //Get stories
@@ -564,6 +686,33 @@ namespace BH.Adapter.RAM
             }
 
             return allRamWalls;
+        }
+
+        /***************************************************/
+
+        private List<IBeam> ReadRamBeams(IModel ramModel)
+        {
+            //Get stories
+            IStories ramStories = ramModel.GetStories();
+            int numStories = ramStories.GetCount();
+            List<IBeam> allRamBeams = new List<IBeam>();
+
+            // Get all beams on each story
+            for (int i = 0; i < numStories; i++)
+            {
+                //Get beams
+                IBeams ramBeams = ramStories.GetAt(i).GetBeams();
+                int numBeams = ramBeams.GetCount();
+
+                // Convert beams
+                for (int j = 0; j < numBeams; j++)
+                {
+                    IBeam ramBeam = ramBeams.GetAt(j);
+                    allRamBeams.Add(ramBeam);
+                }
+            }
+
+            return allRamBeams;
         }
 
         /***************************************************/
