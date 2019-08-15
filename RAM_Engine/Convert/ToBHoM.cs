@@ -779,6 +779,23 @@ namespace BH.Engine.RAM
 
         /***************************************************/
 
+        public static NodeReaction ToBHoMObject(this IMemberForce ramForce)
+        {
+            NodeReaction bhomNodeReaction = new NodeReaction
+            {
+                FX = ramForce.dAxial,
+                FY = ramForce.dShearMajor,
+                FZ = ramForce.dShearMinor,
+                MX = ramForce.dTorsion,
+                MY = ramForce.dMomentMajor,
+                MZ = ramForce.dMomentMinor
+            };
+
+            return bhomNodeReaction;
+        }
+
+        /***************************************************/
+
         public static Grid ToBHoMObject(this IModelGrid IModelGrid, IGridSystem IGridSystem, int counter)
         {
             Grid myGrid = new Grid();
