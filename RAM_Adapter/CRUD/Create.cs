@@ -97,6 +97,7 @@ namespace BH.Adapter.RAM
             foreach (Bar bar in barBeams)
             {
                 string name = bar.Name;
+                ILayoutBeam ramBeam;
 
                 try
                 {
@@ -111,7 +112,18 @@ namespace BH.Adapter.RAM
 
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
-                    ILayoutBeam ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
+
+                    object IsStubCant;
+                    bar.CustomData.TryGetValue("IsStubCantilever", out IsStubCant);
+
+                    if (IsStubCant.ToString() == "True" || IsStubCant.ToString() == "1") //Check bool per RAM or GH preferred boolean context
+                    {
+                        ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
+                    }
+                    else
+                    {
+                        ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
+                    }
 
                     // Add warning to report distance of snapping to level as required for RAM
                     if (zStart != 0 || zEnd != 0)
