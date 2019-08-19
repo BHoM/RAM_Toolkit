@@ -98,8 +98,16 @@ namespace BH.Engine.RAM
                     elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
                     break;
                 case StructuralUsage1D.Column:
-                    //Column to be placed on the level it supports.
-                    elev = Math.Max(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    object IsHanging;
+                    bar.CustomData.TryGetValue("IsHangingColumn", out IsHanging);
+                    if (IsHanging.ToString() == "True" || IsHanging.ToString() == "1") //Hanging Column to be placed on its btm level.
+                    {
+                        elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    }
+                    else  //Column to be placed on the level it supports.
+                    {
+                        elev = Math.Max(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    }
                     break;
                 default:
                     //Use lowest end elevation

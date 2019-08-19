@@ -150,8 +150,14 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
                     ILayoutColumn ramColumn;
+                    object IsHanging;
+                    bar.CustomData.TryGetValue("IsHangingColumn", out IsHanging);
 
-                    if (bar.IsVertical())
+                    if (IsHanging.ToString() == "True" || IsHanging.ToString() == "1") //Check bool per RAM or GH preferred boolean context
+                    {
+                        ramColumn = ramColumns.Add3(bar.SectionProperty.Material.ToRAM(), xBtm, yBtm, xTop, yTop, 0, 0, 1); //No Z offsets, cols start and end at stories
+                    }  
+                    else if (bar.IsVertical())
                     {
                         //Failing if no section property is provided
                         ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), xTop, yTop, 0, 0); //No Z offsets, cols start and end at stories
