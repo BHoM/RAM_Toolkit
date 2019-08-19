@@ -279,9 +279,13 @@ namespace BH.Engine.RAM
             // Unique RAM ID
             bhomBar.CustomData["lUID"] = IBeam.lUID;
             bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
-            bhomBar.CustomData["CantDist"] = IBeam.dEndCantilever.ToString();
+            bhomBar.CustomData["StartCantilever"] = IBeam.dStartCantilever.ToString();
+            bhomBar.CustomData["EndCantilever"] = IBeam.dEndCantilever.ToString();
+            bhomBar.CustomData["IsStubCantilever"] = ILayoutBeam.IsStubCantilever();
             bhomBar.CustomData["FrameType"] = IBeam.eFramingType.ToString();
             bhomBar.CustomData["Material"] = IBeam.eMaterial.ToString();
+            
+
             bhomBar.Tags.Add("Beam");
 
 
