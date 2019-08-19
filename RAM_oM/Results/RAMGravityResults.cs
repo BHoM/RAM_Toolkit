@@ -27,6 +27,8 @@ namespace BH.oM.Structure.Results
         /***************************************************/
     }
 
+    /***************************************************/
+
     public class RAMLineGravityLoad : BHoMObject
     {
         /***************************************************/
@@ -46,4 +48,21 @@ namespace BH.oM.Structure.Results
 
         /***************************************************/
     }
+
+    /***************************************************/
+
+    public class RAMFactoredEndReactions : BHoMObject
+    {
+        /***************************************************/
+        /**** Properties                                ****/
+        /***************************************************/
+
+        public int ObjectId { get; set; } = 0;
+        public NodeReaction StartReaction { get; set; } = null;
+        public NodeReaction EndReaction { get; set; } = null;
+
+        /***************************************************/
+    }
+
+    /***************************************************/
 }

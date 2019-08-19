@@ -353,7 +353,7 @@ namespace BH.Adapter.RAM
                     if (Math.Abs(panel.Normal().Z) < 1)
                     { Engine.Reflection.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
                 }
-                catch (Exception ex)
+                catch
                 {
                     CreateElementError("panel", name);
                 }
@@ -420,7 +420,7 @@ namespace BH.Adapter.RAM
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     CreateElementError("panel", name);
                 }
@@ -587,11 +587,11 @@ namespace BH.Adapter.RAM
             double gridSystemRotation = 0;
             string gridSystemLabel = "";
             IGridSystem ramGridSystemXY = null;
-            IGridSystem ramGridSystemRad = null;
-            IGridSystem ramGridSystemSk = null;
+            //IGridSystem ramGridSystemRad = null;
+            //IGridSystem ramGridSystemSk = null;
             IModelGrids ramModelGridsXY = null;
-            IModelGrids ramModelGridsRad = null;
-            IModelGrids ramModelGridsSk = null;
+            //IModelGrids ramModelGridsRad = null;
+            //IModelGrids ramModelGridsSk = null;
 
 
 

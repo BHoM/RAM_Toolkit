@@ -790,8 +790,8 @@ namespace BH.Engine.RAM
             NodeReaction bhomNodeReaction = new NodeReaction
             {
                 FX = ramForce.dAxial,
-                FY = ramForce.dShearMajor,
-                FZ = ramForce.dShearMinor,
+                FY = ramForce.dShearMinor,
+                FZ = ramForce.dShearMajor,
                 MX = ramForce.dTorsion,
                 MY = ramForce.dMomentMajor,
                 MZ = ramForce.dMomentMinor

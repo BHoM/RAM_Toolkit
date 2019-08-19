@@ -71,6 +71,8 @@ namespace BH.Adapter.RAM
                 return ReadPointGravityLoad(ids as dynamic);
             else if (type == typeof(RAMLineGravityLoad))
                 return ReadLineGravityLoad(ids as dynamic);
+            else if (type == typeof(RAMFactoredEndReactions))
+                return ReadBeamEndReactions(ids as dynamic);
 
             return null;
         }
@@ -628,9 +630,9 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private List<Tuple<NodeReaction, NodeReaction>> ReadBeamEndReactions(List<string> ids = null)
+        private List<RAMFactoredEndReactions> ReadBeamEndReactions(List<string> ids = null)
         {
-            List<Tuple<NodeReaction, NodeReaction>> barEndReactions = new List<Tuple<NodeReaction, NodeReaction>>();
+            List<RAMFactoredEndReactions> barEndReactions = new List<RAMFactoredEndReactions>();
 
             IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
@@ -638,24 +640,17 @@ namespace BH.Adapter.RAM
 
             foreach ( IBeam beam in ramBeams)
             {
-                int beamID = beam.lUID;
-
                 IAnalyticalResult result = beam.GetAnalyticalResult();
-
                 IMemberForces forces = result.GetMaximumComboReactions(COMBO_MATERIAL_TYPE.GRAV_STEEL);
 
-                IMemberForce startForce = forces.GetAt(0);
-                IMemberForce endForce = forces.GetAt(1);
-
-                NodeReaction startReaction = startForce.ToBHoMObject();
-                startReaction.ObjectId = beamID;
-                NodeReaction endReaction = startForce.ToBHoMObject();
-                endReaction.ObjectId = beamID;
-
-                Tuple<NodeReaction, NodeReaction> bhomEndReactions = Tuple.Create(startReaction, endReaction);
+                RAMFactoredEndReactions bhomEndReactions = new RAMFactoredEndReactions()
+                {
+                    ObjectId = beam.lUID,
+                    StartReaction = forces.GetAt(0).ToBHoMObject(),
+                    EndReaction = forces.GetAt(1).ToBHoMObject(),
+                };
 
                 barEndReactions.Add(bhomEndReactions);
-
             }
 
             return barEndReactions;
