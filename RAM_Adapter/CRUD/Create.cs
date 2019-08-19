@@ -122,7 +122,7 @@ namespace BH.Adapter.RAM
                     beam.strSectionLabel = bar.SectionProperty.Name;
                     // beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze; deprecated in API 
                 }
-                catch (Exception ex)
+                catch
                 {
                     CreateElementError("bar", name);
                 }
@@ -167,7 +167,7 @@ namespace BH.Adapter.RAM
                     column.strSectionLabel = bar.SectionProperty.Name;
                     column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
                 }
-                catch (Exception ex)
+                catch
                 {
                     CreateElementError("bar", name);
                 }
@@ -335,7 +335,7 @@ namespace BH.Adapter.RAM
                     if (Math.Abs(panel.Normal().Z) < 1)
                     { Engine.Reflection.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
                 }
-                catch (Exception ex)
+                catch
                 {
                     CreateElementError("panel", name);
                 }
@@ -402,7 +402,7 @@ namespace BH.Adapter.RAM
                         }
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
                     CreateElementError("panel", name);
                 }
@@ -569,11 +569,11 @@ namespace BH.Adapter.RAM
             double gridSystemRotation = 0;
             string gridSystemLabel = "";
             IGridSystem ramGridSystemXY = null;
-            IGridSystem ramGridSystemRad = null;
-            IGridSystem ramGridSystemSk = null;
+            //IGridSystem ramGridSystemRad = null;
+            //IGridSystem ramGridSystemSk = null;
             IModelGrids ramModelGridsXY = null;
-            IModelGrids ramModelGridsRad = null;
-            IModelGrids ramModelGridsSk = null;
+            //IModelGrids ramModelGridsRad = null;
+            //IModelGrids ramModelGridsSk = null;
 
 
 
