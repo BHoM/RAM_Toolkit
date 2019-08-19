@@ -245,6 +245,8 @@ namespace BH.Engine.RAM
             bhomBar.CustomData["FrameNumber"] = IColumn.lLabel;
             bhomBar.CustomData["FrameType"] = IColumn.eFramingType.ToString();
             bhomBar.CustomData["Material"] = IColumn.eMaterial.ToString();
+            bhomBar.CustomData["IsHangingColumn"] = IColumn.bHanger;
+
 
             bhomBar.Tags.Add("Column");
 
