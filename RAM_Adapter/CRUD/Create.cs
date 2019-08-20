@@ -429,9 +429,19 @@ namespace BH.Adapter.RAM
 
                     // Find outline of planar panel
                     PolyCurve outline = BH.Engine.Structure.Query.Outline(wallPanel);
+                    List<Point> wallPts = outline.DiscontinuityPoints();
+                    wallPts.OrderBy(p => p.X).ToList();
+                    Point leftPt = wallPts.First();
+                    Point rtPt = wallPts.Last();
+                    bool downToRight = leftPt.Y > rtPt.Y;                   
+
                     BoundingBox wallBounds = BH.Engine.Geometry.Query.Bounds(outline);
                     Point wallMin = wallBounds.Min;
                     Point wallMax = wallBounds.Max;
+                    double tempY = wallMin.Y;
+
+                    wallMin.Y = downToRight ? wallMax.Y : wallMin.Y;
+                    wallMax.Y = downToRight ? tempY : wallMax.Y;
 
                     for (int i = 0; i < ramStories.GetCount(); i++)
                     {
