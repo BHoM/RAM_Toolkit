@@ -103,38 +103,49 @@ namespace BH.Adapter.RAM
                 {
                     IStory barStory = bar.GetStory(StructuralUsage1D.Beam, ramStories);
 
-                    double xStart = bar.StartNode.Position().X;
-                    double yStart = bar.StartNode.Position().Y;
-                    double zStart = bar.StartNode.Position().Z - barStory.dElevation;
-                    double xEnd = bar.EndNode.Position().X;
-                    double yEnd = bar.EndNode.Position().Y;
-                    double zEnd = bar.EndNode.Position().Z - barStory.dElevation;
-
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
 
+                    double zStart = bar.StartNode.Position().Z - barStory.dElevation;
+                    double zEnd = bar.EndNode.Position().Z - barStory.dElevation;
+
+                    //  Get critical cant values
                     object isStubCant;
                     bar.CustomData.TryGetValue("IsStubCantilever", out isStubCant);
+                    object startCantObj;
+                    object endCantObj;
+                    bar.CustomData.TryGetValue("StartCantilever", out startCantObj);
+                    bar.CustomData.TryGetValue("EndCantilever", out endCantObj);
+                    double startCant, endCant;
+                    double.TryParse(startCantObj.ToString(), out startCant);
+                    double.TryParse(endCantObj.ToString(), out endCant);
 
                     if (isStubCant.ToString() == "True" || isStubCant.ToString() == "1") //Check bool per RAM or GH preferred boolean context
                     {
+                        Point startPt, endPt;
+                        if (startCant > 0) // Ensure startPt corresponds with support point
+                        {
+                            startPt = bar.EndNode.Position();
+                            endPt = bar.StartNode.Position();
+                        }
+                        else
+                        {
+                            startPt = bar.StartNode.Position();
+                            endPt = bar.EndNode.Position();
+                        }
+                        double xStart = startPt.X;
+                        double yStart = startPt.Y;
+                        double xEnd = endPt.X;
+                        double yEnd = endPt.Y;
+
                         ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
                     }
                     else
                     {
-                        //  Get critical cant values
-                        object startCantObj;
-                        object endCantObj;
-                        bar.CustomData.TryGetValue("StartCantilever", out startCantObj);
-                        bar.CustomData.TryGetValue("EndCantilever", out endCantObj);
-                        double startCant, endCant;
-                        double.TryParse(startCantObj.ToString(), out startCant);
-                        double.TryParse(endCantObj.ToString(), out endCant);
-
                         //  Get support points
                         Vector barDir = bar.Tangent(true);
                         Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position(), barDir * startCant);
-                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), barDir * endCant);
+                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), -barDir * endCant);
 
                         ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), startSupPt.X, startSupPt.Y, 0, endSupPt.X, endSupPt.Y, 0); // No Z offsets, beams flat on closest story
                         ramBeam.dStartCantilever = startCant;
