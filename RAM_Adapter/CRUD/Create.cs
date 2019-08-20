@@ -113,16 +113,32 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
 
-                    object IsStubCant;
-                    bar.CustomData.TryGetValue("IsStubCantilever", out IsStubCant);
+                    object isStubCant;
+                    bar.CustomData.TryGetValue("IsStubCantilever", out isStubCant);
 
-                    if (IsStubCant.ToString() == "True" || IsStubCant.ToString() == "1") //Check bool per RAM or GH preferred boolean context
+                    if (isStubCant.ToString() == "True" || isStubCant.ToString() == "1") //Check bool per RAM or GH preferred boolean context
                     {
                         ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
                     }
                     else
                     {
-                        ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
+                        //  Get critical cant values
+                        object startCantObj;
+                        object endCantObj;
+                        bar.CustomData.TryGetValue("StartCantilever", out startCantObj);
+                        bar.CustomData.TryGetValue("EndCantilever", out endCantObj);
+                        double startCant, endCant;
+                        double.TryParse(startCantObj.ToString(), out startCant);
+                        double.TryParse(endCantObj.ToString(), out endCant);
+
+                        //  Get support points
+                        Vector barDir = bar.Tangent(true);
+                        Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position(), barDir * startCant);
+                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), barDir * endCant);
+
+                        ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), startSupPt.X, startSupPt.Y, 0, endSupPt.X, endSupPt.Y, 0); // No Z offsets, beams flat on closest story
+                        ramBeam.dStartCantilever = startCant;
+                        ramBeam.dEndCantilever = endCant;
                     }
 
                     // Add warning to report distance of snapping to level as required for RAM
@@ -162,10 +178,10 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
                     ILayoutColumn ramColumn;
-                    object IsHanging;
-                    bar.CustomData.TryGetValue("IsHangingColumn", out IsHanging);
+                    object isHanging;
+                    bar.CustomData.TryGetValue("IsHangingColumn", out isHanging);
 
-                    if (IsHanging.ToString() == "True" || IsHanging.ToString() == "1") //Check bool per RAM or GH preferred boolean context
+                    if (isHanging.ToString() == "True" || isHanging.ToString() == "1") //Check bool per RAM or GH preferred boolean context
                     {
                         ramColumn = ramColumns.Add3(bar.SectionProperty.Material.ToRAM(), xBtm, yBtm, xTop, yTop, 0, 0, 1); //No Z offsets, cols start and end at stories
                     }  
