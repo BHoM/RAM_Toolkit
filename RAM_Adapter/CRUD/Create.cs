@@ -112,15 +112,16 @@ namespace BH.Adapter.RAM
                     //  Get critical cant values
                     object isStubCant;
                     bar.CustomData.TryGetValue("IsStubCantilever", out isStubCant);
+                    isStubCant = isStubCant == null ? "" : isStubCant.ToString();
                     object startCantObj;
                     object endCantObj;
                     bar.CustomData.TryGetValue("StartCantilever", out startCantObj);
                     bar.CustomData.TryGetValue("EndCantilever", out endCantObj);
                     double startCant, endCant;
-                    double.TryParse(startCantObj.ToString(), out startCant);
-                    double.TryParse(endCantObj.ToString(), out endCant);
+                    double.TryParse(startCantObj == null ? "" : startCantObj.ToString(), out startCant);
+                    double.TryParse(endCantObj == null ? "" : startCantObj.ToString(), out endCant);
 
-                    if (isStubCant.ToString() == "True" || isStubCant.ToString() == "1") //Check bool per RAM or GH preferred boolean context
+                    if (isStubCant == "True" || isStubCant == "1") //Check bool per RAM or GH preferred boolean context
                     {
                         Point startPt, endPt;
                         if (startCant > 0) // Ensure startPt corresponds with support point
@@ -191,8 +192,9 @@ namespace BH.Adapter.RAM
                     ILayoutColumn ramColumn;
                     object isHanging;
                     bar.CustomData.TryGetValue("IsHangingColumn", out isHanging);
+                    isHanging = isHanging == null ? "" : isHanging.ToString();
 
-                    if (isHanging.ToString() == "True" || isHanging.ToString() == "1") //Check bool per RAM or GH preferred boolean context
+                    if (isHanging == "True" || isHanging == "1") //Check bool per RAM or GH preferred boolean context
                     {
                         ramColumn = ramColumns.Add3(bar.SectionProperty.Material.ToRAM(), xBtm, yBtm, xTop, yTop, 0, 0, 1); //No Z offsets, cols start and end at stories
                     }  
