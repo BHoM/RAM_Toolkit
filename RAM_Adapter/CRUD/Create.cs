@@ -121,7 +121,7 @@ namespace BH.Adapter.RAM
                     double.TryParse(startCantObj == null ? "" : startCantObj.ToString(), out startCant);
                     double.TryParse(endCantObj == null ? "" : startCantObj.ToString(), out endCant);
 
-                    if (isStubCant == "True" || isStubCant == "1") //Check bool per RAM or GH preferred boolean context
+                    if (isStubCant.Equals("True") || isStubCant.Equals("1")) //Check bool per RAM or GH preferred boolean context
                     {
                         Point startPt, endPt;
                         if (startCant > 0) // Ensure startPt corresponds with support point
@@ -194,7 +194,7 @@ namespace BH.Adapter.RAM
                     bar.CustomData.TryGetValue("IsHangingColumn", out isHanging);
                     isHanging = isHanging == null ? "" : isHanging.ToString();
 
-                    if (isHanging == "True" || isHanging == "1") //Check bool per RAM or GH preferred boolean context
+                    if (isHanging.Equals("True") || isHanging.Equals("1")) //Check bool per RAM or GH preferred boolean context
                     {
                         ramColumn = ramColumns.Add3(bar.SectionProperty.Material.ToRAM(), xBtm, yBtm, xTop, yTop, 0, 0, 1); //No Z offsets, cols start and end at stories
                     }  
