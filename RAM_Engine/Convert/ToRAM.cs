@@ -102,7 +102,7 @@ namespace BH.Engine.RAM
                     bar.CustomData.TryGetValue("IsHangingColumn", out isHanging);
                     isHanging = isHanging == null ? "" : isHanging.ToString();
 
-                    if (isHanging == "True" || isHanging == "1") //Hanging Column to be placed on its btm level.
+                    if (isHanging.Equals("True") || isHanging.Equals("1")) //Hanging Column to be placed on its btm level.
                     {
                         elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
                     }

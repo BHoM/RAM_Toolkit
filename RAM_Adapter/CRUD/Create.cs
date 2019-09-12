@@ -119,7 +119,7 @@ namespace BH.Adapter.RAM
                     bar.CustomData.TryGetValue("EndCantilever", out endCantObj);
                     double startCant, endCant;
                     double.TryParse(startCantObj == null ? "" : startCantObj.ToString(), out startCant);
-                    double.TryParse(endCantObj == null ? "" : startCantObj.ToString(), out endCant);
+                    double.TryParse(endCantObj == null ? "" : endCantObj.ToString(), out endCant);
 
                     if (isStubCant.Equals("True") || isStubCant.Equals("1")) //Check bool per RAM or GH preferred boolean context
                     {
@@ -134,6 +134,8 @@ namespace BH.Adapter.RAM
                             startPt = bar.StartNode.Position();
                             endPt = bar.EndNode.Position();
                         }
+
+
                         double xStart = startPt.X;
                         double yStart = startPt.Y;
                         double xEnd = endPt.X;
@@ -149,8 +151,16 @@ namespace BH.Adapter.RAM
                         Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), -barDir * endCant);
 
                         ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), startSupPt.X, startSupPt.Y, 0, endSupPt.X, endSupPt.Y, 0); // No Z offsets, beams flat on closest story
-                        ramBeam.dStartCantilever = startCant;
-                        ramBeam.dEndCantilever = endCant;
+                        if (startSupPt.X < endSupPt.X || (startSupPt.X == endSupPt.X && startSupPt.Y>endSupPt.Y))
+                        {
+                            ramBeam.dStartCantilever = startCant;
+                            ramBeam.dEndCantilever = endCant;
+                        }
+                        else
+                        {
+                            ramBeam.dStartCantilever = endCant;
+                            ramBeam.dEndCantilever = startCant;
+                        }
                     }
 
                     // Add warning to report distance of snapping to level as required for RAM
