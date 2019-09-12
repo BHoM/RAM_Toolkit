@@ -90,6 +90,7 @@ namespace BH.Adapter.RAM
                     //modify file path to ensure its validity
                     string filePathMod = filePath.Replace("\\\\", "\\");
                     filePathMod = filePathMod.Replace("\r\n", "");
+                    filePathMod = filePathMod.Replace("RSS", "rss");
                     filePath = filePathMod;
                     
                     //check if after modification file exists
