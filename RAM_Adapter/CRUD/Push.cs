@@ -24,7 +24,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BH.oM.Architecture.Elements;
+using BH.oM.Geometry.SettingOut;
 using BH.oM.Base;
 
 namespace BH.Adapter.RAM
