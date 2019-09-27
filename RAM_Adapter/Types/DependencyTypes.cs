@@ -25,7 +25,7 @@ using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.MaterialFragments;
-using BH.oM.Architecture.Elements;
+using BH.oM.Geometry.SettingOut;
 using System;
 using System.Collections.Generic;
 

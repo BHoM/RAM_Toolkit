@@ -36,7 +36,7 @@ using BH.oM.Common.Materials;
 using BH.oM.Structure.MaterialFragments;
 using RAMDATAACCESSLib;
 using System.IO;
-using BH.oM.Architecture.Elements;
+using BH.oM.Geometry.SettingOut;
 
 
 namespace BH.Adapter.RAM
