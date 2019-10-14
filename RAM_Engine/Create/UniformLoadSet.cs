@@ -5,8 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using BH.oM.Base;
 using BH.oM.Structure.Loads;
+using BH.oM.Adapters.RAM;
 
-namespace BH.Engine.Structure.Loads
+
+namespace BH.Engine.Adapters.RAM
 {
     public static partial class Create
     {
