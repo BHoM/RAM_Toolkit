@@ -6,37 +6,50 @@ using System.Threading.Tasks;
 using BH.oM.Base;
 using BH.oM.Structure.Loads;
 using BH.oM.Adapters.RAM;
+using RAMDATAACCESSLib;
+using BH.Engine.Reflection;
 
 
 namespace BH.Engine.Adapters.RAM
 {
     public static partial class Create
     {
-        public static UniformLoadSet CreateRAMUniformLoadSet(string name, double sdl, double cdl, double llReducible, double llNonreducible, double partition, double cll, double massDl)
+        public static UniformLoadSet CreateRAMUniformLoadSet(string name, double sdl, double cdl, double liveLoad, int llType, double partition, double cll, double massDl)
         {
-            //This section, definition of RAM internal loadcases, needs to go somewhere central and be referenced here.
-            Loadcase sdlCase = new Loadcase { Name = "SDL", Nature = LoadNature.SuperDead };
-            Loadcase cdlCase = new Loadcase { Name = "CDL", Nature = LoadNature.Dead };
-            Loadcase llReducibleCase = new Loadcase { Name = "LLRed", Nature = LoadNature.Live };
-            Loadcase llNonreducibleCase = new Loadcase { Name = "LLNRed", Nature = LoadNature.Live };
-            Loadcase partitionCase = new Loadcase { Name = "Partition", Nature = LoadNature.Live };
-            Loadcase cllCase = new Loadcase { Name = "CLL", Nature = LoadNature.Live };
-            Loadcase massDlCase = new Loadcase { Name = "MassDL", Nature = LoadNature.Dead };
 
-            return new UniformLoadSet
+            UniformLoadSet loadSet = new UniformLoadSet
             {
                 Name = name,
-                Loads = new Dictionary<Loadcase, double>
+                Loads = new Dictionary<string, double>
                 {
-                    { sdlCase, sdl },
-                    { cdlCase, cdl },
-                    { llReducibleCase, llReducible },
-                    { llNonreducibleCase, llNonreducible },
-                    { partitionCase, partition },
-                    { cllCase, cll },
-                    { massDlCase, massDl }
+                    { ELoadCaseType.DeadLCa.ToString(), sdl },
+                    { ELoadCaseType.ConstructionDeadLCa.ToString(), cdl },
+                    { ELoadCaseType.PartitionLCa.ToString(), partition },
+                    { ELoadCaseType.ConstructionLiveLCa.ToString(), cll },
+                    { ELoadCaseType.MassDeadLCa.ToString(), massDl }
                 }
             };
+
+            switch (llType)
+            {
+                case 0:
+                    loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()] = liveLoad;
+                    break;
+                case 1:
+                    loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()] = liveLoad;
+                    break;
+                case 2:
+                    loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()] = liveLoad;
+                    break;
+                case 3:
+                    loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()] = liveLoad;
+                    break;
+                default:
+                    Engine.Reflection.Compute.RecordWarning("Could not understand llType. 0 = Reducible, 1 = Storage, 2 = Non-reducible, 3 = Roof");
+                    break;
+            }
+
+            return loadSet;
 
             /***************************************************/
         }

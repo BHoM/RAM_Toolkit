@@ -24,7 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BH.Engine.RAM
+namespace BH.Engine.Adapters.RAM
 {
     public static partial class Convert
     {

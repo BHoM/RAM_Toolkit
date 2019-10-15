@@ -31,7 +31,7 @@ using BH.Engine.Geometry;
 using RAMDATAACCESSLib;
 
 
-namespace BH.Engine.RAM
+namespace BH.Engine.Adapters.RAM
 {
     public static partial class Convert
     {

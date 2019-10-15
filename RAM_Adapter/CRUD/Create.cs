@@ -35,7 +35,8 @@ using System.IO;
 using BH.oM.Geometry;
 using BH.Engine.Geometry;
 using BH.Engine.Structure;
-using BH.Engine.RAM;
+using BH.Engine.Adapters.RAM;
+using BH.oM.Adapters.RAM;
 
 
 
@@ -774,6 +775,63 @@ namespace BH.Adapter.RAM
             RAMDataAccIDBIO.SaveDatabase();
             // Release main interface and delete user file
             RAMDataAccIDBIO = null;
+            return true;
+        }
+
+        /***************************************************/
+
+        private bool CreateCollection(IEnumerable<UniformLoadSet> loadSets)
+        {
+            //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            ISurfaceLoadPropertySets ramSurfaceLoadPropertySets = ramModel.GetSurfaceLoadPropertySets();
+
+            foreach (UniformLoadSet loadSet in loadSets)
+            {
+                //Add the loadset
+                ISurfaceLoadPropertySet ramLoadSet = ramSurfaceLoadPropertySets.Add(loadSet.Name);
+
+                ramLoadSet.dConstDeadLoad   = loadSet.Loads[ELoadCaseType.ConstructionDeadLCa.ToString()];
+                ramLoadSet.dConstLiveLoad   = loadSet.Loads[ELoadCaseType.ConstructionLiveLCa.ToString()];
+                ramLoadSet.dDeadLoad        = loadSet.Loads[ELoadCaseType.DeadLCa.ToString()];
+                ramLoadSet.dMassDeadLoad    = loadSet.Loads[ELoadCaseType.MassDeadLCa.ToString()];
+                ramLoadSet.dPartitionLoad   = loadSet.Loads[ELoadCaseType.PartitionLCa.ToString()];
+
+                //Check which live load case has been applied, to set load type. Not currently checking if more than one has been set.
+                Engine.Reflection.Compute.RecordNote("If more than one live load has been set, only the first one will be applied");
+
+                if (loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()] != 0)
+                {
+                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveReducibleLCa;
+                    ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()];
+                }
+                else if (loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()] != 0)
+                {
+                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveStorageLCa;
+                    ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()];
+                }
+                else if (loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()] != 0)
+                {
+                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveUnReducibleLCa;
+                    ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()];
+                }
+                else if (loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()] != 0)
+                {
+                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveRoofLCa;
+                    ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()];
+                }
+
+                //Set the custom data to return
+                loadSet.CustomData[AdapterId] = ramLoadSet.lUID;
+            }           
+
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+
             return true;
         }
 
