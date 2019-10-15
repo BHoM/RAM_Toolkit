@@ -26,7 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BH.Adapter;
-using BH.Engine.RAM;
+using BH.Engine.Adapters.RAM;
 using RAMDATAACCESSLib;
 using System.IO;
 using System.Net.NetworkInformation;
@@ -46,7 +46,7 @@ namespace BH.Adapter.RAM
 
             if (Active)
             {
-                AdapterId = BH.Engine.RAM.Convert.AdapterId;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
+                AdapterId = BH.Engine.Adapters.RAM.Convert.AdapterId;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
 
                 Config.SeparateProperties = true;   //Set to true to push dependant properties of objects before the main objects are being pushed. Example: push nodes before pushing bars
                 Config.MergeWithComparer = true;    //Set to true to use EqualityComparers to merge objects. Example: merge nodes in the same location

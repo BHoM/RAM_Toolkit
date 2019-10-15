@@ -7,7 +7,7 @@ using BH.oM.Base;
 using BH.oM.Structure.Results;
 using BH.oM.Geometry;
 
-namespace BH.oM.Structure.Results
+namespace BH.oM.Adapters.RAM
 {
     public class RAMPointGravityLoad : BHoMObject
     {

@@ -36,7 +36,7 @@ using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.Results;
 using RAMDATAACCESSLib;
 
-namespace BH.Engine.RAM
+namespace BH.Engine.Adapters.RAM
 {
     public static partial class Convert
     {
