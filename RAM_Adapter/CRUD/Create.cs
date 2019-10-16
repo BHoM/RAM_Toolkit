@@ -802,22 +802,22 @@ namespace BH.Adapter.RAM
                 //Check which live load case has been applied, to set load type. Not currently checking if more than one has been set.
                 Engine.Reflection.Compute.RecordNote("If more than one live load has been set, only the first one will be applied");
 
-                if (loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()] != 0)
+                if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveLCa.ToString()))
                 {
                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveReducibleLCa;
                     ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()];
                 }
-                else if (loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()] != 0)
+                else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveStorageLCa.ToString()))
                 {
                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveStorageLCa;
                     ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()];
                 }
-                else if (loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()] != 0)
+                else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveUnReducibleLCa.ToString()))
                 {
                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveUnReducibleLCa;
                     ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()];
                 }
-                else if (loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()] != 0)
+                else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveRoofLCa.ToString()))
                 {
                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveRoofLCa;
                     ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()];
