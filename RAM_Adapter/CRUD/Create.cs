@@ -37,6 +37,7 @@ using BH.Engine.Geometry;
 using BH.Engine.Structure;
 using BH.Engine.Adapters.RAM;
 using BH.oM.Adapters.RAM;
+using BH.oM.Structure.Loads;
 
 
 
@@ -826,6 +827,44 @@ namespace BH.Adapter.RAM
                 //Set the custom data to return
                 loadSet.CustomData[AdapterId] = ramLoadSet.lUID;
             }           
+
+            //Save file
+            RAMDataAccIDBIO.SaveDatabase();
+            // Release main interface and delete user file
+            RAMDataAccIDBIO = null;
+
+            return true;
+        }
+
+        /***************************************************/
+
+        private bool CreateCollection(IEnumerable<ContourLoad> loads)
+        {
+            //Access model
+            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);            
+
+            foreach (ContourLoad load in loads)
+            {
+                //Ensure points describe a closed polyline
+                List<Point> loadPoints = load.Contour.ControlPoints();
+                if (loadPoints.First() != loadPoints.Last())
+                {
+                    loadPoints.Add(loadPoints.Last().Clone());
+                }
+
+                //Find the layout to apply to
+                IStories ramStories = ramModel.GetStories();
+                IStory loadStory = load.GetStory(StructuralUsage2D.Slab, ramStories); // write getStory() for contourloads (or polylines)
+                IFloorType floorType = loadStory.GetFloorType();
+
+                ISurfaceLoadSets floorLoads = floorType.GetSurfaceLoadSets2();
+                int nextId = floorLoads.GetCount();
+                ISurfaceLoadSet ramLoad = floorLoads.Add(nextId, loadPoints.Count());
+                ramLoad.SetPoints(loadPoints.ToRAM); // write ToRAM(Points) which returns IPoints, or figure out how to set existing IPoints object to our points.
+                ramLoad.lPropertySetUID = load.UniformLoadSet.CustomData[AdapterId].TolUID(); // need to get the uniform load set out of a ContourLoad. Invent a new object? Not sure.
+                
+            }
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
