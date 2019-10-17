@@ -855,13 +855,13 @@ namespace BH.Adapter.RAM
 
                 //Find the layout to apply to
                 IStories ramStories = ramModel.GetStories();
-                IStory loadStory = loadPoints.First().GetStory(ramStories); // write getStory() for contourloads (or polylines)
+                IStory loadStory = loadPoints.First().GetStory(ramStories);
                 IFloorType floorType = loadStory.GetFloorType();
 
                 ISurfaceLoadSets floorLoads = floorType.GetSurfaceLoadSets2();
                 int nextId = floorLoads.GetCount();
                 ISurfaceLoadSet ramLoad = floorLoads.Add(nextId, loadPoints.Count());
-                ramLoad.SetPoints(loadPoints.ToRAM); // write ToRAM(Points) which returns IPoints, or figure out how to set existing IPoints object to our points.
+                ramLoad.SetPoints(loadPoints.ToRAM()); // write ToRAM(Points) which returns IPoints, or figure out how to set existing IPoints object to our points.
                 ramLoad.lPropertySetUID = load.UniformLoadSet.CustomData[AdapterId].TolUID(); // need to get the uniform load set out of a ContourLoad. Invent a new object? Not sure.
                 
             }
