@@ -131,7 +131,14 @@ namespace BH.Engine.Adapters.RAM
 
         public static IStory GetStory(this Node node, IStories ramStories)
         {
-            double elev = node.Position().Z;
+            return node.Position.GetStory(ramStories);
+        }
+
+        /***************************************************/
+
+        public static IStory GetStory(this Point point, IStories ramStories)
+        {
+            double elev = point.Z;
 
             //There must be a better way to iterate over IStories
             List<IStory> storeys = new List<IStory>();
