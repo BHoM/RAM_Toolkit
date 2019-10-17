@@ -855,7 +855,7 @@ namespace BH.Adapter.RAM
 
                 //Find the layout to apply to
                 IStories ramStories = ramModel.GetStories();
-                IStory loadStory = load.GetStory(StructuralUsage2D.Slab, ramStories); // write getStory() for contourloads (or polylines)
+                IStory loadStory = loadPoints.First().GetStory(ramStories); // write getStory() for contourloads (or polylines)
                 IFloorType floorType = loadStory.GetFloorType();
 
                 ISurfaceLoadSets floorLoads = floorType.GetSurfaceLoadSets2();
