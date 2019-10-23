@@ -57,6 +57,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Loads\ContourLoadSet.cs" />
     <Compile Include="RAMLoadCases.cs" />
     <Compile Include="Loads\UniformLoadSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

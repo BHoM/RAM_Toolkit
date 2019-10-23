@@ -838,13 +838,13 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<ContourLoad> loads)
+        private bool CreateCollection(IEnumerable<ContourLoadSet> loads)
         {
             //Access model
             IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
             IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);            
 
-            foreach (ContourLoad load in loads)
+            foreach (ContourLoadSet load in loads)
             {
                 //Ensure points describe a closed polyline
                 List<Point> loadPoints = load.Contour.ControlPoints();
@@ -861,8 +861,8 @@ namespace BH.Adapter.RAM
                 ISurfaceLoadSets floorLoads = floorType.GetSurfaceLoadSets2();
                 int nextId = floorLoads.GetCount();
                 ISurfaceLoadSet ramLoad = floorLoads.Add(nextId, loadPoints.Count());
-                ramLoad.SetPoints(loadPoints.ToRAM()); // write ToRAM(Points) which returns IPoints, or figure out how to set existing IPoints object to our points.
-                ramLoad.lPropertySetUID = load.UniformLoadSet.CustomData[AdapterId].TolUID(); // need to get the uniform load set out of a ContourLoad. Invent a new object? Not sure.
+                ramLoad.SetPoints((IPoints)loadPoints.Select(x => x.ToRAM()));
+                ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterId];
                 
             }
 
