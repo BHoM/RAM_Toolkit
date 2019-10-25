@@ -14,7 +14,7 @@ namespace BH.Engine.Adapters.RAM
 {
     public static partial class Create
     {
-        public static UniformLoadSet CreateRAMUniformLoadSet(string name, double sdl, double cdl, double liveLoad, int llType, double partition, double cll, double massDl)
+        public static UniformLoadSet CreateRAMUniformLoadSet(double sdl, double cdl, double liveLoad, int llType, double partition, double cll, double massDl, string name = "")
         {
 
             UniformLoadSet loadSet = new UniformLoadSet

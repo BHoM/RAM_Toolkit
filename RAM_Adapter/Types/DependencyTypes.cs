@@ -26,6 +26,7 @@ using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.MaterialFragments;
 using BH.oM.Geometry.SettingOut;
+using BH.oM.Adapters.RAM;
 using System;
 using System.Collections.Generic;
 
@@ -74,7 +75,8 @@ namespace BH.Adapter.RAM
             //{typeof(RigidLink), new List<Type> { typeof(LinkConstraint), typeof(Node) } },
             //{typeof(MeshFace), new List<Type> { typeof(ISurfaceProperty), typeof(Node) } },
             {typeof(ISurfaceProperty), new List<Type> { typeof(IMaterialFragment) } },
-            {typeof(Panel), new List<Type> { typeof(ISurfaceProperty) } }
+            {typeof(Panel), new List<Type> { typeof(ISurfaceProperty) } },
+            {typeof(ContourLoadSet), new List<Type> { typeof(UniformLoadSet) } }
         };
 
 
