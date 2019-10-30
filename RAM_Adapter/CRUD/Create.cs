@@ -875,25 +875,25 @@ namespace BH.Adapter.RAM
                 //Find the layout to apply to
                 IStories ramStories = ramModel.GetStories();
                 IStory loadStory = loadPoints.First().GetStory(ramStories);
+                double storyElev = loadStory.dElevation;
                 IFloorType floorType = loadStory.GetFloorType();
 
                 ISurfaceLoadSets floorLoads = floorType.GetSurfaceLoadSets2();
                 int nextId = floorLoads.GetCount();
-                ISurfaceLoadSet ramLoad = floorLoads.Add(nextId, 0);
+                ISurfaceLoadSet ramLoad = floorLoads.Add(nextId, loadPoints.Count());
                 IPoints verticePoints = ramLoad.GetPoints();
 
                 List<SCoordinate> checkList = new List<SCoordinate>();
                 SCoordinate verticeCoord;
-                IPoint verticePoint;
                 SCoordinate coordCheck = new SCoordinate();
 
                 //IPoint causing issues, frozen database, same as Deck
                 for (int i = 0; i<loadPoints.Count(); i++)
                 {
                     verticeCoord = loadPoints[i].ToRAM();
-                    verticePoint = verticePoints.Add(verticeCoord);
-                    verticePoint.GetCoordinate(coordCheck);
-                    checkList.Add(coordCheck);
+                    verticePoints.Delete(i);
+                    verticePoints.InsertAt2(i, verticeCoord.dXLoc, verticeCoord.dYLoc, storyElev);
+                    checkList.Add(verticeCoord);
                 }
                 ramLoad.SetPoints(verticePoints);
 
