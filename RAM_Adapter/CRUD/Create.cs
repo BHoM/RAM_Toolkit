@@ -50,7 +50,7 @@ namespace BH.Adapter.RAM
         /**** Adapter overload method                   ****/
         /***************************************************/
 
-        protected override bool Create<T>(IEnumerable<T> objects, bool replaceAll = true)
+        protected override bool Create<T>(IEnumerable<T> objects)
         {
             bool success = true;        //boolean returning if the creation was successful or not
 
