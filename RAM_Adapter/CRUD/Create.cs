@@ -892,7 +892,7 @@ namespace BH.Adapter.RAM
                 {
                     verticeCoord = loadPoints[i].ToRAM();
                     verticePoints.Delete(i);
-                    verticePoints.InsertAt2(i, verticeCoord.dXLoc, verticeCoord.dYLoc, storyElev);
+                    verticePoints.InsertAt2(i, verticeCoord.dXLoc, verticeCoord.dYLoc, 0);
                     checkList.Add(verticeCoord);
                 }
                 ramLoad.SetPoints(verticePoints);

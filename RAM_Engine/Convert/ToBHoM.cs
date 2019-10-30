@@ -34,6 +34,7 @@ using BH.oM.Structure.Constraints;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.Results;
+using BH.oM.Adapters.RAM;
 using RAMDATAACCESSLib;
 
 namespace BH.Engine.Adapters.RAM
@@ -76,7 +77,7 @@ namespace BH.Engine.Adapters.RAM
 
         /***************************************************/
         
-        public static Polyline ToPolyline(this IPoints IPoints)
+        public static Polyline ToPolyline(this IPoints IPoints, double zShift = 0)
         {
             List<Point> controlPts = new List<Point>();
             SCoordinate SCoordPt = new SCoordinate();
@@ -86,7 +87,7 @@ namespace BH.Engine.Adapters.RAM
                 //Get Polyline Pts
                 IPoint IPoint = IPoints.GetAt(i);
                 IPoint.GetCoordinate(ref SCoordPt);
-                Point controlPt = new BH.oM.Geometry.Point() { X = SCoordPt.dXLoc, Y = SCoordPt.dYLoc, Z = SCoordPt.dZLoc };
+                Point controlPt = new BH.oM.Geometry.Point() { X = SCoordPt.dXLoc, Y = SCoordPt.dYLoc, Z = SCoordPt.dZLoc + zShift};
                 controlPts.Add(controlPt);
             }
 
@@ -942,5 +943,64 @@ namespace BH.Engine.Adapters.RAM
 
         /***************************************************/
 
+        public static ContourLoadSet ToBHoMObject(this ISurfaceLoadSet srfLoadSet, IModel ramModel, IStory ramStory)
+        {
+            // Get srf load outline
+            List<Point> srfLoadContourPts = new List<Point>();
+            SCoordinate srfPolyCoord = new SCoordinate();
+            double elev = ramStory.dElevation;
+
+            IPoints srfPolyPts = srfLoadSet.GetPoints();
+
+            Polyline srfLoadContour = ToPolyline(srfPolyPts, elev);
+
+            // Get srf load props
+            UniformLoadSet ramLoadSet = null;
+            int propUID = srfLoadSet.lPropertySetUID;
+
+            ISurfaceLoadPropertySets srfLoadPropSets = ramModel.GetSurfaceLoadPropertySets();
+            ISurfaceLoadPropertySet srfProps = srfLoadPropSets.Get(propUID);
+            ramLoadSet = srfProps.ToBHoMObject();
+
+            ContourLoadSet srfLoad = new ContourLoadSet
+            {
+                Contour = srfLoadContour,
+                UniformLoadSet = ramLoadSet
+            };
+
+            // Unique RAM ID
+            srfLoad.CustomData["lUID"] = srfLoadSet.lUID;
+
+            return srfLoad;
+        }
+
+
+        /***************************************************/
+
+        public static UniformLoadSet ToBHoMObject(this ISurfaceLoadPropertySet srfLoadPropSet)
+        {
+            Dictionary<string, double> loads = new Dictionary<string, double>();
+            loads.Add("CDL", srfLoadPropSet.dConstDeadLoad);
+            loads.Add("CLL", srfLoadPropSet.dConstLiveLoad);
+            loads.Add("DL", srfLoadPropSet.dDeadLoad);
+            loads.Add(srfLoadPropSet.eLiveLoadType.ToString(), srfLoadPropSet.dConstLiveLoad);
+            loads.Add("MDL", srfLoadPropSet.dMassDeadLoad);
+            loads.Add("PL", srfLoadPropSet.dPartitionLoad);
+
+            UniformLoadSet uniformLoadSet = new UniformLoadSet
+            {
+                Loads = loads
+            };
+
+            uniformLoadSet.Name = srfLoadPropSet.strLabel;
+            
+            // Unique RAM ID
+            uniformLoadSet.CustomData["lUID"] = srfLoadPropSet.lUID;
+
+            return uniformLoadSet;
+        }
+
+
+        /***************************************************/
     }
 }
