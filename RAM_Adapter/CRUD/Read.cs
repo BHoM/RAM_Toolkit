@@ -74,6 +74,8 @@ namespace BH.Adapter.RAM
                 return ReadLineGravityLoad(ids as dynamic);
             else if (type == typeof(RAMFactoredEndReactions))
                 return ReadBeamEndReactions(ids as dynamic);
+            else if (type == typeof(ContourLoadSet))
+                return ReadContourLoadSets(ids as dynamic);
 
             return null;
         }
@@ -332,6 +334,37 @@ namespace BH.Adapter.RAM
 
             }
             return bhomPanels;
+        }
+
+        /***************************************************/
+
+        private List<ContourLoadSet> ReadContourLoadSets(List<string> ids = null)
+        {
+            //Implement code for reading Contour Load Sets
+            List<ContourLoadSet> bhomContourLoadSets = new List<ContourLoadSet>();
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            //Get stories
+            IStories IStories = IModel.GetStories();
+            int numStories = IStories.GetCount();
+
+            // Get all elements on each story
+            for (int i = 0; i < numStories; i++)
+            {
+                IFloorType floorType = IStories.GetAt(i).GetFloorType();
+                //Get contour load sets per story
+                ISurfaceLoadSets srfLoadSets = floorType.GetSurfaceLoadSets2();
+                int numSrfLoads = srfLoadSets.GetCount();
+
+                for (int j = 0; j<numSrfLoads; j++)
+                {
+                    ISurfaceLoadSet srfLoadSet = srfLoadSets.GetAt(j);
+                    ContourLoadSet srfLoad = srfLoadSet.ToBHoMObject(IModel, IStories.GetAt(i));
+                    bhomContourLoadSets.Add(srfLoad);
+                }
+            }
+
+            return bhomContourLoadSets;
         }
 
         /***************************************************/
