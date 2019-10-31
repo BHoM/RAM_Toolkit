@@ -585,24 +585,24 @@ namespace BH.Engine.Adapters.RAM
             List<Opening> bhomWallOpenings = new List<Opening>();
 
             // Create openings (disabled, causing database freeze)
-            //IFinalWallOpenings IFinalWallOpenings = ramWall.GetFinalOpenings();
+            IFinalWallOpenings IFinalWallOpenings = ramWall.GetFinalOpenings();
 
-            //for (int i = 0; i < IFinalWallOpenings.GetCount(); i++)
-            //{
-            //    IFinalWallOpening IFinalWallOpening = IFinalWallOpenings.GetAt(i);
-            //    IPoints openingPts = IFinalWallOpening.GetOpeningVertices();
+            for (int i = 0; i < IFinalWallOpenings.GetCount(); i++)
+            {
+                IFinalWallOpening IFinalWallOpening = IFinalWallOpenings.GetAt(i);
+                IPoints openingPts = IFinalWallOpening.GetOpeningVertices();
 
-            //    Re-add first point to close Polygon
-            //    IPoint firstOPt = openingPts.GetAt(0);
-            //    SCoordinate firstOCoord = new SCoordinate();
-            //    firstOPt.GetCoordinate(ref firstOCoord);
-            //    openingPts.Add(firstOCoord);
+                //Re-add first point to close Polygon
+                IPoint firstOPt = openingPts.GetAt(0);
+                SCoordinate firstOCoord = new SCoordinate();
+                firstOPt.GetCoordinate(ref firstOCoord);
+                openingPts.Add(firstOCoord);
 
-            //    ICurve wallOpeningOutline = ToPolyline(openingPts);
+                ICurve wallOpeningOutline = ToPolyline(openingPts);
 
-            //    Opening bhomOpening = Structure.Create.Opening(wallOpeningOutline);
-            //    bhomWallOpenings.Add(bhomOpening);
-            //}
+                Opening bhomOpening = Structure.Create.Opening(wallOpeningOutline);
+                bhomWallOpenings.Add(bhomOpening);
+            }
 
             //  Create wall
             Panel bhomPanel = Structure.Create.Panel(outline, bhomWallOpenings);
