@@ -55,7 +55,7 @@ namespace BH.Adapter.RAM
                 IDBIO1 RAMDataAccIDBIO;
                 IModel IModel;
 
-                //CASE01 :  if NO filepath is proivded and NO .rss file exists 
+                //CASE01 :  if NO filepath is provided and NO .rss file exists 
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
 
                 if (filePath == "" && !File.Exists(filePath))

@@ -580,40 +580,35 @@ namespace BH.Engine.Adapters.RAM
             Polyline outline = new Polyline();
             outline.ControlPoints = corners;
 
-            // Create openings
-            IFinalWallOpenings IFinalWallOpenings = ramWall.GetFinalOpenings();
-
             //Create opening outlines
             List<ICurve> wallOpeningPLs = new List<ICurve>();
             List<Opening> bhomWallOpenings = new List<Opening>();
 
-            for (int i = 0; i < IFinalWallOpenings.GetCount(); i++)
-            {
-                IFinalWallOpening IFinalWallOpening = IFinalWallOpenings.GetAt(i);
-                IPoints openingPts = IFinalWallOpening.GetOpeningVertices();
+            // Create openings (disabled, causing database freeze)
+            //IFinalWallOpenings IFinalWallOpenings = ramWall.GetFinalOpenings();
 
-                //Re-add first point to close Polygon
-                IPoint firstOPt = openingPts.GetAt(0);
-                SCoordinate firstOCoord = new SCoordinate();
-                firstOPt.GetCoordinate(ref firstOCoord);
-                openingPts.Add(firstOCoord);
+            //for (int i = 0; i < IFinalWallOpenings.GetCount(); i++)
+            //{
+            //    IFinalWallOpening IFinalWallOpening = IFinalWallOpenings.GetAt(i);
+            //    IPoints openingPts = IFinalWallOpening.GetOpeningVertices();
 
-                ICurve wallOpeningOutline = ToPolyline(openingPts);
+            //    Re-add first point to close Polygon
+            //    IPoint firstOPt = openingPts.GetAt(0);
+            //    SCoordinate firstOCoord = new SCoordinate();
+            //    firstOPt.GetCoordinate(ref firstOCoord);
+            //    openingPts.Add(firstOCoord);
 
-                Opening bhomOpening = Structure.Create.Opening(wallOpeningOutline);
-                bhomWallOpenings.Add(bhomOpening);
-            }
+            //    ICurve wallOpeningOutline = ToPolyline(openingPts);
+
+            //    Opening bhomOpening = Structure.Create.Opening(wallOpeningOutline);
+            //    bhomWallOpenings.Add(bhomOpening);
+            //}
 
             //  Create wall
-            Panel bhomPanel = Structure.Create.Panel(outline,bhomWallOpenings);
+            Panel bhomPanel = Structure.Create.Panel(outline, bhomWallOpenings);
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
-
-
-            //Extract properties
-            List<string> CustomProps = new List<string>();
-            EMATERIALTYPES material = ramWall.eMaterial;
 
             //Get wall section property
             ConstantThickness wall2DProp = new ConstantThickness();
@@ -646,6 +641,7 @@ namespace BH.Engine.Adapters.RAM
             bhomPanel.Tags.Add("Wall");
 
             return bhomPanel;
+
         }
 
         /***************************************************/
