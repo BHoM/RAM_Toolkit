@@ -49,6 +49,7 @@ namespace BH.Adapter.RAM
         /***************************************************/
         protected override IEnumerable<IBHoMObject> Read(Type type, IList ids)
         {
+
             //Choose what to pull out depending on the type. Also see example methods below for pulling out bars and dependencies
             if (type == typeof(Bar))
                 return ReadBars(ids as dynamic);
@@ -284,9 +285,11 @@ namespace BH.Adapter.RAM
 
         private List<Panel> ReadPanels(List<string> ids = null)
         {
+            //Access model
+            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            
             //Implement code for reading panels
             List<Panel> bhomPanels = new List<Panel>();
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             //Get stories
             IStories IStories = IModel.GetStories();
@@ -333,6 +336,7 @@ namespace BH.Adapter.RAM
                 }
 
             }
+
             return bhomPanels;
         }
 

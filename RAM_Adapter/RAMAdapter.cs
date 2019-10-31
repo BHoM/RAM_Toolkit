@@ -52,8 +52,8 @@ namespace BH.Adapter.RAM
 
                 m_RAMApplication = null;
                 m_RAMApplication = new RamDataAccess1();
-                IDBIO1 RAMDataAccIDBIO;
-                IModel IModel;
+                IDBIO1 RAMDataAccIDBIO = null;
+                IModel IModel = null;
 
                 //CASE01 :  if NO filepath is provided and NO .rss file exists 
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
@@ -116,11 +116,15 @@ namespace BH.Adapter.RAM
 
                         string fileName = Path.GetFileName(filePath);
                         string fileNameRAM = fileName.Replace(".rss", ".ram");
+                        string fileNameDbSdf = fileName.Replace(".rss", ".db.sdf");
                         //Two possible working dirs depending on install
                         string filePathWorkingDir1 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Working\\";
                         string filePathWorkingDir2 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Working\\";
                         string filePathTempRAMFile1 = filePathWorkingDir1 + fileNameRAM;
                         string filePathTempRAMFile2 = filePathWorkingDir2 + fileNameRAM;
+                        string filePathTempDBFile1 = filePathWorkingDir1 + fileNameDbSdf;
+                        string filePathTempDBFile2 = filePathWorkingDir2 + fileNameDbSdf;
+
                         //Delete .ram file in working directory if it exists
                         if (File.Exists(filePathTempRAMFile1))
                         {
@@ -132,6 +136,19 @@ namespace BH.Adapter.RAM
                         }
 
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+
+                        //Check if temp db.sdf file is read-only
+                        if (File.Exists(filePathTempDBFile1))
+                        {
+                            try { File.Delete(filePathTempDBFile1); }
+                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close and reopen."); }
+                        }
+                        if (File.Exists(filePathTempDBFile2))
+                        {
+                            try { File.Delete(filePathTempDBFile2); }
+                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close and reopen."); }
+                        }
+
                         double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper"); //if 0 successful
 
                         //check if data base is properly loaded
