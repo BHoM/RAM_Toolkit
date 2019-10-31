@@ -50,35 +50,36 @@ namespace BH.Adapter.RAM
         protected override IEnumerable<IBHoMObject> Read(Type type, IList ids)
         {
 
+            dynamic elems = null;
             //Choose what to pull out depending on the type. Also see example methods below for pulling out bars and dependencies
             if (type == typeof(Bar))
-                return ReadBars(ids as dynamic);
+                elems = ReadBars(ids as dynamic);
             else if (type == typeof(ISectionProperty) || type.GetInterfaces().Contains(typeof(ISectionProperty)))
-                return ReadSectionProperties(ids as dynamic);
+                elems = ReadSectionProperties(ids as dynamic);
             else if (type == typeof(IMaterialFragment))
-                return ReadMaterials(ids as dynamic);
+                elems = ReadMaterials(ids as dynamic);
             else if (type == typeof(Panel))
-                return ReadPanels(ids as dynamic);
+                elems = ReadPanels(ids as dynamic);
             else if (type == typeof(ISurfaceProperty))
-                return ReadISurfaceProperties(ids as dynamic);
+                elems = ReadISurfaceProperties(ids as dynamic);
             else if (type == typeof(LoadCombination))
-                return ReadLoadCombination(ids as dynamic);
+                elems = ReadLoadCombination(ids as dynamic);
             else if (type == typeof(Loadcase))
-                return ReadLoadCase(ids as dynamic);
+                elems = ReadLoadCase(ids as dynamic);
             else if (type == typeof(Level))
-                return ReadLevel(ids as dynamic);
+                elems = ReadLevel(ids as dynamic);
             else if (type == typeof(Grid))
-                return ReadGrid(ids as dynamic);
+                elems = ReadGrid(ids as dynamic);
             else if (type == typeof(RAMPointGravityLoad))
-                return ReadPointGravityLoad(ids as dynamic);
+                elems = ReadPointGravityLoad(ids as dynamic);
             else if (type == typeof(RAMLineGravityLoad))
-                return ReadLineGravityLoad(ids as dynamic);
+                elems = ReadLineGravityLoad(ids as dynamic);
             else if (type == typeof(RAMFactoredEndReactions))
-                return ReadBeamEndReactions(ids as dynamic);
+                elems = ReadBeamEndReactions(ids as dynamic);
             else if (type == typeof(ContourLoadSet))
-                return ReadContourLoadSets(ids as dynamic);
+                elems = ReadContourLoadSets(ids as dynamic);
 
-            return null;
+            return elems;
         }
 
         /***************************************************/
