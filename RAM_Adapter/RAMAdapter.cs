@@ -43,6 +43,12 @@ namespace BH.Adapter.RAM
         //Add any applicable constructors here, such as linking to a specific file or anything else as well as linking to that file through the (if existing) com link via the API
         public RAMAdapter(string filePath = "", bool Active = false)
         {
+            //Close any open databse
+            if (!Active)
+            {
+                if (RAMDataAccIDBIO != null)
+                { RAMDataAccIDBIO.CloseDatabase(); }
+            }
 
             if (Active)
             {
@@ -52,8 +58,7 @@ namespace BH.Adapter.RAM
 
                 m_RAMApplication = null;
                 m_RAMApplication = new RamDataAccess1();
-                IDBIO1 RAMDataAccIDBIO = null;
-                IModel IModel = null;
+                RAMDataAccIDBIO = null;
 
                 //CASE01 :  if NO filepath is provided and NO .rss file exists 
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
@@ -64,8 +69,7 @@ namespace BH.Adapter.RAM
                     try
                     {
                         RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                        // Object Model Interface
-                        IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                        // Create DB
                         RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
                         // Delete usr file
                         File.Delete(filePathNew.Replace(".rss", ".usr"));
@@ -95,8 +99,7 @@ namespace BH.Adapter.RAM
                         try
                         {
                             RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                            // Object Model Interface
-                            IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                            // Create DB
                             RAMDataAccIDBIO.CreateNewDatabase2(filePath, EUnits.eUnitsEnglish, "Grasshopper");
                             // Delete usr file
                             File.Delete(filePath.Replace(".rss", ".usr"));
@@ -135,20 +138,20 @@ namespace BH.Adapter.RAM
                             File.Delete(filePathTempRAMFile2);
                         }
 
-                        RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-
                         //Check if temp db.sdf file is read-only
                         if (File.Exists(filePathTempDBFile1))
                         {
                             try { File.Delete(filePathTempDBFile1); }
-                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close and reopen."); }
+                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
                         }
                         if (File.Exists(filePathTempDBFile2))
                         {
                             try { File.Delete(filePathTempDBFile2); }
-                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close and reopen."); }
+                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
                         }
 
+                        RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                        
                         double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper"); //if 0 successful
 
                         //check if data base is properly loaded
@@ -171,16 +174,14 @@ namespace BH.Adapter.RAM
                             throw new ArgumentException("Failed to read .ram file.");
                         }
 
-                        // Object Model Interface
-                        IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
                         // Delete usr file
                         System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
                     }
 
                 }//check of filepath ends here
 
-
+                // Object Model Interface
+                m_RAMModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
             }
 
         }
@@ -195,6 +196,8 @@ namespace BH.Adapter.RAM
         //private SoftwareComLink m_softwareNameCom;
 
         private RamDataAccess1 m_RAMApplication;
+        private IDBIO1 RAMDataAccIDBIO;
+        private IModel m_RAMModel;
 
         /***************************************************/
 

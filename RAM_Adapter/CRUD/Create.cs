@@ -76,12 +76,8 @@ namespace BH.Adapter.RAM
             //Code for creating a collection of bars in the software
             List<Bar> bars = bhomBars.ToList();
 
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
             //Get the stories in the model
-            IStories ramStories = IModel.GetStories();
+            IStories ramStories = m_RAMModel.GetStories();
 
             //Cycle through bars, split to beam and col lists, then add to corresponding story.
             List<Bar> barBeams = new List<Bar>();
@@ -235,9 +231,6 @@ namespace BH.Adapter.RAM
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
 
-            // Release main interface and delete user file
-            RAMDataAccIDBIO = null;
-            //System.IO.File.Delete(filePathUserfile);
             return true;
         }
 
@@ -325,14 +318,10 @@ namespace BH.Adapter.RAM
                 }
             }
 
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-            ramStories = ramModel.GetStories();
+            ramStories = m_RAMModel.GetStories();
 
             //Get concrete deck properties
-            IConcSlabProps ramConcSlabProps = ramModel.GetConcreteSlabProps();
+            IConcSlabProps ramConcSlabProps = m_RAMModel.GetConcreteSlabProps();
 
             // Cycle through floors and create on story
             foreach (Panel panel in floors)
@@ -480,10 +469,6 @@ namespace BH.Adapter.RAM
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
 
-            // Release main interface and delete user file
-            RAMDataAccIDBIO = null;
-            //System.IO.File.Delete(filePathUserfile);
-
             return true;
         }
 
@@ -518,17 +503,13 @@ namespace BH.Adapter.RAM
                 IFloorType ramFloorType = null;
                 IStories ramStories;
 
-                //Access model
-                IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
                 //Create floor type at each level
                 for (int i = 0; i < sortedBhomLevels.Count(); i++)
                 {
                     Level level = sortedBhomLevels.ElementAt(i);
 
                     // Get elevations and skip if level elevation already in RAM
-                    ramStories = IModel.GetStories();
+                    ramStories = m_RAMModel.GetStories();
                     List<double> ramElevs = new List<double>();
                     for (int j = 0; j < ramStories.GetCount(); j++)
                     {
@@ -560,7 +541,7 @@ namespace BH.Adapter.RAM
                         }
 
                         List<string> ramFloorTypeNames = new List<string>();
-                        ramFloorTypes = IModel.GetFloorTypes();
+                        ramFloorTypes = m_RAMModel.GetFloorTypes();
                         Boolean floorTypeExists = false;
                         for (int j = 0; j < ramFloorTypes.GetCount(); j++)
                         {
@@ -597,8 +578,6 @@ namespace BH.Adapter.RAM
 
                 //Save file
                 RAMDataAccIDBIO.SaveDatabase();
-                // Release main interface and delete user file
-                RAMDataAccIDBIO = null;
 
             }
 
@@ -610,18 +589,11 @@ namespace BH.Adapter.RAM
 
         private bool CreateCollection(IEnumerable<Grid> bhomGrid)
         {
-            //Code for creating a Grid System in the software
-
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-
             // Register GridSystems
-            IGridSystems ramGridSystems = ramModel.GetGridSystems();
+            IGridSystems ramGridSystems = m_RAMModel.GetGridSystems();
 
             // Register FloorTypes
-            IFloorTypes ramFloorTypes = ramModel.GetFloorTypes();
+            IFloorTypes ramFloorTypes = m_RAMModel.GetFloorTypes();
 
             // initializa a BhoM grid
             List<Grid> Grids = bhomGrid.ToList();
@@ -643,7 +615,6 @@ namespace BH.Adapter.RAM
             IModelGrids ramModelGridsXY = null;
             //IModelGrids ramModelGridsRad = null;
             //IModelGrids ramModelGridsSk = null;
-
 
 
             //Loop through the BHoM grids and sort per type (x,y,radial, circular, skewed) 
@@ -774,8 +745,7 @@ namespace BH.Adapter.RAM
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
-            // Release main interface and delete user file
-            RAMDataAccIDBIO = null;
+
             return true;
         }
 
@@ -783,13 +753,9 @@ namespace BH.Adapter.RAM
 
         private bool CreateCollection(IEnumerable<UniformLoadSet> loadSets)
         {
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
             foreach (UniformLoadSet loadSet in loadSets)
             {
-                ISurfaceLoadPropertySets ramSurfaceLoadPropertySets = ramModel.GetSurfaceLoadPropertySets();
+                ISurfaceLoadPropertySets ramSurfaceLoadPropertySets = m_RAMModel.GetSurfaceLoadPropertySets();
 
                 int existingLoadPropSetID = 0;
 
@@ -849,8 +815,6 @@ namespace BH.Adapter.RAM
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
-            // Release main interface and delete user file
-            RAMDataAccIDBIO = null;
 
             return true;
         }
@@ -859,10 +823,6 @@ namespace BH.Adapter.RAM
 
         private bool CreateCollection(IEnumerable<ContourLoadSet> loads)
         {
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);            
-
             foreach (ContourLoadSet load in loads)
             {
                 //Ensure points describe a closed polyline
@@ -873,7 +833,7 @@ namespace BH.Adapter.RAM
                 }
 
                 //Find the layout to apply to
-                IStories ramStories = ramModel.GetStories();
+                IStories ramStories = m_RAMModel.GetStories();
                 IStory loadStory = loadPoints.First().GetStory(ramStories);
                 double storyElev = loadStory.dElevation;
                 IFloorType floorType = loadStory.GetFloorType();
@@ -903,8 +863,6 @@ namespace BH.Adapter.RAM
 
             //Save file
             RAMDataAccIDBIO.SaveDatabase();
-            // Release main interface and delete user file
-            RAMDataAccIDBIO = null;
 
             return true;
         }
