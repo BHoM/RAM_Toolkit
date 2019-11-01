@@ -105,10 +105,9 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading bars
             List<Bar> bhomBars = new List<Bar>();
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             // Get stories
-            IStories IStories = IModel.GetStories();
+            IStories IStories = m_RAMModel.GetStories();
             int numStories = IStories.GetCount();
 
             // Get all elements on each story
@@ -245,8 +244,7 @@ namespace BH.Adapter.RAM
             //Implement code for reading loadcases
             List<Loadcase> bhomLoadCases = new List<Loadcase>();
 
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            ILoadCases ILoadCases = IModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
+            ILoadCases ILoadCases = m_RAMModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
 
             for (int i = 0; i < ILoadCases.GetCount(); i++)
             {
@@ -267,14 +265,13 @@ namespace BH.Adapter.RAM
             //Implement code for reading loadcombinations
             List<LoadCombination> bhomLoadCombinations = new List<LoadCombination>();
 
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            ILoadCombinations ILoadCombinations = IModel.GetLoadCombinations(COMBO_MATERIAL_TYPE.ANALYSIS_CUSTOM);
+            ILoadCombinations ILoadCombinations = m_RAMModel.GetLoadCombinations(COMBO_MATERIAL_TYPE.ANALYSIS_CUSTOM);
 
             for (int i = 0; i < ILoadCombinations.GetCount(); i++)
             {
                 //Get LoadCombinations
                 ILoadCombination ILoadCombination = ILoadCombinations.GetAt(i);
-                LoadCombination bhomLoadCombination = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IModel, ILoadCombination);
+                LoadCombination bhomLoadCombination = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(m_RAMModel, ILoadCombination);
                 bhomLoadCombinations.Add(bhomLoadCombination);
             }
 
@@ -285,15 +282,12 @@ namespace BH.Adapter.RAM
         /***************************************************/
 
         private List<Panel> ReadPanels(List<string> ids = null)
-        {
-            //Access model
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            
+        {            
             //Implement code for reading panels
             List<Panel> bhomPanels = new List<Panel>();
 
             //Get stories
-            IStories IStories = IModel.GetStories();
+            IStories IStories = m_RAMModel.GetStories();
             int numStories = IStories.GetCount();
 
             // Get all elements on each story
@@ -327,7 +321,7 @@ namespace BH.Adapter.RAM
                     IDeck IDeck = IDecks.GetAt(j);
                     try
                     {
-                        Panel Panel = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IDeck, IModel, IStoryUID);
+                        Panel Panel = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IDeck, m_RAMModel, IStoryUID);
                         bhomPanels.Add(Panel);
                     }
                     catch
@@ -347,10 +341,9 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Contour Load Sets
             List<ContourLoadSet> bhomContourLoadSets = new List<ContourLoadSet>();
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             //Get stories
-            IStories IStories = IModel.GetStories();
+            IStories IStories = m_RAMModel.GetStories();
             int numStories = IStories.GetCount();
 
             // Get all elements on each story
@@ -364,7 +357,7 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j<numSrfLoads; j++)
                 {
                     ISurfaceLoadSet srfLoadSet = srfLoadSets.GetAt(j);
-                    ContourLoadSet srfLoad = srfLoadSet.ToBHoMObject(IModel, IStories.GetAt(i));
+                    ContourLoadSet srfLoad = srfLoadSet.ToBHoMObject(m_RAMModel, IStories.GetAt(i));
                     bhomContourLoadSets.Add(srfLoad);
                 }
             }
@@ -378,11 +371,9 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Grids
             List<Grid> bhomGrids = new List<Grid>();
- 
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
                  
             // Get the gridsystems that are in the model
-            IGridSystems IGridSystems = IModel.GetGridSystems();
+            IGridSystems IGridSystems = m_RAMModel.GetGridSystems();
             int numGridSystems = IGridSystems.GetCount();
      
             // Get all elements on each GridSystem
@@ -415,11 +406,9 @@ namespace BH.Adapter.RAM
             //Implement code for reading Levels
             List<Level> bhomLevels = new List<Level>();
 
-            IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
             // Get the levels that are in the model
 
-            IStories stories = IModel.GetStories();
+            IStories stories = m_RAMModel.GetStories();
             int numStories = stories.GetCount();
 
             for (int i = 0; i < numStories; i++)
@@ -438,11 +427,10 @@ namespace BH.Adapter.RAM
             //Implement code for reading Gravity Loads
             List<RAMPointGravityLoad> bhomPtGravLoads = new List<RAMPointGravityLoad>();
 
-            IModel ramModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
             IGravityLoads1 ramGravityLoads = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
             
             // Get all IWalls
-            List<IWall> allRamWalls = ReadRamWalls(ramModel);
+            List<IWall> allRamWalls = ReadRamWalls(m_RAMModel);
 
             // Adding node reactions per wall per gravity loads (point and line)
             foreach (IWall wall in allRamWalls)
@@ -487,7 +475,7 @@ namespace BH.Adapter.RAM
             }
 
             // Get all IBeams
-            List<IBeam> allRamBeams = ReadRamBeams(ramModel);
+            List<IBeam> allRamBeams = ReadRamBeams(m_RAMModel);
 
             // Adding node reactions per beam per gravity loads (point and line)
             foreach (IBeam beam in allRamBeams)
