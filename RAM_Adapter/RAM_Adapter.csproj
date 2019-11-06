@@ -100,7 +100,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Actions\Execute.cs" />
     <Compile Include="CRUD\Create.cs" />
     <Compile Include="CRUD\Delete.cs" />
     <Compile Include="CRUD\Push.cs" />
