@@ -43,48 +43,24 @@ namespace BH.Adapter.RAM
         //Add any applicable constructors here, such as linking to a specific file or anything else as well as linking to that file through the (if existing) com link via the API
         public RAMAdapter(string filePath = "", bool Active = false)
         {
-            //Close any open databse
-            if (!Active)
-            {
-                if (RAMDataAccIDBIO != null)
-                { RAMDataAccIDBIO.CloseDatabase(); }
-            }
-
             if (Active)
             {
                 AdapterId = BH.Engine.Adapters.RAM.Convert.AdapterId;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
 
                 Config.UseAdapterId = false;        //Tag objects with a software specific id in the CustomData. Requires the NextIndex method to be overridden and implemented
 
-                m_RAMApplication = null;
-                m_RAMApplication = new RamDataAccess1();
-                RAMDataAccIDBIO = null;
+                m_Application = null;
+                m_Application = new RamDataAccess1();
+                m_IDBIO = null;
 
                 //CASE01 :  if NO filepath is provided and NO .rss file exists 
                 // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
 
-                if (filePath == "" && !File.Exists(filePath))
+                if (filePath == "")
                 {
-                    string filePathNew = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
-                    try
-                    {
-                        RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                        // Create DB
-                        RAMDataAccIDBIO.CreateNewDatabase2(filePathNew, EUnits.eUnitsEnglish, "Grasshopper");
-                        // Delete usr file
-                        File.Delete(filePathNew.Replace(".rss", ".usr"));
-
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
-                    }
-
+                    m_filePath = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
                 }
-
-                // if a file path is provided by the USER check it for Validity
-
-                if (filePath != "") 
+                else
                 {
                     //modify file path to ensure its validity
                     string filePathMod = filePath.Replace("\\\\", "\\");
@@ -93,24 +69,10 @@ namespace BH.Adapter.RAM
                     filePath = filePathMod;
                     
                     //check if after modification file exists
-                    //if the file does not exist create a new file
+                    //if the file does not exist create a new file at the location
                     if (!File.Exists(filePath))
                     {
-                        try
-                        {
-                            RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                            // Create DB
-                            RAMDataAccIDBIO.CreateNewDatabase2(filePath, EUnits.eUnitsEnglish, "Grasshopper");
-                            // Delete usr file
-                            File.Delete(filePath.Replace(".rss", ".usr"));
-
-                        }
-                        catch
-                        {
-                            Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
-                        }
-
-
+                        m_filePath = filePath;
                     }
                     else if (File.Exists(filePath))
                     {
@@ -142,48 +104,77 @@ namespace BH.Adapter.RAM
                         if (File.Exists(filePathTempDBFile1))
                         {
                             try { File.Delete(filePathTempDBFile1); }
-                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+                            catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
                         }
                         if (File.Exists(filePathTempDBFile2))
                         {
                             try { File.Delete(filePathTempDBFile2); }
-                            catch { throw new ArgumentException("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+                            catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
                         }
 
-                        RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                        
-                        double loadOutput = RAMDataAccIDBIO.LoadDataBase2(filePath, "Grasshopper"); //if 0 successful
+                        m_filePath = filePath;
 
-                        //check if data base is properly loaded
-
-                        if (loadOutput == 25673)
-                        {
-                            throw new ArgumentException("Cannot access RAM database. If file is open in RAM, please close. Otherwise, open the file in RAM, close RAM, and try again.");
-                        }
-                        else if (loadOutput == 25657)
-                        {
-                            File.Delete(filePath.Replace(".rss", ".usr"));       // Delete usr file
-                            throw new ArgumentException("RAM Version installed does not match version of file.");
-                        }
-                        else if (loadOutput == 25674)
-                        {
-                            throw new ArgumentException(".rss and .ram file exist for same model.");
-                        }
-                        else if (loadOutput == 301)
-                        {
-                            throw new ArgumentException("Failed to read .ram file.");
-                        }
-
-                        // Delete usr file
-                        System.IO.File.Delete(filePath.Replace(".rss", ".usr"));
                     }
+                }
+            }
+        }
 
-                }//check of filepath ends here
+        private bool OpenDatabase()
+        {
+            if (m_Application == null)
+            {
+                return false;
+            }
+            m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
 
-                // Object Model Interface
-                m_RAMModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            int loadOutput = m_IDBIO.LoadDataBase2(m_filePath, "BHoM_UI"); //if 0 successful
+
+            //check if data base is properly loaded
+
+            switch (loadOutput)
+            {
+                case 0:
+                    //Success!
+                    break;
+                case 25673:
+                    Engine.Reflection.Compute.RecordError("Cannot access RAM database. If file is open in RAM, please close. Otherwise, open the file in RAM, close RAM, and try again.");
+                    return false;
+                case 25657:
+                    File.Delete(m_filePath.Replace(".rss", ".usr"));       // Delete usr file
+                    Engine.Reflection.Compute.RecordError("RAM Version installed does not match version of file.");
+                    return false;
+                case 25674:
+                    Engine.Reflection.Compute.RecordError(".rss and .ram file exist for same model.");
+                    return false;
+                case 301:
+                    Engine.Reflection.Compute.RecordError("Failed to read .ram file.");
+                    return false;
+                default:
+                    break;
             }
 
+            // Object Model Interface
+            m_Model = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+
+            return true;
+        }
+
+        private bool CloseDatabase()
+        {
+            if (m_Application == null)
+            {
+                return false;
+            }
+
+            m_IDBIO.CloseDatabase();
+
+            m_IDBIO = null;
+            m_Model = null;
+
+            // Delete usr file
+            System.IO.File.Delete(m_filePath.Replace(".rss", ".usr"));
+
+            return true;
         }
 
 
@@ -195,9 +186,10 @@ namespace BH.Adapter.RAM
 
         //private SoftwareComLink m_softwareNameCom;
 
-        private RamDataAccess1 m_RAMApplication;
-        private IDBIO1 RAMDataAccIDBIO;
-        private IModel m_RAMModel;
+        private string m_filePath;
+        private RamDataAccess1 m_Application;
+        private IDBIO1 m_IDBIO;
+        private IModel m_Model;
 
         /***************************************************/
 
