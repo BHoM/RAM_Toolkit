@@ -54,6 +54,9 @@
       <HintPath>..\..\BHoM\Build\Common_oM.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Data_oM">
+      <HintPath>..\..\BHoM\Build\Data_oM.dll</HintPath>
+    </Reference>
     <Reference Include="Geometry_Engine">
       <HintPath>..\..\BHoM_Engine\Build\Geometry_Engine.dll</HintPath>
       <Private>False</Private>
@@ -102,6 +105,7 @@
   <ItemGroup>
     <Compile Include="CRUD\Create.cs" />
     <Compile Include="CRUD\Delete.cs" />
+    <Compile Include="CRUD\Pull.cs" />
     <Compile Include="CRUD\Push.cs" />
     <Compile Include="CRUD\Read.cs" />
     <Compile Include="CRUD\UpdateObjects.cs" />

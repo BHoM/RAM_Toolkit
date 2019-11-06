@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Geometry.SettingOut;
 using BH.oM.Base;
+using BH.oM.Data.Requests;
 
 namespace BH.Adapter.RAM
 {
@@ -36,28 +37,20 @@ namespace BH.Adapter.RAM
         /**** Adapter overload method                   ****/
         /***************************************************/
 
-        public override List<IObject> Push(IEnumerable<IObject> objects, string tag = "", Dictionary<string, object> config = null)
+        public override IEnumerable<object> Pull(IRequest request, Dictionary<string, object> config = null)
         {
-            //Filter out levels for others
-            IEnumerable<IObject> levels = objects.Where(x => x is Level);
-            IEnumerable<IObject> notLevels = objects.Where(x => !(x is Level));
-
-            //Add the levels to a new list. This is to ensure that they are first and thereby pushed before the other objects
-            List<IObject> sortedObjects = new List<IObject>();
-            sortedObjects.AddRange(levels);
-            sortedObjects.AddRange(notLevels);
 
             if (OpenDatabase())
             {
-                //Call base push
-                List<IObject> result = base.Push(sortedObjects, tag, config);
+
+                IEnumerable<object> result = base.Pull(request, config);
 
                 CloseDatabase();
 
                 return result;
             }
 
-            return new List<IObject>();
+            return null;
         }
 
         /***************************************************/

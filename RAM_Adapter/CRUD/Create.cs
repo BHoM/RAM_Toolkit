@@ -77,7 +77,7 @@ namespace BH.Adapter.RAM
             List<Bar> bars = bhomBars.ToList();
 
             //Get the stories in the model
-            IStories ramStories = m_RAMModel.GetStories();
+            IStories ramStories = m_Model.GetStories();
 
             //Cycle through bars, split to beam and col lists, then add to corresponding story.
             List<Bar> barBeams = new List<Bar>();
@@ -229,7 +229,7 @@ namespace BH.Adapter.RAM
             }
 
             //Save file
-            RAMDataAccIDBIO.SaveDatabase();
+            m_IDBIO.SaveDatabase();
 
             return true;
         }
@@ -318,10 +318,10 @@ namespace BH.Adapter.RAM
                 }
             }
 
-            ramStories = m_RAMModel.GetStories();
+            ramStories = m_Model.GetStories();
 
             //Get concrete deck properties
-            IConcSlabProps ramConcSlabProps = m_RAMModel.GetConcreteSlabProps();
+            IConcSlabProps ramConcSlabProps = m_Model.GetConcreteSlabProps();
 
             // Cycle through floors and create on story
             foreach (Panel panel in floors)
@@ -467,7 +467,7 @@ namespace BH.Adapter.RAM
             }
 
             //Save file
-            RAMDataAccIDBIO.SaveDatabase();
+            m_IDBIO.SaveDatabase();
 
             return true;
         }
@@ -509,7 +509,7 @@ namespace BH.Adapter.RAM
                     Level level = sortedBhomLevels.ElementAt(i);
 
                     // Get elevations and skip if level elevation already in RAM
-                    ramStories = m_RAMModel.GetStories();
+                    ramStories = m_Model.GetStories();
                     List<double> ramElevs = new List<double>();
                     for (int j = 0; j < ramStories.GetCount(); j++)
                     {
@@ -541,7 +541,7 @@ namespace BH.Adapter.RAM
                         }
 
                         List<string> ramFloorTypeNames = new List<string>();
-                        ramFloorTypes = m_RAMModel.GetFloorTypes();
+                        ramFloorTypes = m_Model.GetFloorTypes();
                         Boolean floorTypeExists = false;
                         for (int j = 0; j < ramFloorTypes.GetCount(); j++)
                         {
@@ -577,7 +577,7 @@ namespace BH.Adapter.RAM
                 }
 
                 //Save file
-                RAMDataAccIDBIO.SaveDatabase();
+                m_IDBIO.SaveDatabase();
 
             }
 
@@ -590,10 +590,10 @@ namespace BH.Adapter.RAM
         private bool CreateCollection(IEnumerable<Grid> bhomGrid)
         {
             // Register GridSystems
-            IGridSystems ramGridSystems = m_RAMModel.GetGridSystems();
+            IGridSystems ramGridSystems = m_Model.GetGridSystems();
 
             // Register FloorTypes
-            IFloorTypes ramFloorTypes = m_RAMModel.GetFloorTypes();
+            IFloorTypes ramFloorTypes = m_Model.GetFloorTypes();
 
             // initializa a BhoM grid
             List<Grid> Grids = bhomGrid.ToList();
@@ -744,7 +744,7 @@ namespace BH.Adapter.RAM
             }
 
             //Save file
-            RAMDataAccIDBIO.SaveDatabase();
+            m_IDBIO.SaveDatabase();
 
             return true;
         }
@@ -755,7 +755,7 @@ namespace BH.Adapter.RAM
         {
             foreach (UniformLoadSet loadSet in loadSets)
             {
-                ISurfaceLoadPropertySets ramSurfaceLoadPropertySets = m_RAMModel.GetSurfaceLoadPropertySets();
+                ISurfaceLoadPropertySets ramSurfaceLoadPropertySets = m_Model.GetSurfaceLoadPropertySets();
 
                 int existingLoadPropSetID = 0;
 
@@ -814,7 +814,7 @@ namespace BH.Adapter.RAM
             }           
 
             //Save file
-            RAMDataAccIDBIO.SaveDatabase();
+            m_IDBIO.SaveDatabase();
 
             return true;
         }
@@ -833,7 +833,7 @@ namespace BH.Adapter.RAM
                 }
 
                 //Find the layout to apply to
-                IStories ramStories = m_RAMModel.GetStories();
+                IStories ramStories = m_Model.GetStories();
                 IStory loadStory = loadPoints.First().GetStory(ramStories);
                 double storyElev = loadStory.dElevation;
                 IFloorType floorType = loadStory.GetFloorType();
@@ -862,7 +862,7 @@ namespace BH.Adapter.RAM
             }
 
             //Save file
-            RAMDataAccIDBIO.SaveDatabase();
+            m_IDBIO.SaveDatabase();
 
             return true;
         }
