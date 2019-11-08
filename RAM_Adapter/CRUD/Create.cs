@@ -845,7 +845,6 @@ namespace BH.Adapter.RAM
 
                 List<SCoordinate> checkList = new List<SCoordinate>();
                 SCoordinate verticeCoord;
-                SCoordinate coordCheck = new SCoordinate();
 
                 //IPoint causing issues, frozen database, same as Deck
                 for (int i = 0; i<loadPoints.Count(); i++)
