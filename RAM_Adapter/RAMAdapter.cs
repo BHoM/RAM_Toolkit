@@ -59,6 +59,17 @@ namespace BH.Adapter.RAM
                 if (filePath == "")
                 {
                     m_filePath = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
+                    try
+                    {
+                        m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                        // Create DB
+                        m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "Grasshopper");
+                        CloseDatabase();
+                    }
+                    catch
+                    {
+                        Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
+                    }
                 }
                 else
                 {
@@ -73,6 +84,17 @@ namespace BH.Adapter.RAM
                     if (!File.Exists(filePath))
                     {
                         m_filePath = filePath;
+                        try
+                        {
+                            m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                            // Create DB
+                            m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "Grasshopper");
+                            CloseDatabase();
+                        }
+                        catch
+                        {
+                            Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
+                        }
                     }
                     else if (File.Exists(filePath))
                     {
