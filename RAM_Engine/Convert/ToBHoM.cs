@@ -943,7 +943,6 @@ namespace BH.Engine.Adapters.RAM
         {
             // Get srf load outline
             List<Point> srfLoadContourPts = new List<Point>();
-            SCoordinate srfPolyCoord = new SCoordinate();
             double elev = ramStory.dElevation;
 
             IPoints srfPolyPts = srfLoadSet.GetPoints();
