@@ -975,12 +975,12 @@ namespace BH.Engine.Adapters.RAM
         public static UniformLoadSet ToBHoMObject(this ISurfaceLoadPropertySet srfLoadPropSet)
         {
             Dictionary<string, double> loads = new Dictionary<string, double>();
-            loads.Add("CDL", srfLoadPropSet.dConstDeadLoad);
-            loads.Add("CLL", srfLoadPropSet.dConstLiveLoad);
-            loads.Add("DL", srfLoadPropSet.dDeadLoad);
+            loads.Add(ELoadCaseType.ConstructionDeadLCa.ToString(), srfLoadPropSet.dConstDeadLoad);
+            loads.Add(ELoadCaseType.ConstructionLiveLCa.ToString(), srfLoadPropSet.dConstLiveLoad);
+            loads.Add(ELoadCaseType.DeadLCa.ToString(), srfLoadPropSet.dDeadLoad);
             loads.Add(srfLoadPropSet.eLiveLoadType.ToString(), srfLoadPropSet.dConstLiveLoad);
-            loads.Add("MDL", srfLoadPropSet.dMassDeadLoad);
-            loads.Add("PL", srfLoadPropSet.dPartitionLoad);
+            loads.Add(ELoadCaseType.MassDeadLCa.ToString(), srfLoadPropSet.dMassDeadLoad);
+            loads.Add(ELoadCaseType.PartitionLCa.ToString(), srfLoadPropSet.dPartitionLoad);
 
             UniformLoadSet uniformLoadSet = new UniformLoadSet
             {

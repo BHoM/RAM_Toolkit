@@ -753,63 +753,70 @@ namespace BH.Adapter.RAM
 
         private bool CreateCollection(IEnumerable<UniformLoadSet> loadSets)
         {
-            foreach (UniformLoadSet loadSet in loadSets)
-            {
-                ISurfaceLoadPropertySets ramSurfaceLoadPropertySets = m_Model.GetSurfaceLoadPropertySets();
-
-                int existingLoadPropSetID = 0;
-
-                //Check if load set already exists
-                for (int i = 0; i < ramSurfaceLoadPropertySets.GetCount(); i++)
+          foreach (UniformLoadSet loadSet in loadSets)
+          {
+                try
                 {
-                    ISurfaceLoadPropertySet ramPropSet = ramSurfaceLoadPropertySets.GetAt(i);
-                    if (ramPropSet.strLabel == loadSet.Name)
+                    ISurfaceLoadPropertySets ramSurfaceLoadPropertySets = m_Model.GetSurfaceLoadPropertySets();
+
+                    int existingLoadPropSetID = 0;
+
+                    //Check if load set already exists
+                    for (int i = 0; i < ramSurfaceLoadPropertySets.GetCount(); i++)
                     {
-                        existingLoadPropSetID = ramPropSet.lUID;
+                        ISurfaceLoadPropertySet ramPropSet = ramSurfaceLoadPropertySets.GetAt(i);
+                        if (ramPropSet.strLabel == loadSet.Name)
+                        {
+                            existingLoadPropSetID = ramPropSet.lUID;
+                        }
+                    }
+
+                    if (existingLoadPropSetID == 0)
+                    {
+                        //Add the loadset if it does not already exist
+                        ISurfaceLoadPropertySet ramLoadSet = ramSurfaceLoadPropertySets.Add(loadSet.Name);
+
+                        ramLoadSet.dConstDeadLoad = loadSet.Loads[ELoadCaseType.ConstructionDeadLCa.ToString()];
+                        ramLoadSet.dConstLiveLoad = loadSet.Loads[ELoadCaseType.ConstructionLiveLCa.ToString()];
+                        ramLoadSet.dDeadLoad = loadSet.Loads[ELoadCaseType.DeadLCa.ToString()];
+                        ramLoadSet.dMassDeadLoad = loadSet.Loads[ELoadCaseType.MassDeadLCa.ToString()];
+                        ramLoadSet.dPartitionLoad = loadSet.Loads[ELoadCaseType.PartitionLCa.ToString()];
+
+                        //Check which live load case has been applied, to set load type. Not currently checking if more than one has been set.
+                        Engine.Reflection.Compute.RecordNote("If more than one live load has been set, only the first one will be applied");
+
+                        if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveLCa.ToString()))
+                        {
+                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveReducibleLCa;
+                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()];
+                        }
+                        else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveStorageLCa.ToString()))
+                        {
+                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveStorageLCa;
+                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()];
+                        }
+                        else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveUnReducibleLCa.ToString()))
+                        {
+                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveUnReducibleLCa;
+                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()];
+                        }
+                        else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveRoofLCa.ToString()))
+                        {
+                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveRoofLCa;
+                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()];
+                        }
+                        //Set the custom data to return if created
+                        loadSet.CustomData[AdapterId] = ramLoadSet.lUID;
+                    }
+                    else
+                    {
+                        //Set the custom data to return if already existing
+                        loadSet.CustomData[AdapterId] = existingLoadPropSetID;
                     }
                 }
-
-                if (existingLoadPropSetID == 0)
+                catch
                 {
-                    //Add the loadset if it does not already exist
-                    ISurfaceLoadPropertySet ramLoadSet = ramSurfaceLoadPropertySets.Add(loadSet.Name);
-
-                    ramLoadSet.dConstDeadLoad = loadSet.Loads[ELoadCaseType.ConstructionDeadLCa.ToString()];
-                    ramLoadSet.dConstLiveLoad = loadSet.Loads[ELoadCaseType.ConstructionLiveLCa.ToString()];
-                    ramLoadSet.dDeadLoad = loadSet.Loads[ELoadCaseType.DeadLCa.ToString()];
-                    ramLoadSet.dMassDeadLoad = loadSet.Loads[ELoadCaseType.MassDeadLCa.ToString()];
-                    ramLoadSet.dPartitionLoad = loadSet.Loads[ELoadCaseType.PartitionLCa.ToString()];
-
-                    //Check which live load case has been applied, to set load type. Not currently checking if more than one has been set.
-                    Engine.Reflection.Compute.RecordNote("If more than one live load has been set, only the first one will be applied");
-
-                    if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveLCa.ToString()))
-                    {
-                        ramLoadSet.eLiveLoadType = ELoadCaseType.LiveReducibleLCa;
-                        ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()];
-                    }
-                    else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveStorageLCa.ToString()))
-                    {
-                        ramLoadSet.eLiveLoadType = ELoadCaseType.LiveStorageLCa;
-                        ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()];
-                    }
-                    else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveUnReducibleLCa.ToString()))
-                    {
-                        ramLoadSet.eLiveLoadType = ELoadCaseType.LiveUnReducibleLCa;
-                        ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()];
-                    }
-                    else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveRoofLCa.ToString()))
-                    {
-                        ramLoadSet.eLiveLoadType = ELoadCaseType.LiveRoofLCa;
-                        ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()];
-                    }
-                    //Set the custom data to return if created
-                    loadSet.CustomData[AdapterId] = ramLoadSet.lUID;
-                }
-                else
-                {
-                    //Set the custom data to return if already existing
-                    loadSet.CustomData[AdapterId] = existingLoadPropSetID;
+                    CreateElementError("UniformLoadSet", loadSet.Name);
                 }
             }           
 
@@ -825,40 +832,48 @@ namespace BH.Adapter.RAM
         {
             foreach (ContourLoadSet load in loads)
             {
-                //Ensure points describe a closed polyline
-                List<Point> loadPoints = load.Contour.ControlPoints();
-                if (loadPoints.First() != loadPoints.Last())
+                try
                 {
-                    loadPoints.Add(loadPoints.Last().Clone());
+                    //Ensure points describe a closed polyline
+                    List<Point> loadPoints = load.Contour.ControlPoints();
+                    if (loadPoints.First() != loadPoints.Last())
+                    {
+                        loadPoints.Add(loadPoints.Last().Clone());
+                    }
+
+                    //Find the layout to apply to
+                    IStories ramStories = m_Model.GetStories();
+                    IStory loadStory = loadPoints.First().GetStory(ramStories);
+                    double storyElev = loadStory.dElevation;
+                    IFloorType floorType = loadStory.GetFloorType();
+
+                    ISurfaceLoadSets floorLoads = floorType.GetSurfaceLoadSets2();
+                    int nextId = floorLoads.GetCount();
+                    ISurfaceLoadSet ramLoad = floorLoads.Add(nextId, loadPoints.Count());
+                    IPoints verticePoints = ramLoad.GetPoints();
+
+                    List<SCoordinate> checkList = new List<SCoordinate>();
+                    SCoordinate verticeCoord;
+
+                    for (int i = 0; i < loadPoints.Count(); i++)
+                    {
+                        verticeCoord = loadPoints[i].ToRAM();
+                        verticePoints.Delete(i);
+                        verticePoints.InsertAt2(i, verticeCoord.dXLoc, verticeCoord.dYLoc, 0);
+                        checkList.Add(verticeCoord);
+                    }
+                    ramLoad.SetPoints(verticePoints);
+
+                    ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterId];
                 }
 
-                //Find the layout to apply to
-                IStories ramStories = m_Model.GetStories();
-                IStory loadStory = loadPoints.First().GetStory(ramStories);
-                double storyElev = loadStory.dElevation;
-                IFloorType floorType = loadStory.GetFloorType();
-
-                ISurfaceLoadSets floorLoads = floorType.GetSurfaceLoadSets2();
-                int nextId = floorLoads.GetCount();
-                ISurfaceLoadSet ramLoad = floorLoads.Add(nextId, loadPoints.Count());
-                IPoints verticePoints = ramLoad.GetPoints();
-
-                List<SCoordinate> checkList = new List<SCoordinate>();
-                SCoordinate verticeCoord;
-
-                //IPoint causing issues, frozen database, same as Deck
-                for (int i = 0; i<loadPoints.Count(); i++)
+                catch
                 {
-                    verticeCoord = loadPoints[i].ToRAM();
-                    verticePoints.Delete(i);
-                    verticePoints.InsertAt2(i, verticeCoord.dXLoc, verticeCoord.dYLoc, 0);
-                    checkList.Add(verticeCoord);
+                    CreateElementError("UniformLoadSet", load.Name);
                 }
-                ramLoad.SetPoints(verticePoints);
-
-                ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterId];
-                
             }
+
+
 
             //Save file
             m_IDBIO.SaveDatabase();
