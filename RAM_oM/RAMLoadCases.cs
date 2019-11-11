@@ -6,14 +6,11 @@ using System.Threading.Tasks;
 
 namespace BH.oM.Adapters.RAM
 {
-    public enum RAMLoadCases
+    public enum RAMLiveLoadTypes
     {
-        SDL,
-        CDL,
-        LLRed,
-        LLNRed,
-        Partition,
-        CLL,
-        MassDL,
+        LiveReducibleLCa,
+        LiveStorageLCa,
+        LiveUnReducibleLCa,
+        LiveRoofLCa,
     };
 }

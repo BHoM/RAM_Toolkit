@@ -78,6 +78,8 @@ namespace BH.Adapter.RAM
                 elems = ReadBeamEndReactions(ids as dynamic);
             else if (type == typeof(ContourLoadSet))
                 elems = ReadContourLoadSets(ids as dynamic);
+            else if (type == typeof(UniformLoadSet))
+                elems = ReadUniformLoadSets(ids as dynamic);
 
             return elems;
         }
@@ -341,6 +343,7 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Contour Load Sets
             List<ContourLoadSet> bhomContourLoadSets = new List<ContourLoadSet>();
+            Dictionary<int, UniformLoadSet> bhomUniformLoadSets = ReadUniformLoadSets().ToDictionary(x => (int)x.CustomData["lUID"]);
 
             //Get stories
             IStories IStories = m_Model.GetStories();
@@ -357,12 +360,32 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j<numSrfLoads; j++)
                 {
                     ISurfaceLoadSet srfLoadSet = srfLoadSets.GetAt(j);
-                    ContourLoadSet srfLoad = srfLoadSet.ToBHoMObject(m_Model, IStories.GetAt(i));
+                    ContourLoadSet srfLoad = srfLoadSet.ToBHoMObject(IStories.GetAt(i));
+                    int propUID = srfLoadSet.lPropertySetUID;
+                    srfLoad.UniformLoadSet = bhomUniformLoadSets[propUID];
                     bhomContourLoadSets.Add(srfLoad);
                 }
             }
 
             return bhomContourLoadSets;
+        }
+
+        /***************************************************/
+
+        private List<UniformLoadSet> ReadUniformLoadSets(List<string> ids = null)
+        {
+            //Implement code for reading Contour Load Sets
+            List<UniformLoadSet> bhomUniformLoadSets = new List<UniformLoadSet>();
+
+            ISurfaceLoadPropertySets RAMLoadSets = m_Model.GetSurfaceLoadPropertySets();
+            
+            for (int i = 0; i < RAMLoadSets.GetCount(); i++)
+            {
+                UniformLoadSet bhLoad = RAMLoadSets.GetAt(i).ToBHoMObject();
+                bhomUniformLoadSets.Add(bhLoad);
+            }
+
+            return bhomUniformLoadSets;
         }
 
         /***************************************************/

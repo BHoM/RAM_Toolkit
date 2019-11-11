@@ -939,7 +939,7 @@ namespace BH.Engine.Adapters.RAM
 
         /***************************************************/
 
-        public static ContourLoadSet ToBHoMObject(this ISurfaceLoadSet srfLoadSet, IModel ramModel, IStory ramStory)
+        public static ContourLoadSet ToBHoMObject(this ISurfaceLoadSet srfLoadSet, IStory ramStory)
         {
             // Get srf load outline
             List<Point> srfLoadContourPts = new List<Point>();
@@ -949,18 +949,9 @@ namespace BH.Engine.Adapters.RAM
 
             Polyline srfLoadContour = ToPolyline(srfPolyPts, elev);
 
-            // Get srf load props
-            UniformLoadSet ramLoadSet = null;
-            int propUID = srfLoadSet.lPropertySetUID;
-
-            ISurfaceLoadPropertySets srfLoadPropSets = ramModel.GetSurfaceLoadPropertySets();
-            ISurfaceLoadPropertySet srfProps = srfLoadPropSets.Get(propUID);
-            ramLoadSet = srfProps.ToBHoMObject();
-
             ContourLoadSet srfLoad = new ContourLoadSet
             {
-                Contour = srfLoadContour,
-                UniformLoadSet = ramLoadSet
+                Contour = srfLoadContour
             };
 
             // Unique RAM ID
@@ -969,16 +960,36 @@ namespace BH.Engine.Adapters.RAM
             return srfLoad;
         }
 
-
         /***************************************************/
 
         public static UniformLoadSet ToBHoMObject(this ISurfaceLoadPropertySet srfLoadPropSet)
         {
             Dictionary<string, double> loads = new Dictionary<string, double>();
+            ELoadCaseType liveType = ELoadCaseType.LiveReducibleLCa;
+
+            switch (srfLoadPropSet.eLiveLoadType)
+            {
+                case ELoadCaseType.LiveUnReducibleLCa:
+                    liveType = ELoadCaseType.LiveUnReducibleLCa;
+                    break;
+                case ELoadCaseType.LiveReducibleLCa:
+                    liveType = ELoadCaseType.LiveReducibleLCa;
+                    break;
+                case ELoadCaseType.LiveRoofLCa:
+                    liveType = ELoadCaseType.LiveRoofLCa;
+                    break;
+                case ELoadCaseType.LiveStorageLCa:
+                    liveType = ELoadCaseType.LiveStorageLCa;
+                    break;
+                default:
+                    Engine.Reflection.Compute.RecordWarning("Live load type did not match expectations. Using Live Non-Reducible.");
+                    break;
+            }
+
             loads.Add(ELoadCaseType.ConstructionDeadLCa.ToString(), srfLoadPropSet.dConstDeadLoad);
             loads.Add(ELoadCaseType.ConstructionLiveLCa.ToString(), srfLoadPropSet.dConstLiveLoad);
             loads.Add(ELoadCaseType.DeadLCa.ToString(), srfLoadPropSet.dDeadLoad);
-            loads.Add(srfLoadPropSet.eLiveLoadType.ToString(), srfLoadPropSet.dConstLiveLoad);
+            loads.Add(liveType.ToString(), srfLoadPropSet.dConstLiveLoad);
             loads.Add(ELoadCaseType.MassDeadLCa.ToString(), srfLoadPropSet.dMassDeadLoad);
             loads.Add(ELoadCaseType.PartitionLCa.ToString(), srfLoadPropSet.dPartitionLoad);
 
@@ -994,7 +1005,6 @@ namespace BH.Engine.Adapters.RAM
 
             return uniformLoadSet;
         }
-
 
         /***************************************************/
     }

@@ -14,7 +14,7 @@ namespace BH.Engine.Adapters.RAM
 {
     public static partial class Create
     {
-        public static UniformLoadSet CreateRAMUniformLoadSet(double sdl, double cdl, double liveLoad, int llType, double partition, double cll, double massDl, string name = "")
+        public static UniformLoadSet CreateRAMUniformLoadSet(double sdl, double cdl, double liveLoad, RAMLiveLoadTypes llType, double partition, double cll, double massDl, string name = "")
         {
 
             UniformLoadSet loadSet = new UniformLoadSet
@@ -32,20 +32,21 @@ namespace BH.Engine.Adapters.RAM
 
             switch (llType)
             {
-                case 0:
+                case RAMLiveLoadTypes.LiveReducibleLCa:
                     loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()] = liveLoad;
                     break;
-                case 1:
+                case RAMLiveLoadTypes.LiveStorageLCa:
                     loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()] = liveLoad;
                     break;
-                case 2:
+                case RAMLiveLoadTypes.LiveUnReducibleLCa:
                     loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()] = liveLoad;
                     break;
-                case 3:
+                case RAMLiveLoadTypes.LiveRoofLCa:
                     loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()] = liveLoad;
                     break;
                 default:
-                    Engine.Reflection.Compute.RecordWarning("Could not understand llType. 0 = Reducible, 1 = Storage, 2 = Non-reducible, 3 = Roof");
+                    Engine.Reflection.Compute.RecordWarning("Could not understand llType. 0 = Reducible, 1 = Storage, 2 = Non-reducible, 3 = Roof. Assumed Live Reducible.");
+                    loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()] = liveLoad;
                     break;
             }
 
