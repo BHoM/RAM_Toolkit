@@ -39,18 +39,23 @@ namespace BH.Adapter.RAM
 
         public override IEnumerable<object> Pull(IRequest request, Dictionary<string, object> config = null)
         {
+            IEnumerable<object> result = null;
 
             if (OpenDatabase())
             {
-
-                IEnumerable<object> result = base.Pull(request, config);
-
-                CloseDatabase();
-
-                return result;
+                try
+                {
+                    result = base.Pull(request, config);
+                }
+                catch
+                {
+                    Engine.Reflection.Compute.RecordError("Could not complete Pull.");
+                }
             }
 
-            return null;
+            CloseDatabase();
+
+            return result;
         }
 
         /***************************************************/

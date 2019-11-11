@@ -47,17 +47,24 @@ namespace BH.Adapter.RAM
             sortedObjects.AddRange(levels);
             sortedObjects.AddRange(notLevels);
 
+            List<IObject> result = new List<IObject>();
+
             if (OpenDatabase())
             {
                 //Call base push
-                List<IObject> result = base.Push(sortedObjects, tag, config);
-
-                CloseDatabase();
-
-                return result;
+                try
+                {
+                    result = base.Push(sortedObjects, tag, config);
+                }
+                catch
+                {
+                    Engine.Reflection.Compute.RecordError("Could not complete Push.");
+                }                
             }
 
-            return new List<IObject>();
+            CloseDatabase();
+
+            return result;
         }
 
         /***************************************************/
