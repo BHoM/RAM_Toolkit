@@ -65,10 +65,11 @@ namespace BH.Adapter.RAM
                         // Create DB
                         m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "Grasshopper");
                         CloseDatabase();
+                        Engine.Reflection.Compute.RecordNote("No filepath provided. File saved to" + m_filePath);
                     }
                     catch
                     {
-                        Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
+                        Engine.Reflection.Compute.RecordError("Cannot create RAM database, check that a compatible version of RAM is installed");
                     }
                 }
                 else
@@ -93,7 +94,7 @@ namespace BH.Adapter.RAM
                         }
                         catch
                         {
-                            Console.WriteLine("Cannot create RAM database, check that a compatible version of RAM is installed");
+                            Engine.Reflection.Compute.RecordError("Cannot create RAM database, check that a compatible version of RAM is installed");
                         }
                     }
                     else if (File.Exists(filePath))
