@@ -258,29 +258,53 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        private bool CreateCollection(IEnumerable<ISurfaceProperty> ISurfaceProperties)
-        {           
-            //NOTE: Deck property functionality not resolved yet but code framework is below
+        private bool CreateCollection(IEnumerable<ISurfaceProperty> srfProps)
+        {
+            foreach (ISurfaceProperty srfProp in srfProps)
+            {
+                try
+                {
+                    ICompDeckProps ramCompDeckProps = m_Model.GetCompositeDeckProps();
 
-            ////Access model
-            //IDBIO1 RAMDataAccIDBIO = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            //IModel IModel = m_RAMApplication.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+                    int existingProp = 0;
 
-            ////Get composite deck properties
-            //ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
+                    //Check if load set already exists
+                    for (int i = 0; i < ramCompDeckProps.GetCount(); i++)
+                    {
+                        ICompDeckProp ramProp = ramCompDeckProps.GetAt(i);
+                        if (ramProp.strLabel == srfProp.Name)
+                        {
+                            existingProp = ramProp.lUID;
+                        }
+                    }
 
-            //foreach (ISurfaceProperty iProp in ISurfaceProperties)
-            //{
-            //    string deckName = iProp.Name;
-            //    double thickness = 6;
-            //    double studLength = 4;
+                    if (existingProp == 0)
+                    {
+                        //Add the Deck prop if it does not already exist
+                        string deckName = srfProp.Name;
+                        string deckType = "ASC 3W";
+                        double thickness = 3; // above deck
+                        double studLength = 4.5;
+                       
+                        ICompDeckProp ramProp = ramCompDeckProps.Add2(deckName, deckType, thickness, studLength);
 
-            //    ICompDeckProps.Add(deckName, thickness, studLength);
-
-            //    object iPropId = iProp.CustomData[AdapterId];
-            //}
+                        //Set the custom data to return if created
+                        srfProp.CustomData[AdapterId] = ramProp.lUID;
+                    }
+                    else
+                    {
+                        //Set the custom data to return if already existing
+                        srfProp.CustomData[AdapterId] = existingProp;
+                    }
+                }
+                catch
+                {
+                    CreateElementError("Panel Deck Property", srfProp.Name);
+                }
+            }
 
             return true;
+
         }
 
         /***************************************************/
@@ -302,6 +326,8 @@ namespace BH.Adapter.RAM
             List<double> panelHeights = new List<double>();
             List<Point> panelPoints = new List<Point>();
 
+            int lastlUID = 0;
+
             // Split walls and floors and get all elevations
             foreach (Panel panel in panels)
             {
@@ -320,19 +346,16 @@ namespace BH.Adapter.RAM
 
             ramStories = m_Model.GetStories();
 
-            //Get concrete deck properties
-            IConcSlabProps ramConcSlabProps = m_Model.GetConcreteSlabProps();
-
             // Cycle through floors and create on story
             foreach (Panel panel in floors)
             {
                 string name = panel.Name;
+                PolyCurve outlineExternal = panel.Outline();
+                ramStory = panel.GetStory(ramStories);
+                ramFloorType = ramStory.GetFloorType();
 
                 try
                 {
-                    ramStory = panel.GetStory(ramStories);
-                    ramFloorType = ramStory.GetFloorType();
-
                     // Set slab edges on FloorType in RAM for external edges
                     ISlabEdges ramSlabEdges = ramFloorType.GetAllSlabEdges();
                     ISlabEdges ramOpeningEdges = ramFloorType.GetAllSlabOpenings();
@@ -340,8 +363,7 @@ namespace BH.Adapter.RAM
                     // Get external and internal edges of floor panel
                     List<PolyCurve> panelOutlines = new List<PolyCurve>();
                     List<PolyCurve> openingOutlines = new List<PolyCurve>();
-
-                    PolyCurve outlineExternal = panel.Outline();
+            
                     List<Opening> panelOpenings = panel.Openings;
 
                     foreach (Opening opening in panelOpenings)
@@ -389,18 +411,15 @@ namespace BH.Adapter.RAM
                 }
 
 
-                //// Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
+                // Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
+                List<Point> ctrlPoints = outlineExternal.ControlPoints();
+
+                { int deckProplUID = (int)panel.Property.CustomData[AdapterId]; }
 
                 //IDecks ramDecks = ramFloorType.GetDecks();
-                //IDeck ramDeck = null;
+                //IDeck ramDeck = ramDecks.Add(deckProplUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
 
-                //// Default panel properties to apply to model
-                //string deckName = "Default RAM_Toolkit Deck"; //pull deck name from decktable
-                //double deckThk = 6.5;
-                //double selfweight = 150;
-                //IConcSlabProp ramConcSlabProp = ramConcSlabProps.Add(deckName, deckThk, selfweight);
-                //List<Point> ctrlPoints = outlineExternal.ControlPoints();
-                //ramDeck = ramDecks.Add(ramConcSlabProp.lUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
+
                 //IPoints ramPoints = ramDeck.GetPoints();
 
                 //// Create list of SCoordinates for floor outlines
@@ -408,7 +427,7 @@ namespace BH.Adapter.RAM
 
                 //foreach (Point point in ctrlPoints)
                 //{
-                //    SCoordinate cornerExt = BH.Engine.RAM.Convert.ToRAM(point);
+                //    SCoordinate cornerExt = point.ToRAM();
                 //    cornersExt.Add(cornerExt);
                 //}
 
@@ -418,7 +437,7 @@ namespace BH.Adapter.RAM
                 //    ramPoints.InsertAt(k, cornersExt[k]);
                 //}
             }
-            
+
 
             //Cycle through walls; if wall crosses level place at level
             foreach (Panel wallPanel in wallPanels)
