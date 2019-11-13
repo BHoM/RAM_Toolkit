@@ -413,7 +413,7 @@ namespace BH.Adapter.RAM
 
                     //(IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
                     IDecks ramDecks = ramFloorType.GetDecks();
-                    IDeck ramDeck = ramDecks.Add(deckProplUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
+                    IDeck ramDeck = ramDecks.Add(deckProplUID, ctrlPoints.Count);
 
                     IPoints ramPoints = ramDeck.GetPoints();
 

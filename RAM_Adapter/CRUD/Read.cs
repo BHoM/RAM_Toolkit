@@ -231,6 +231,9 @@ namespace BH.Adapter.RAM
             IProp.Name = "default";
             //IProp.Type = MaterialType.Concrete;
 
+            //Set the custom data to return if created
+            //srfProp.CustomData[AdapterId] = ramProp.lUID;
+
             IProps.Add(IProp);
 
             return IProps;
