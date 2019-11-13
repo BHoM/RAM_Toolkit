@@ -344,6 +344,8 @@ namespace BH.Adapter.RAM
 
             ramStories = m_Model.GetStories();
 
+            #region Create Floors
+
             // Cycle through floors and create on story
             foreach (Panel panel in floors)
             {
@@ -441,8 +443,9 @@ namespace BH.Adapter.RAM
                     CreateElementError("panel", name);
                 }
             }
+            #endregion
 
-
+            #region Create Walls
             //Cycle through walls; if wall crosses level place at level
             foreach (Panel wallPanel in wallPanels)
                 {
@@ -450,8 +453,12 @@ namespace BH.Adapter.RAM
 
                 try
                 {
-                    // Default Thickness for now
-                    double thickness = 6;
+                    double thickness = 6; // default thickness
+                    if (wallPanel.Property is ConstantThickness)
+                    {
+                        ConstantThickness prop = (ConstantThickness)wallPanel.Property;
+                        thickness = prop.Thickness;
+                    }
 
                     // Find outline of planar panel
                     PolyCurve outline = BH.Engine.Structure.Query.Outline(wallPanel);
@@ -488,6 +495,7 @@ namespace BH.Adapter.RAM
                     CreateElementError("panel", name);
                 }
             }
+            #endregion
 
             //Save file
             m_IDBIO.SaveDatabase();
