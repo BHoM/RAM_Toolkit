@@ -326,8 +326,6 @@ namespace BH.Adapter.RAM
             List<double> panelHeights = new List<double>();
             List<Point> panelPoints = new List<Point>();
 
-            int lastlUID = 0;
-
             // Split walls and floors and get all elevations
             foreach (Panel panel in panels)
             {
@@ -363,14 +361,6 @@ namespace BH.Adapter.RAM
                     // Get external and internal edges of floor panel
                     List<PolyCurve> panelOutlines = new List<PolyCurve>();
                     List<PolyCurve> openingOutlines = new List<PolyCurve>();
-            
-                    List<Opening> panelOpenings = panel.Openings;
-
-                    foreach (Opening opening in panelOpenings)
-                    {
-                        PolyCurve outlineOpening = opening.Outline();
-                        openingOutlines.Add(outlineOpening);
-                    }
 
                     Vector zDown = BH.Engine.Geometry.Create.Vector(0, 0, -1);
 
@@ -384,6 +374,14 @@ namespace BH.Adapter.RAM
                         Point startPt = crv.IStartPoint();
                         Point endPt = crv.IEndPoint();
                         ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
+                    }
+
+                    List<Opening> panelOpenings = panel.Openings;
+
+                    foreach (Opening opening in panelOpenings)
+                    {
+                        PolyCurve outlineOpening = opening.Outline();
+                        openingOutlines.Add(outlineOpening);
                     }
 
                     foreach (PolyCurve outline in openingOutlines)
@@ -401,6 +399,39 @@ namespace BH.Adapter.RAM
                         }
                     }
 
+                    // Create Deck 
+                    List<Point> ctrlPoints = cwOutline.ControlPoints();
+
+                    if (ctrlPoints.First() != ctrlPoints.Last())
+                    {
+                        ctrlPoints.Add(ctrlPoints.Last().Clone());
+                    }
+
+                    int deckProplUID = (int)panel.Property.CustomData[AdapterId];
+
+                    //(IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
+                    IDecks ramDecks = ramFloorType.GetDecks();
+                    IDeck ramDeck = ramDecks.Add(deckProplUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
+
+                    IPoints ramPoints = ramDeck.GetPoints();
+
+                    // Create list of SCoordinates for floor outlines
+                    List<SCoordinate> cornersExt = new List<SCoordinate>();
+
+                    foreach (Point point in ctrlPoints)
+                    {
+                        SCoordinate cornerExt = point.ToRAM();
+                        cornersExt.Add(cornerExt);
+                    }
+
+                    for (int k = 0; k < cornersExt.Count; k++)
+                    {
+                        ramPoints.Delete(k);
+                        ramPoints.InsertAt(k, cornersExt[k]);
+                    }
+
+                    ramDeck.SetPoints(ramPoints);
+
                     // Add warning to report floors flattened to level as required for RAM
                     if (Math.Abs(panel.Normal().Z) < 1)
                     { Engine.Reflection.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
@@ -409,33 +440,6 @@ namespace BH.Adapter.RAM
                 {
                     CreateElementError("panel", name);
                 }
-
-
-                // Create Deck (IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
-                List<Point> ctrlPoints = outlineExternal.ControlPoints();
-
-                { int deckProplUID = (int)panel.Property.CustomData[AdapterId]; }
-
-                //IDecks ramDecks = ramFloorType.GetDecks();
-                //IDeck ramDeck = ramDecks.Add(deckProplUID, ctrlPoints.Count); // THIS CAUSES READ MEMORY ERROR CRASHING AT SAVE
-
-
-                //IPoints ramPoints = ramDeck.GetPoints();
-
-                //// Create list of SCoordinates for floor outlines
-                //List<SCoordinate> cornersExt = new List<SCoordinate>();
-
-                //foreach (Point point in ctrlPoints)
-                //{
-                //    SCoordinate cornerExt = point.ToRAM();
-                //    cornersExt.Add(cornerExt);
-                //}
-
-                //for (int k = 0; k < cornersExt.Count; k++)
-                //{
-                //    ramPoints.Delete(k);
-                //    ramPoints.InsertAt(k, cornersExt[k]);
-                //}
             }
 
 
