@@ -242,7 +242,7 @@ namespace BH.Engine.Adapters.RAM
             bhomBar.OrientationAngle = 0;
 
             // Add RAM Unique ID, custom Data
-            bhomBar.CustomData["lUID"] = IColumn.lUID;
+            bhomBar.CustomData[AdapterId] = IColumn.lUID;
             bhomBar.CustomData["FrameNumber"] = IColumn.lLabel;
             bhomBar.CustomData["FrameType"] = IColumn.eFramingType.ToString();
             bhomBar.CustomData["Material"] = IColumn.eMaterial.ToString();
@@ -278,7 +278,7 @@ namespace BH.Engine.Adapters.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData["lUID"] = IBeam.lUID;
+            bhomBar.CustomData[AdapterId] = IBeam.lUID;
             bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
             bhomBar.CustomData["StartCantilever"] = IBeam.dStartCantilever.ToString();
             bhomBar.CustomData["EndCantilever"] = IBeam.dEndCantilever.ToString();
@@ -398,7 +398,7 @@ namespace BH.Engine.Adapters.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData["lUID"] = IVerticalBrace.lUID;
+            bhomBar.CustomData[AdapterId] = IVerticalBrace.lUID;
             bhomBar.CustomData["FrameNumber"] = IVerticalBrace.lLabel;
             bhomBar.CustomData["FrameType"] = IVerticalBrace.eSeismicFrameType.ToString();
             bhomBar.CustomData["Material"] = IVerticalBrace.eMaterial.ToString();
@@ -436,7 +436,7 @@ namespace BH.Engine.Adapters.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData["lUID"] = IHorizBrace.lUID;
+            bhomBar.CustomData[AdapterId] = IHorizBrace.lUID;
             bhomBar.CustomData["FrameNumber"] = IHorizBrace.lLabel;
             bhomBar.CustomData["Material"] = IHorizBrace.eMaterial.ToString();
             bhomBar.Tags.Add("HorizontalBrace");
@@ -550,7 +550,7 @@ namespace BH.Engine.Adapters.RAM
             deck2DProp.PanelType = PanelType.Slab;
             deck2DProp.Material = Material;
             bhomPanel.Property = deck2DProp;
-            bhomPanel.CustomData["lUID"] = IDeck.lUID;
+            bhomPanel.CustomData[AdapterId] = IDeck.lUID;
 
             return bhomPanel;
         }
@@ -637,7 +637,7 @@ namespace BH.Engine.Adapters.RAM
             bhomPanel.Name = ramWall.lLabel.ToString();
 
             // Add custom data
-            bhomPanel.CustomData["lUID"] = ramWall.lUID;
+            bhomPanel.CustomData[AdapterId] = ramWall.lUID;
             bhomPanel.Tags.Add("Wall");
 
             return bhomPanel;
@@ -955,7 +955,7 @@ namespace BH.Engine.Adapters.RAM
             };
 
             // Unique RAM ID
-            srfLoad.CustomData["lUID"] = srfLoadSet.lUID;
+            srfLoad.CustomData[AdapterId] = srfLoadSet.lUID;
 
             return srfLoad;
         }
@@ -1001,7 +1001,7 @@ namespace BH.Engine.Adapters.RAM
             uniformLoadSet.Name = srfLoadPropSet.strLabel;
             
             // Unique RAM ID
-            uniformLoadSet.CustomData["lUID"] = srfLoadPropSet.lUID;
+            uniformLoadSet.CustomData[AdapterId] = srfLoadPropSet.lUID;
 
             return uniformLoadSet;
         }

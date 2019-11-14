@@ -346,7 +346,7 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Contour Load Sets
             List<ContourLoadSet> bhomContourLoadSets = new List<ContourLoadSet>();
-            Dictionary<int, UniformLoadSet> bhomUniformLoadSets = ReadUniformLoadSets().ToDictionary(x => (int)x.CustomData["lUID"]);
+            Dictionary<int, UniformLoadSet> bhomUniformLoadSets = ReadUniformLoadSets().ToDictionary(x => (int)x.CustomData[AdapterId]);
 
             //Get stories
             IStories IStories = m_Model.GetStories();

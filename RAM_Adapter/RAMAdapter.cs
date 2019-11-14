@@ -47,8 +47,6 @@ namespace BH.Adapter.RAM
             {
                 AdapterId = BH.Engine.Adapters.RAM.Convert.AdapterId;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
 
-               //Tag objects with a software specific id in the CustomData, default true. Requires the NextIndex method to be overridden and implemented
-
                 m_Application = null;
                 m_Application = new RamDataAccess1();
                 m_IDBIO = null;
