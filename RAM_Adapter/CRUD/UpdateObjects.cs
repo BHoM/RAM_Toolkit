@@ -74,7 +74,7 @@ namespace BH.Adapter.RAM
             foreach (Bar bar in bars)
             {
                 //Extract ID
-                int ID = System.Convert.ToInt32(bar.CustomData["lUID"]);
+                int ID = System.Convert.ToInt32(bar.CustomData[AdapterId]);
 
                 if (BH.Engine.Structure.Query.IsVertical(bar))
                 {
