@@ -483,10 +483,30 @@ namespace BH.Adapter.RAM
                         if (Math.Round(wallMax.Z, 0) >= ramStory.dElevation && Math.Round(wallMin.Z, 0) < ramStory.dElevation)
                         {
                             ramFloorType = ramStory.GetFloorType();
-                            //Get ILayoutWalls of FloorType
+                            
+                            //Get ILayoutWalls of FloorType and add wall
                             ILayoutWalls ramLayoutWalls = ramFloorType.GetLayoutWalls();
+                            ILayoutWall ramLayoutWall = ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
+                            IWalls ramWalls = ramLayoutWall.GetAssociatedStoryWalls();
+                            IWall ramWall = ramWalls.GetAt(0);
 
-                            ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
+                            // Find opening location, width, and height from outline and apply                      
+                            foreach (Opening open in wallPanel.Openings)
+                            {
+                                PolyCurve openOutline = open.Outline();
+                                BoundingBox openBounds = BH.Engine.Geometry.Query.Bounds(openOutline);
+                                Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());
+                                double distX = Math.Sqrt(Math.Pow(closestOpenPt.X - wallMin.X, 2) + Math.Pow(closestOpenPt.Y - wallMin.Y, 2));
+                                double distZ = closestOpenPt.Z - ramStory.dElevation;
+                                double openWidth = Math.Sqrt(Math.Pow(openBounds.Max.X - openBounds.Min.X, 2) + Math.Pow(openBounds.Max.Y - openBounds.Min.Y, 2));
+                                double openHt = openBounds.Max.Z - openBounds.Min.Z;
+
+                                //Create opening in RAM per geom check
+                                IRawWallOpenings ramOpenings = ramWall.GetRawOpenings();
+
+                                //Add causing error
+                                // IRawWallOpening ramOpen = ramOpenings.Add(EDA_MEMBER_LOC.eTopStart, distX, distZ, openWidth, -openHt);
+                            }
                         }
                     }
                 }
