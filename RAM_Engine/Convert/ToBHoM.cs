@@ -587,7 +587,11 @@ namespace BH.Engine.Adapters.RAM
             // Create openings (disabled, causing database freeze)
             IFinalWallOpenings IFinalWallOpenings = ramWall.GetFinalOpenings();
             IRawWallOpenings rawOpenings = ramWall.GetRawOpenings();
-            IRawWallOpening check = rawOpenings.GetAt(0);
+            if (rawOpenings.GetCount() > 0)
+            {
+                IRawWallOpening check = rawOpenings.GetAt(0);
+            }
+
 
             for (int i = 0; i < IFinalWallOpenings.GetCount(); i++)
             {

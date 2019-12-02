@@ -497,24 +497,22 @@ namespace BH.Adapter.RAM
                                 BoundingBox openBounds = BH.Engine.Geometry.Query.Bounds(openOutline);
                                 Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());
                                 double distX = Math.Sqrt(Math.Pow(closestOpenPt.X - wallMin.X, 2) + Math.Pow(closestOpenPt.Y - wallMin.Y, 2));
-                                double distZ = closestOpenPt.Z - ramStory.dElevation;
+                                double distZ = openBounds.Min.Z - (ramStory.dElevation - ramStory.dFlrHeight);
                                 double openWidth = Math.Sqrt(Math.Pow(openBounds.Max.X - openBounds.Min.X, 2) + Math.Pow(openBounds.Max.Y - openBounds.Min.Y, 2));
                                 double openHt = openBounds.Max.Z - openBounds.Min.Z;
 
-                                //Create opening in RAM per geom check
-                                IRawWallOpenings ramOpenings = ramWall.GetRawOpenings();
-
                                 //Add causing error
-                                // IRawWallOpening ramOpen = ramOpenings.Add(EDA_MEMBER_LOC.eTopStart, distX, distZ, openWidth, -openHt);
+                                IRawWallOpenings ramWallOpenings = ramWall.GetRawOpenings();
+                                ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX, distZ, openWidth, openHt);
                             }
                         }
                     }
-                }
-                catch
-                {
-                    CreateElementError("panel", name);
-                }
             }
+                catch
+            {
+                CreateElementError("panel", name);
+            }
+        }
             #endregion
 
             //Save file
