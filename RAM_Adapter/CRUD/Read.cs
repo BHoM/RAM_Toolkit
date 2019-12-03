@@ -683,6 +683,21 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
+        private List<BarDeformation> ReadBarDeformations(List<string> ids = null)
+        {
+            List<BarDeformation> bhomBarDeformations = new List<BarDeformation> ();
+            List <IBeam> ramBeams= ReadRamBeams(m_Model);
+            foreach (IBeam ramBeam in ramBeams)
+            {
+                int beamID = ramBeam.lUID;
+                //TODO: read deflections goes here
+            }
+            return bhomBarDeformations;
+        }
+
+
+        /***************************************************/
+
         private List<RAMFactoredEndReactions> ReadBeamEndReactions(List<string> ids = null)
         {
             List<RAMFactoredEndReactions> barEndReactions = new List<RAMFactoredEndReactions>();
