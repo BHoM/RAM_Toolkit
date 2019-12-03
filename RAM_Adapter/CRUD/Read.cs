@@ -690,7 +690,7 @@ namespace BH.Adapter.RAM
             foreach (IBeam ramBeam in ramBeams)
             {
                 int beamID = ramBeam.lUID;
-                //TODO: read deflections goes here
+                //TODO: read deflections to go here            
             }
             return bhomBarDeformations;
         }

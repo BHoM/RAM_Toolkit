@@ -487,6 +487,10 @@ namespace BH.Adapter.RAM
                             //Get ILayoutWalls of FloorType and add wall
                             ILayoutWalls ramLayoutWalls = ramFloorType.GetLayoutWalls();
                             ILayoutWall ramLayoutWall = ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
+
+                            //Set lateral
+                            ramLayoutWall.eFramingType = EFRAMETYPE.MemberIsLateral;
+
                             IWalls ramWalls = ramLayoutWall.GetAssociatedStoryWalls();
                             IWall ramWall = ramWalls.GetAt(0);
 
