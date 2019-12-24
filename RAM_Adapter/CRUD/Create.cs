@@ -417,7 +417,7 @@ namespace BH.Adapter.RAM
 
                     int deckProplUID = (int)panel.Property.CustomData[AdapterId];
 
-                    //(IDecks.Add causes RAMDataAccIDBIO to be read only causing crash, slab edges only for now)
+                    //Add decks, then set deck points per outline
                     IDecks ramDecks = ramFloorType.GetDecks();
                     IDeck ramDeck = ramDecks.Add(deckProplUID, ctrlPoints.Count);
 
