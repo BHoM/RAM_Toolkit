@@ -175,7 +175,6 @@ namespace BH.Adapter.RAM
                     bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
-
             }
 
             return bhomBars;
