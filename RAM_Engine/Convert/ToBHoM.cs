@@ -818,7 +818,7 @@ namespace BH.Engine.Adapters.RAM
             double gridRotAngle = 0;
 
             // Add the properties of the GridSystem as CustomData 
-            myGrid.CustomData.Add("lUID", gridSystemID);
+            myGrid.CustomData.Add(AdapterId, gridSystemID);
             myGrid.CustomData.Add("RAMLabel", gridSystemLabel);
             myGrid.CustomData.Add("RamGridType", gridSystemType);
             myGrid.CustomData.Add("xOffset", gridXoffset);
