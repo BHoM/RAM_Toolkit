@@ -28,6 +28,6 @@ namespace BH.Engine.Adapters.RAM
 {
     public static partial class Convert
     {
-        public const string AdapterId = "RAM_id";
+        public const string AdapterIdName = "RAM_id";
     }
 }

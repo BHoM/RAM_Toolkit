@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Geometry.SettingOut;
 using BH.oM.Base;
+using BH.oM.Adapter;
 
 namespace BH.Adapter.RAM
 {
@@ -36,25 +37,34 @@ namespace BH.Adapter.RAM
         /**** Adapter overload method                   ****/
         /***************************************************/
 
-        public override List<IObject> Push(IEnumerable<IObject> objects, string tag = "", Dictionary<string, object> config = null)
+        public override List<object> Push(IEnumerable<object> objects, string tag = "", PushType pushType = PushType.AdapterDefault, ActionConfig actionConfig = null)
         {
+            // ----------------------------------------//
+            //                 SET-UP                  //
+            // ----------------------------------------//
+
+            // If unset, set the pushType to AdapterSettings' value (base AdapterSettings default is FullCRUD).
+            if (pushType == PushType.AdapterDefault)
+                pushType = m_AdapterSettings.DefaultPushType;
+            
+            
             //Filter out levels for others
-            IEnumerable<IObject> levels = objects.Where(x => x is Level);
-            IEnumerable<IObject> notLevels = objects.Where(x => !(x is Level));
+            IEnumerable<object> levels = objects.Where(x => x is Level);
+            IEnumerable<object> notLevels = objects.Where(x => !(x is Level));
 
             //Add the levels to a new list. This is to ensure that they are first and thereby pushed before the other objects
-            List<IObject> sortedObjects = new List<IObject>();
+            List<object> sortedObjects = new List<object>();
             sortedObjects.AddRange(levels);
             sortedObjects.AddRange(notLevels);
 
-            List<IObject> result = new List<IObject>();
+            List<object> result = new List<object>();
 
             if (OpenDatabase())
             {
                 //Call base push
                 try
                 {
-                    result = base.Push(sortedObjects, tag, config);
+                    result = base.Push(sortedObjects, tag, pushType, actionConfig);
                 }
                 catch
                 {

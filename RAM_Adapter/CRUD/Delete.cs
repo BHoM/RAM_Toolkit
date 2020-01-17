@@ -22,19 +22,20 @@
 
 using System;
 using System.Collections.Generic;
+using BH.oM.Adapter;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BH.Adapter.RAM
 {
-    public partial class RAMAdapter
+    public partial class RAMAdapter : BHoMAdapter
     {
         /***************************************************/
         /**** Adapter overload method                   ****/
         /***************************************************/
 
-        protected override int Delete(Type type, IEnumerable<object> ids)
+        protected override int IDelete(Type type, IEnumerable<object> ids, ActionConfig actionConfig = null)
         {
             //Insert code here to enable deletion of specific types of objects with specific ids
             return 0;

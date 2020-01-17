@@ -37,20 +37,20 @@ using BH.Engine.Geometry;
 using BH.Engine.Structure;
 using BH.Engine.Adapters.RAM;
 using BH.oM.Adapters.RAM;
+using BH.oM.Adapter;
 using BH.oM.Structure.Loads;
-
 
 
 namespace BH.Adapter.RAM
 {
     public partial class RAMAdapter
     {
-      
+
         /***************************************************/
         /**** Adapter overload method                   ****/
         /***************************************************/
 
-        protected override bool Create<T>(IEnumerable<T> objects)
+        protected override bool ICreate<T>(IEnumerable<T> objects, ActionConfig actionConfig = null)
         {
             bool success = true;        //boolean returning if the creation was successful or not
 
@@ -289,12 +289,12 @@ namespace BH.Adapter.RAM
                         ICompDeckProp ramProp = ramCompDeckProps.Add2(deckName, deckType, thickness, studLength);
 
                         //Set the custom data to return if created
-                        srfProp.CustomData[AdapterId] = ramProp.lUID;
+                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
                     }
                     else
                     {
                         //Set the custom data to return if already existing
-                        srfProp.CustomData[AdapterId] = existingProp;
+                        srfProp.CustomData[AdapterIdName] = existingProp;
                     }
                 }
                 catch
@@ -415,7 +415,7 @@ namespace BH.Adapter.RAM
                         ctrlPoints.Add(ctrlPoints.Last().Clone());
                     }
 
-                    int deckProplUID = (int)panel.Property.CustomData[AdapterId];
+                    int deckProplUID = (int)panel.Property.CustomData[AdapterIdName];
 
                     //Add decks, then set deck points per outline
                     IDecks ramDecks = ramFloorType.GetDecks();
@@ -874,12 +874,12 @@ namespace BH.Adapter.RAM
                             ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()];
                         }
                         //Set the custom data to return if created
-                        loadSet.CustomData[AdapterId] = ramLoadSet.lUID;
+                        loadSet.CustomData[AdapterIdName] = ramLoadSet.lUID;
                     }
                     else
                     {
                         //Set the custom data to return if already existing
-                        loadSet.CustomData[AdapterId] = existingLoadPropSetID;
+                        loadSet.CustomData[AdapterIdName] = existingLoadPropSetID;
                     }
                 }
                 catch
@@ -932,7 +932,7 @@ namespace BH.Adapter.RAM
                     }
                     ramLoad.SetPoints(verticePoints);
 
-                    ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterId];
+                    ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterIdName];
                 }
 
                 catch
