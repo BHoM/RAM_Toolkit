@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.Engine.Adapters.RAM;
 using BH.oM.Adapters.RAM;
+using BH.oM.Adapter;
 using BH.oM.Base;
 using BH.oM.Common;
 using BH.oM.Structure.Elements;
@@ -47,7 +48,7 @@ namespace BH.Adapter.RAM
         /***************************************************/
         /**** Adapter overload method                   ****/
         /***************************************************/
-        protected override IEnumerable<IBHoMObject> Read(Type type, IList ids)
+        protected override IEnumerable<IBHoMObject> IRead(Type type, IList ids, ActionConfig actionConfig = null)
         {
 
             dynamic elems = null;
@@ -231,7 +232,7 @@ namespace BH.Adapter.RAM
             //IProp.Type = MaterialType.Concrete;
 
             //Set the custom data to return if created
-            //srfProp.CustomData[AdapterId] = ramProp.lUID;
+            //srfProp.CustomData[AdapterIdName] = ramProp.lUID;
 
             IProps.Add(IProp);
 
@@ -345,7 +346,7 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Contour Load Sets
             List<ContourLoadSet> bhomContourLoadSets = new List<ContourLoadSet>();
-            Dictionary<int, UniformLoadSet> bhomUniformLoadSets = ReadUniformLoadSets().ToDictionary(x => (int)x.CustomData[AdapterId]);
+            Dictionary<int, UniformLoadSet> bhomUniformLoadSets = ReadUniformLoadSets().ToDictionary(x => (int)x.CustomData[AdapterIdName]);
 
             //Get stories
             IStories IStories = m_Model.GetStories();

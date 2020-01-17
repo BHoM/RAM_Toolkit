@@ -34,6 +34,7 @@ using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
 using BH.Engine.Structure;
+using BH.oM.Adapter;
 
 
 namespace BH.Adapter.RAM
@@ -47,7 +48,7 @@ namespace BH.Adapter.RAM
         //Method being called for any object already existing in the model in terms of comparers is found.
         //Default implementation first deletes these objects, then creates new ones, if not applicable for the software, override this method
 
-        protected override bool UpdateObjects<T>(IEnumerable<T> objects)
+        protected override bool IUpdate<T>(IEnumerable<T> objects, ActionConfig actionConfig = null)
         {
             bool success = true;
             success = Update(objects as dynamic);
@@ -74,7 +75,7 @@ namespace BH.Adapter.RAM
             foreach (Bar bar in bars)
             {
                 //Extract ID
-                int ID = System.Convert.ToInt32(bar.CustomData[AdapterId]);
+                int ID = System.Convert.ToInt32(bar.CustomData[AdapterIdName]);
 
                 if (BH.Engine.Structure.Query.IsVertical(bar))
                 {

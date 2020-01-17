@@ -27,17 +27,19 @@ using System.Linq;
 using BH.oM.Geometry.SettingOut;
 using BH.oM.Base;
 using BH.oM.Data.Requests;
+using BH.oM.Adapter;
 
 namespace BH.Adapter.RAM
 {
-    public partial class RAMAdapter
+    public partial class RAMAdapter : BHoMAdapter
     {
 
         /***************************************************/
         /**** Adapter overload method                   ****/
         /***************************************************/
 
-        public override IEnumerable<object> Pull(IRequest request, Dictionary<string, object> config = null)
+        public override IEnumerable<object> Pull(IRequest request, PullType pullType = PullType.AdapterDefault, ActionConfig actionConfig = null)
+
         {
             IEnumerable<object> result = null;
 
@@ -45,7 +47,7 @@ namespace BH.Adapter.RAM
             {
                 try
                 {
-                    result = base.Pull(request, config);
+                    result = base.Pull(request, pullType, actionConfig);
                 }
                 catch
                 {

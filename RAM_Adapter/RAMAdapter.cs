@@ -43,9 +43,11 @@ namespace BH.Adapter.RAM
         //Add any applicable constructors here, such as linking to a specific file or anything else as well as linking to that file through the (if existing) com link via the API
         public RAMAdapter(string filePath = "", bool Active = false)
         {
+
             if (Active)
             {
-                AdapterId = BH.Engine.Adapters.RAM.Convert.AdapterId;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
+                AdapterIdName = BH.Engine.Adapters.RAM.Convert.AdapterIdName;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
+                BH.Adapter.Modules.Structure.ModuleLoader.LoadModules(this);
 
                 m_Application = null;
                 m_Application = new RamDataAccess1();
