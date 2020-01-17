@@ -42,34 +42,17 @@ namespace BH.Adapter.RAM
         //Compares Materials, SectionProprties, LinkConstraints, and Property2D by name
         //Add/remove any type in the dictionary below that you want (or not) a specific comparison method for
 
-        protected override IEqualityComparer<T> Comparer<T>()
+        protected void SetupComparers()
         {
-            Type type = typeof(T);
-
-            if (m_Comparers.ContainsKey(type))
+            AdapterComparers = new Dictionary<Type, object>
             {
-                return m_Comparers[type] as IEqualityComparer<T>;
-            }
-            else
-            {
-                return EqualityComparer<T>.Default;
-            }
-
+                {typeof(Node), new BH.Engine.Structure.NodeDistanceComparer(3) },   //The 3 in here sets how many decimal places to look at for node merging. 3 decimal places gives mm precision
+                {typeof(ISectionProperty), new BHoMObjectNameOrToStringComparer() },
+                {typeof(Material), new BHoMObjectNameComparer() },
+                {typeof(LinkConstraint), new BHoMObjectNameComparer() },
+                {typeof(ISurfaceProperty), new BHoMObjectNameComparer() },
+            };
         }
-
-
-        /***************************************************/
-        /**** Private Fields                            ****/
-        /***************************************************/
-
-        private static Dictionary<Type, object> m_Comparers = new Dictionary<Type, object>
-        {
-            {typeof(Node), new BH.Engine.Structure.NodeDistanceComparer(3) },   //The 3 in here sets how many decimal places to look at for node merging. 3 decimal places gives mm precision
-            {typeof(ISectionProperty), new BHoMObjectNameOrToStringComparer() },
-            {typeof(Material), new BHoMObjectNameComparer() },
-            {typeof(LinkConstraint), new BHoMObjectNameComparer() },
-            {typeof(ISurfaceProperty), new BHoMObjectNameComparer() },
-        };
 
 
         /***************************************************/
