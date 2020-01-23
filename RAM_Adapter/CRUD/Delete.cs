@@ -29,7 +29,7 @@ using System.Threading.Tasks;
 
 namespace BH.Adapter.RAM
 {
-    public partial class RAMAdapter : BHoMAdapter
+    public partial class RAMAdapter
     {
         /***************************************************/
         /**** Adapter overload method                   ****/

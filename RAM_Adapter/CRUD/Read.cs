@@ -87,14 +87,7 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        protected override IEnumerable<IResult> ReadResults(Type type, IList ids = null, IList cases = null, int divisions = 5)
-        {
 
-            if (type == typeof(NodeReaction))
-                return ReadNodeReaction(ids as dynamic);
-
-            return null;
-        }
 
         /***************************************************/
 
