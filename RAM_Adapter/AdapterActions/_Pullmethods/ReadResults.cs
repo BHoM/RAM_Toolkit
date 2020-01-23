@@ -28,38 +28,20 @@ using BH.oM.Geometry.SettingOut;
 using BH.oM.Base;
 using BH.oM.Data.Requests;
 using BH.oM.Adapter;
+using BH.oM.Common;
+using BH.oM.Structure.Results;
 
 namespace BH.Adapter.RAM
 {
     public partial class RAMAdapter
     {
-
-        /***************************************************/
-        /**** Adapter overload method                   ****/
-        /***************************************************/
-
-        public override IEnumerable<object> Pull(IRequest request, PullType pullType = PullType.AdapterDefault, ActionConfig actionConfig = null)
-
+        protected override IEnumerable<IResult> ReadResults(Type type, IList ids = null, IList cases = null, int divisions = 5, ActionConfig actionConfig = null)
         {
-            IEnumerable<object> result = null;
 
-            if (OpenDatabase())
-            {
-                try
-                {
-                    result = base.Pull(request, pullType, actionConfig);
-                }
-                catch
-                {
-                    Engine.Reflection.Compute.RecordError("Could not complete Pull.");
-                }
-            }
+            if (type == typeof(NodeReaction))
+                return ReadNodeReaction(ids as dynamic);
 
-            CloseDatabase();
-
-            return result;
+            return null;
         }
-
-        /***************************************************/
     }
 }
