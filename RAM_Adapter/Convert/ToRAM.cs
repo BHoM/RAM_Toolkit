@@ -46,9 +46,9 @@ namespace BH.Adapter.RAM
         //}
         /***************************************************/
 
-        public static ILayoutBeam ToRAM(this Bar bar, ILayoutBeams ILayoutBeams)
+        public static ILayoutBeam ToRAM(this Bar bar, ILayoutBeams iLayoutBeams)
         {
-            ILayoutBeam ILayoutBeam = ILayoutBeams.GetAt(0);
+            ILayoutBeam iLayoutBeam = iLayoutBeams.GetAt(0);
 
             double xStart = bar.StartNode.Position().X;
             double yStart = bar.StartNode.Position().Y;
@@ -57,21 +57,21 @@ namespace BH.Adapter.RAM
 
             //Set support coordinates and name
             //CAUTION: different from actual end points and cantilevers hardcoded
-            ILayoutBeam.SetLayoutCoordinates(xStart, yStart, 0, xEnd, yEnd, 0, 0, 0);
-            ILayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+            iLayoutBeam.SetLayoutCoordinates(xStart, yStart, 0, xEnd, yEnd, 0, 0, 0);
+            iLayoutBeam.strSectionLabel = bar.SectionProperty.Name;
 
-            return ILayoutBeam;
+            return iLayoutBeam;
         }
 
         /***************************************************/
 
         public static SCoordinate ToRAM(this Point point)
         {
-            SCoordinate Point = new SCoordinate();
-            Point.dXLoc = point.X;
-            Point.dYLoc = point.Y;
-            Point.dZLoc = point.Z;
-            return Point;
+            SCoordinate pt = new SCoordinate();
+            pt.dXLoc = point.X;
+            pt.dYLoc = point.Y;
+            pt.dZLoc = point.Z;
+            return pt;
         }
 
         /***************************************************/
