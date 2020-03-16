@@ -119,6 +119,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdapterActions\_Pullmethods\ReadResults.cs" />
+    <Compile Include="Convert\AdapterIdName.cs" />
+    <Compile Include="Convert\ToBHoM.cs" />
+    <Compile Include="Convert\ToRAM.cs" />
     <Compile Include="CRUD\Create.cs" />
     <Compile Include="CRUD\Delete.cs" />
     <Compile Include="AdapterActions\Pull.cs" />

@@ -24,7 +24,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BH.Engine.Adapters.RAM;
 using BH.oM.Adapters.RAM;
 using BH.oM.Adapter;
 using BH.oM.Base;
@@ -136,7 +135,7 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j < numColumns; j++)
                 {
                     IColumn IColumn = IColumns.GetAt(j);
-                    Bar bhomBar = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IColumn);
+                    Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IColumn);
                     bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
@@ -146,7 +145,7 @@ namespace BH.Adapter.RAM
                 {
                     IBeam IBeam = IBeams.GetAt(j);
                     ILayoutBeam ILayoutBeam = ILayoutBeams.GetAt(j);
-                    Bar bhomBar = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IBeam, ILayoutBeam, dElevation);
+                    Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IBeam, ILayoutBeam, dElevation);
                     bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
@@ -155,7 +154,7 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j < numVBraces; j++)
                 {
                     IVerticalBrace IVerticalBrace = IVBraces.GetAt(j);
-                    Bar bhomBar = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IVerticalBrace);
+                    Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IVerticalBrace);
                     bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
@@ -165,7 +164,7 @@ namespace BH.Adapter.RAM
                 {
                     IHorizBrace IHorizBrace = IHorizBraces.GetAt(j);
                     ILayoutHorizBrace ILayoutHorizBrace = ILayoutHorizBraces.GetAt(j);
-                    Bar bhomBar = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IHorizBrace, ILayoutHorizBrace, dElevation);
+                    Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IHorizBrace, ILayoutHorizBrace, dElevation);
                     bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
                     bhomBars.Add(bhomBar);
                 }
@@ -248,7 +247,7 @@ namespace BH.Adapter.RAM
             {
                 //Get Loadcases
                 ILoadCase LoadCase = ILoadCases.GetAt(i);
-                Loadcase bhomLoadcase = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(LoadCase);
+                Loadcase bhomLoadcase = BH.Adapter.RAM.Convert.ToBHoMObject(LoadCase);
                 bhomLoadCases.Add(bhomLoadcase);
             }
 
@@ -269,7 +268,7 @@ namespace BH.Adapter.RAM
             {
                 //Get LoadCombinations
                 ILoadCombination ILoadCombination = ILoadCombinations.GetAt(i);
-                LoadCombination bhomLoadCombination = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(m_Model, ILoadCombination);
+                LoadCombination bhomLoadCombination = BH.Adapter.RAM.Convert.ToBHoMObject(m_Model, ILoadCombination);
                 bhomLoadCombinations.Add(bhomLoadCombination);
             }
 
@@ -300,7 +299,7 @@ namespace BH.Adapter.RAM
                 for (int j = 0; j < numWalls; j++)
                 {
                     IWall IWall = IWalls.GetAt(j);
-                    Panel Panel = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IWall);
+                    Panel Panel = BH.Adapter.RAM.Convert.ToBHoMObject(IWall);
                     bhomPanels.Add(Panel);
                 }
 
@@ -319,7 +318,7 @@ namespace BH.Adapter.RAM
                     IDeck IDeck = IDecks.GetAt(j);
                     try
                     {
-                        Panel Panel = BH.Engine.Adapters.RAM.Convert.ToBHoMObject(IDeck, m_Model, IStoryUID);
+                        Panel Panel = BH.Adapter.RAM.Convert.ToBHoMObject(IDeck, m_Model, IStoryUID);
                         bhomPanels.Add(Panel);
                     }
                     catch
