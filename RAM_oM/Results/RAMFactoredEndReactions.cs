@@ -26,18 +26,21 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using BH.oM.Base;
+using BH.oM.Structure.Results;
 using BH.oM.Geometry;
 
 namespace BH.oM.Adapters.RAM
-{ 
-    public class ContourLoadSet : BHoMObject
+{
+
+    public class RAMFactoredEndReactions : BHoMObject
     {
         /***************************************************/
         /**** Properties                                ****/
         /***************************************************/
 
-        public Polyline Contour { get; set; } = null;
-        public UniformLoadSet UniformLoadSet { get; set; } = null;
+        public int ObjectId { get; set; } = 0;
+        public NodeReaction StartReaction { get; set; } = null;
+        public NodeReaction EndReaction { get; set; } = null;
 
         /***************************************************/
     }
