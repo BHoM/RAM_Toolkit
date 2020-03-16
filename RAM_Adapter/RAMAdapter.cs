@@ -46,7 +46,7 @@ namespace BH.Adapter.RAM
 
             if (Active)
             {
-                AdapterIdName = BH.Engine.Adapters.RAM.Convert.AdapterIdName;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
+                AdapterIdName = BH.Adapter.RAM.Convert.AdapterIdName;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
 
                 BH.Adapter.Modules.Structure.ModuleLoader.LoadModules(this);
                 SetupDependencies();

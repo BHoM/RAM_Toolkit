@@ -95,9 +95,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Convert\AdapterIdName.cs" />
-    <Compile Include="Convert\ToBHoM.cs" />
-    <Compile Include="Convert\ToRAM.cs" />
     <Compile Include="Create\ContourLoadSet.cs" />
     <Compile Include="Create\UniformLoadSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

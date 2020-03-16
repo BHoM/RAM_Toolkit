@@ -35,7 +35,7 @@ using System.IO;
 using BH.oM.Geometry;
 using BH.Engine.Geometry;
 using BH.Engine.Structure;
-using BH.Engine.Adapters.RAM;
+using BH.Adapter.RAM;
 using BH.oM.Adapters.RAM;
 using BH.oM.Adapter;
 using BH.oM.Structure.Loads;
