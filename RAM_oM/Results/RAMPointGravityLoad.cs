@@ -48,43 +48,4 @@ namespace BH.oM.Adapters.RAM
 
         /***************************************************/
     }
-
-    /***************************************************/
-
-    public class RAMLineGravityLoad : BHoMObject
-    {
-        /***************************************************/
-        /**** Properties                                ****/
-        /***************************************************/
-
-        public int ObjectId { get; set; } = 0;
-        public double dist1 { get; set; } = 0;
-        public double dist2 { get; set; } = 0;
-        public double DL1 { get; set; } = 0;
-        public double DL2 { get; set; } = 0;
-        public double LL1 { get; set; } = 0;
-        public double LL2 { get; set; } = 0;
-        public double PL1 { get; set; } = 0;
-        public double PL2 { get; set; } = 0;
-        public string type { get; set; } = "";
-
-        /***************************************************/
-    }
-
-    /***************************************************/
-
-    public class RAMFactoredEndReactions : BHoMObject
-    {
-        /***************************************************/
-        /**** Properties                                ****/
-        /***************************************************/
-
-        public int ObjectId { get; set; } = 0;
-        public NodeReaction StartReaction { get; set; } = null;
-        public NodeReaction EndReaction { get; set; } = null;
-
-        /***************************************************/
-    }
-
-    /***************************************************/
 }
