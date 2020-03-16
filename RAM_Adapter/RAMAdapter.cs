@@ -41,10 +41,10 @@ namespace BH.Adapter.RAM
         /***************************************************/
 
         //Add any applicable constructors here, such as linking to a specific file or anything else as well as linking to that file through the (if existing) com link via the API
-        public RAMAdapter(string filePath = "", bool Active = false)
+        public RAMAdapter(string filePath = "", bool active = false)
         {
 
-            if (Active)
+            if (active)
             {
                 AdapterIdName = BH.Adapter.RAM.Convert.AdapterIdName;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
 
@@ -139,7 +139,6 @@ namespace BH.Adapter.RAM
                         }
 
                         m_filePath = filePath;
-
                     }
                 }
             }
@@ -156,7 +155,6 @@ namespace BH.Adapter.RAM
             int loadOutput = m_IDBIO.LoadDataBase2(m_filePath, "BHoM_UI"); //if 0 successful
 
             //check if data base is properly loaded
-
             switch (loadOutput)
             {
                 case 0:
@@ -193,13 +191,11 @@ namespace BH.Adapter.RAM
             }
 
             m_IDBIO.CloseDatabase();
-
             m_IDBIO = null;
             m_Model = null;
 
             // Delete usr file
             System.IO.File.Delete(m_filePath.Replace(".rss", ".usr"));
-
             return true;
         }
 

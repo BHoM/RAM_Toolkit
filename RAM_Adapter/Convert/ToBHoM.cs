@@ -653,16 +653,16 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Node ToBHoMObject(this INode INode)
+        public static Node ToBHoMObject(this INode ramNode)
         {
 
             // Get the location of the node
             SCoordinate Location = new SCoordinate();
-            Location = INode.sLocation;
+            Location = ramNode.sLocation;
             
             Node Node = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc });
 
-            IMemberForces IMemberForces = INode.GetReactions();
+            IMemberForces IMemberForces = ramNode.GetReactions();
 
             // Collect all member forces at node, tracked by index; should these be combined?
             for (int i = 0; i < IMemberForces.GetCount(); i++)
@@ -693,13 +693,13 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Loadcase ToBHoMObject(this ILoadCase ILoadCase)
+        public static Loadcase ToBHoMObject(this ILoadCase ramLoadCase)
         {
 
             Loadcase Loadcase = new Loadcase();
-            Loadcase.Name = ILoadCase.strSymbol;
-            Loadcase.Number = ILoadCase.lUID;
-            ELoadCaseType LoadType = ILoadCase.eLoadType;
+            Loadcase.Name = ramLoadCase.strSymbol;
+            Loadcase.Number = ramLoadCase.lUID;
+            ELoadCaseType LoadType = ramLoadCase.eLoadType;
             switch (LoadType)
             {
                 case ELoadCaseType.NotionalDeadLCa:
@@ -737,31 +737,31 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static LoadCombination ToBHoMObject(IModel IModel,ILoadCombination ILoadCombination)
+        public static LoadCombination ToBHoMObject(IModel ramModel,ILoadCombination ramLoadCombination)
         {
 
-            LoadCombination LoadCombination = new LoadCombination();
-            LoadCombination.Name = ILoadCombination.strDisplayString;
-            LoadCombination.Number = ILoadCombination.lLabelNo;
+            LoadCombination loadCombination = new LoadCombination();
+            loadCombination.Name = ramLoadCombination.strDisplayString;
+            loadCombination.Number = ramLoadCombination.lLabelNo;
 
-            ILoadCombinationTerms ILoadCombinationTerms = ILoadCombination.GetLoadCombinationTerms();
+            ILoadCombinationTerms iLoadCombinationTerms = ramLoadCombination.GetLoadCombinationTerms();
 
-            for (int i = 0; i < ILoadCombinationTerms.GetCount(); i++)
+            for (int i = 0; i < iLoadCombinationTerms.GetCount(); i++)
             {
                 //Get LoadCombination Cases and Factors
-                ILoadCombinationTerm ILoadCombinationTerm = ILoadCombinationTerms.GetAt(i);
-                int caseID = ILoadCombinationTerm.lLoadCaseID;
-                ILoadCases ILoadCases = IModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
-                ILoadCase ILoadCase = ILoadCases.Get(caseID);
+                ILoadCombinationTerm iLoadCombinationTerm = iLoadCombinationTerms.GetAt(i);
+                int caseID = iLoadCombinationTerm.lLoadCaseID;
+                ILoadCases iLoadCases = ramModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
+                ILoadCase iLoadCase = iLoadCases.Get(caseID);
 
                 //Convert Loadcase from RAM to BHoM
-                Loadcase bhomLoadcase = ToBHoMObject(ILoadCase);
+                Loadcase bhomLoadcase = ToBHoMObject(iLoadCase);
                 //Add dict for load factor and loadcase
-                LoadCombination.LoadCases.Add(new Tuple<double, ICase>(ILoadCombinationTerm.dFactor, bhomLoadcase));
+                loadCombination.LoadCases.Add(new Tuple<double, ICase>(iLoadCombinationTerm.dFactor, bhomLoadcase));
                 
             }
 
-            return LoadCombination;
+            return loadCombination;
         }
 
         /***************************************************/
@@ -806,16 +806,16 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Grid ToBHoMObject(this IModelGrid IModelGrid, IGridSystem IGridSystem, int counter)
+        public static Grid ToBHoMObject(this IModelGrid ramModelGrid, IGridSystem ramGridSystem, int counter)
         {
             Grid myGrid = new Grid();
             // Get the parameters of Gridsystem 
-            string gridSystemLabel = IGridSystem.strLabel;// Set the name of the GridSystem from RAM
-            int gridSystemID = IGridSystem.lUID;    //Set the lUID from RAM
-            string gridSystemType = IGridSystem.eOrientationType.ToString();// Set the orientation type
-            double gridXoffset = IGridSystem.dXOffset;   // Set the offset of the GridSystem from 0 along the X axis
-            double gridYoffset = IGridSystem.dYOffset; // Set the offset of the GridSystem from 0 along the Y axis
-            double gridSystemRotation = IGridSystem.dRotation; // Set the rotation angle of the GridSystem
+            string gridSystemLabel = ramGridSystem.strLabel;// Set the name of the GridSystem from RAM
+            int gridSystemID = ramGridSystem.lUID;    //Set the lUID from RAM
+            string gridSystemType = ramGridSystem.eOrientationType.ToString();// Set the orientation type
+            double gridXoffset = ramGridSystem.dXOffset;   // Set the offset of the GridSystem from 0 along the X axis
+            double gridYoffset = ramGridSystem.dYOffset; // Set the offset of the GridSystem from 0 along the Y axis
+            double gridSystemRotation = ramGridSystem.dRotation; // Set the rotation angle of the GridSystem
             double gridRotAngle = 0;
 
             // Add the properties of the GridSystem as CustomData 
@@ -827,13 +827,13 @@ namespace BH.Adapter.RAM
             myGrid.CustomData.Add("RamGridRotation", gridSystemRotation);
 
             //Get info for each grid line
-            int gridLinelUID = IModelGrid.lUID; //unique ID od of the grid line object
-            string gridLineLabel = IModelGrid.strLabel; // label of the gridline
-            double gridLineCoord_Angle = IModelGrid.dCoordinate_Angle; // the grid coordinate or angle
-            string gridLineAxis = IModelGrid.eAxis.ToString(); // grid line axis , X/Radial Y/Circular 
+            int gridLinelUID = ramModelGrid.lUID; //unique ID od of the grid line object
+            string gridLineLabel = ramModelGrid.strLabel; // label of the gridline
+            double gridLineCoord_Angle = ramModelGrid.dCoordinate_Angle; // the grid coordinate or angle
+            string gridLineAxis = ramModelGrid.eAxis.ToString(); // grid line axis , X/Radial Y/Circular 
 
-            double dMaxLimit = IModelGrid.dMaxLimitValue; // maximum limit specified by the user to which gridline will be drawn from origin
-            double dMinLimit = IModelGrid.dMinLimitValue; // minimum limit specified by the user to which gridline will be drawn from origin
+            double dMaxLimit = ramModelGrid.dMaxLimitValue; // maximum limit specified by the user to which gridline will be drawn from origin
+            double dMinLimit = ramModelGrid.dMinLimitValue; // minimum limit specified by the user to which gridline will be drawn from origin
             double GridLength = 3000; //default grid length value
 
             //Set max and min limit values based on if they are used or if -1 is returned
@@ -844,7 +844,7 @@ namespace BH.Adapter.RAM
 
             //Set Grid start offset from system origin
             double spacing = 0;
-            spacing = IModelGrid.dCoordinate_Angle;
+            spacing = ramModelGrid.dCoordinate_Angle;
 
             Point gridCoordPoint1 = new Point();
             Point gridCoordPoint2 = new Point();
@@ -933,12 +933,12 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Level ToBHoMObject(this IStory story)
+        public static Level ToBHoMObject(this IStory ramStory)
         {
             Level bhomLevel = new Level
             {
-                Elevation = story.dElevation,
-                Name = story.strLabel
+                Elevation = ramStory.dElevation,
+                Name = ramStory.strLabel
             };
 
             return bhomLevel;
@@ -946,13 +946,13 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static ContourLoadSet ToBHoMObject(this ISurfaceLoadSet srfLoadSet, IStory ramStory)
+        public static ContourLoadSet ToBHoMObject(this ISurfaceLoadSet ramSrfLoadSet, IStory ramStory)
         {
             // Get srf load outline
             List<Point> srfLoadContourPts = new List<Point>();
             double elev = ramStory.dElevation;
 
-            IPoints srfPolyPts = srfLoadSet.GetPoints();
+            IPoints srfPolyPts = ramSrfLoadSet.GetPoints();
 
             Polyline srfLoadContour = ToPolyline(srfPolyPts, elev);
 
@@ -962,19 +962,19 @@ namespace BH.Adapter.RAM
             };
 
             // Unique RAM ID
-            srfLoad.CustomData[AdapterIdName] = srfLoadSet.lUID;
+            srfLoad.CustomData[AdapterIdName] = ramSrfLoadSet.lUID;
 
             return srfLoad;
         }
 
         /***************************************************/
 
-        public static UniformLoadSet ToBHoMObject(this ISurfaceLoadPropertySet srfLoadPropSet)
+        public static UniformLoadSet ToBHoMObject(this ISurfaceLoadPropertySet ramSrfLoadPropSet)
         {
             Dictionary<string, double> loads = new Dictionary<string, double>();
             ELoadCaseType liveType = ELoadCaseType.LiveReducibleLCa;
 
-            switch (srfLoadPropSet.eLiveLoadType)
+            switch (ramSrfLoadPropSet.eLiveLoadType)
             {
                 case ELoadCaseType.LiveUnReducibleLCa:
                     liveType = ELoadCaseType.LiveUnReducibleLCa;
@@ -993,22 +993,22 @@ namespace BH.Adapter.RAM
                     break;
             }
 
-            loads.Add(ELoadCaseType.ConstructionDeadLCa.ToString(), srfLoadPropSet.dConstDeadLoad);
-            loads.Add(ELoadCaseType.ConstructionLiveLCa.ToString(), srfLoadPropSet.dConstLiveLoad);
-            loads.Add(ELoadCaseType.DeadLCa.ToString(), srfLoadPropSet.dDeadLoad);
-            loads.Add(liveType.ToString(), srfLoadPropSet.dConstLiveLoad);
-            loads.Add(ELoadCaseType.MassDeadLCa.ToString(), srfLoadPropSet.dMassDeadLoad);
-            loads.Add(ELoadCaseType.PartitionLCa.ToString(), srfLoadPropSet.dPartitionLoad);
+            loads.Add(ELoadCaseType.ConstructionDeadLCa.ToString(), ramSrfLoadPropSet.dConstDeadLoad);
+            loads.Add(ELoadCaseType.ConstructionLiveLCa.ToString(), ramSrfLoadPropSet.dConstLiveLoad);
+            loads.Add(ELoadCaseType.DeadLCa.ToString(), ramSrfLoadPropSet.dDeadLoad);
+            loads.Add(liveType.ToString(), ramSrfLoadPropSet.dConstLiveLoad);
+            loads.Add(ELoadCaseType.MassDeadLCa.ToString(), ramSrfLoadPropSet.dMassDeadLoad);
+            loads.Add(ELoadCaseType.PartitionLCa.ToString(), ramSrfLoadPropSet.dPartitionLoad);
 
             UniformLoadSet uniformLoadSet = new UniformLoadSet
             {
                 Loads = loads
             };
 
-            uniformLoadSet.Name = srfLoadPropSet.strLabel;
+            uniformLoadSet.Name = ramSrfLoadPropSet.strLabel;
             
             // Unique RAM ID
-            uniformLoadSet.CustomData[AdapterIdName] = srfLoadPropSet.lUID;
+            uniformLoadSet.CustomData[AdapterIdName] = ramSrfLoadPropSet.lUID;
 
             return uniformLoadSet;
         }
