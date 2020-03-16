@@ -55,7 +55,7 @@ namespace BH.Adapter.RAM
         /// <summary>
         /***************************************************/
 
-        public static List<double> ToLevelElevations(this IModel IModel)
+        public static List<double> ToLevelElevations(this IModel ramModel)
         {
             List<double> RAMLevelHeights = new List<double>();
 
@@ -63,8 +63,8 @@ namespace BH.Adapter.RAM
             List<string> FloorTypeNames = new List<string>();
             List<string> StoryNames = new List<string>();
             double StoryElevation;
-            IFloorTypes IFloorTypes = IModel.GetFloorTypes();
-            IStories IStories = IModel.GetStories();
+            IFloorTypes IFloorTypes = ramModel.GetFloorTypes();
+            IStories IStories = ramModel.GetStories();
 
             double storyCount = IStories.GetCount();
 
@@ -78,15 +78,15 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
         
-        public static Polyline ToPolyline(this IPoints IPoints, double zShift = 0)
+        public static Polyline ToPolyline(this IPoints ramPoints, double zShift = 0)
         {
             List<Point> controlPts = new List<Point>();
             SCoordinate SCoordPt = new SCoordinate();
 
-            for (int i = 0; i < IPoints.GetCount(); i++)
+            for (int i = 0; i < ramPoints.GetCount(); i++)
             {
                 //Get Polyline Pts
-                IPoint IPoint = IPoints.GetAt(i);
+                IPoint IPoint = ramPoints.GetAt(i);
                 IPoint.GetCoordinate(ref SCoordPt);
                 Point controlPt = new BH.oM.Geometry.Point() { X = SCoordPt.dXLoc, Y = SCoordPt.dYLoc, Z = SCoordPt.dZLoc + zShift};
                 controlPts.Add(controlPt);
@@ -99,17 +99,17 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static ISectionProperty ToBHoMSection(this IBeam RAMBar)
+        public static ISectionProperty ToBHoMSection(this IBeam ramBar)
         {
             //Create BHoM SectionProperty
             ISectionProperty sectionProperty = new ExplicitSection();
             IMaterialFragment Material = null;
 
-            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            if (ramBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
                 Material = Engine.Structure.Create.Concrete("Concrete");
             }
-            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            else if (ramBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
                 Material = Engine.Structure.Create.Steel("Steel");
             }
@@ -118,108 +118,108 @@ namespace BH.Adapter.RAM
                 Material = Engine.Structure.Create.Steel("Other");
             }
             sectionProperty.Material = Material;
-            sectionProperty.Name = RAMBar.strSectionLabel;
+            sectionProperty.Name = ramBar.strSectionLabel;
 
             return sectionProperty;
         }
 
         /***************************************************/
 
-        public static ISectionProperty ToBHoMSection(this IColumn RAMBar)
+        public static ISectionProperty ToBHoMSection(this IColumn ramBar)
         {
             //Create BHoM SectionProperty
             ISectionProperty sectionProperty = new ExplicitSection();
 
             IMaterialFragment Material = null;
 
-            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            if (ramBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
                 Material = Engine.Structure.Create.Concrete("Concrete");
                 //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
-            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            else if (ramBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
                 Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
 
             sectionProperty.Material = Material;
-            sectionProperty.Name = RAMBar.strSectionLabel;
+            sectionProperty.Name = ramBar.strSectionLabel;
 
             return sectionProperty;
         }
 
         /***************************************************/
 
-        public static ISectionProperty ToBHoMSection(this IVerticalBrace RAMBar)
+        public static ISectionProperty ToBHoMSection(this IVerticalBrace ramBar)
         {
             //Create BHoM SectionProperty
             ISectionProperty sectionProperty = new ExplicitSection();
 
             IMaterialFragment Material = null;
 
-            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            if (ramBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
                 Material = Engine.Structure.Create.Concrete("Concrete");
                 //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
-            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            else if (ramBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
                 Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
 
             sectionProperty.Material = Material;
-            sectionProperty.Name = RAMBar.strSectionLabel;
+            sectionProperty.Name = ramBar.strSectionLabel;
 
             return sectionProperty;
         }
 
         /***************************************************/
 
-        public static ISectionProperty ToBHoMSection(this IHorizBrace RAMBar)
+        public static ISectionProperty ToBHoMSection(this IHorizBrace ramBar)
         {
             //Create BHoM SectionProperty
             ISectionProperty sectionProperty = new ExplicitSection();
 
             IMaterialFragment Material = null;
 
-            if (RAMBar.eMaterial == EMATERIALTYPES.EConcreteMat)
+            if (ramBar.eMaterial == EMATERIALTYPES.EConcreteMat)
             {
                 Material = Engine.Structure.Create.Concrete("Concrete");
                 //sectionProperty = Create.ConcreteRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, Material, sectionName);
             }
-            else if (RAMBar.eMaterial == EMATERIALTYPES.ESteelMat)
+            else if (ramBar.eMaterial == EMATERIALTYPES.ESteelMat)
             {
                 Material = Engine.Structure.Create.Steel("Steel");
                 //sectionProperty = Create.SteelRectangleSection(IBeam.dWebDepth, IBeam.dFlangeWidthTop, 0,Material,sectionName);
             }
 
             sectionProperty.Material = Material;
-            sectionProperty.Name = RAMBar.strSectionLabel;
+            sectionProperty.Name = ramBar.strSectionLabel;
 
             return sectionProperty;
         }
 
         /***************************************************/
 
-        public static Bar ToBHoMObject(this IColumn IColumn)
+        public static Bar ToBHoMObject(this IColumn ramColumn)
         {
 
             // Get the column name
-            string section = IColumn.strSectionLabel;
+            string section = ramColumn.strSectionLabel;
 
             // Get the start and end pts of every column
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
-            IColumn.GetEndCoordinates(ref startPt, ref endPt);
+            ramColumn.GetEndCoordinates(ref startPt, ref endPt);
             Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
             Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
 
             //Assign section property per bar
-            string sectionName = IColumn.strSectionLabel;
+            string sectionName = ramColumn.strSectionLabel;
 
-            ISectionProperty sectionProperty = ToBHoMSection(IColumn);
+            ISectionProperty sectionProperty = ToBHoMSection(ramColumn);
 
             // Create bars with section properties
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
@@ -234,20 +234,20 @@ namespace BH.Adapter.RAM
             bhomBar.Release.StartRelease.RotationY = new DOFType();
             bhomBar.Release.EndRelease.RotationY = new DOFType();
 
-            if (IColumn.bMajAxisBendFixedTop == 1) { bhomBar.Release.StartRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationX = DOFType.Free; }
-            if (IColumn.bMajAxisBendFixedBot == 1) { bhomBar.Release.EndRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationX = DOFType.Free; }
-            if (IColumn.bMinAxisBendFixedTop == 1) { bhomBar.Release.StartRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationY = DOFType.Free; }
-            if (IColumn.bMinAxisBendFixedBot == 1) { bhomBar.Release.EndRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationY = DOFType.Free; }
+            if (ramColumn.bMajAxisBendFixedTop == 1) { bhomBar.Release.StartRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationX = DOFType.Free; }
+            if (ramColumn.bMajAxisBendFixedBot == 1) { bhomBar.Release.EndRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationX = DOFType.Free; }
+            if (ramColumn.bMinAxisBendFixedTop == 1) { bhomBar.Release.StartRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationY = DOFType.Free; }
+            if (ramColumn.bMinAxisBendFixedBot == 1) { bhomBar.Release.EndRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationY = DOFType.Free; }
 
 
             bhomBar.OrientationAngle = 0;
 
             // Add RAM Unique ID, custom Data
-            bhomBar.CustomData[AdapterIdName] = IColumn.lUID;
-            bhomBar.CustomData["FrameNumber"] = IColumn.lLabel;
-            bhomBar.CustomData["FrameType"] = IColumn.eFramingType.ToString();
-            bhomBar.CustomData["Material"] = IColumn.eMaterial.ToString();
-            bhomBar.CustomData["IsHangingColumn"] = IColumn.bHanger;
+            bhomBar.CustomData[AdapterIdName] = ramColumn.lUID;
+            bhomBar.CustomData["FrameNumber"] = ramColumn.lLabel;
+            bhomBar.CustomData["FrameType"] = ramColumn.eFramingType.ToString();
+            bhomBar.CustomData["Material"] = ramColumn.eMaterial.ToString();
+            bhomBar.CustomData["IsHangingColumn"] = ramColumn.bHanger;
 
 
             bhomBar.Tags.Add("Column");
@@ -257,20 +257,20 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Bar ToBHoMObject(this IBeam IBeam, ILayoutBeam ILayoutBeam, double dElevation)
+        public static Bar ToBHoMObject(this IBeam ramBeam, ILayoutBeam ramLayoutBeam, double dElevation)
         {
 
             // Get coordinates from IBeam
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
-            IBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
+            ramBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
             Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
             Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
 
             //Assign section property per bar
-            string sectionName = IBeam.strSectionLabel;
+            string sectionName = ramBeam.strSectionLabel;
 
-            ISectionProperty sectionProperty = ToBHoMSection(IBeam);
+            ISectionProperty sectionProperty = ToBHoMSection(ramBeam);
 
             // Create bars with section properties
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
@@ -279,28 +279,28 @@ namespace BH.Adapter.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData[AdapterIdName] = IBeam.lUID;
-            bhomBar.CustomData["FrameNumber"] = IBeam.lLabel;
-            bhomBar.CustomData["StartCantilever"] = IBeam.dStartCantilever.ToString();
-            bhomBar.CustomData["EndCantilever"] = IBeam.dEndCantilever.ToString();
-            bhomBar.CustomData["IsStubCantilever"] = ILayoutBeam.IsStubCantilever();
-            bhomBar.CustomData["FrameType"] = IBeam.eFramingType.ToString();
-            bhomBar.CustomData["Material"] = IBeam.eMaterial.ToString();
+            bhomBar.CustomData[AdapterIdName] = ramBeam.lUID;
+            bhomBar.CustomData["FrameNumber"] = ramBeam.lLabel;
+            bhomBar.CustomData["StartCantilever"] = ramBeam.dStartCantilever.ToString();
+            bhomBar.CustomData["EndCantilever"] = ramBeam.dEndCantilever.ToString();
+            bhomBar.CustomData["IsStubCantilever"] = ramLayoutBeam.IsStubCantilever();
+            bhomBar.CustomData["FrameType"] = ramBeam.eFramingType.ToString();
+            bhomBar.CustomData["Material"] = ramBeam.eMaterial.ToString();
             
 
             bhomBar.Tags.Add("Beam");
 
 
             // Get Steel beam results
-            ISteelBeamDesignResult Result = IBeam.GetSteelDesignResult();
+            ISteelBeamDesignResult Result = ramBeam.GetSteelDesignResult();
             DAArray ppalNumStuds = Result.GetNumStudsInSegments();
 
             int numStudSegments = new int();
             ppalNumStuds.GetSize(ref numStudSegments);
-            double Camber = IBeam.dCamber;
+            double Camber = ramBeam.dCamber;
             int studCount = 0;
 
-            IAnalyticalResult AnalyticalResult = IBeam.GetAnalyticalResult();
+            IAnalyticalResult AnalyticalResult = ramBeam.GetAnalyticalResult();
             COMBO_MATERIAL_TYPE Steel_Grav = COMBO_MATERIAL_TYPE.GRAV_STEEL;
             IMemberForces IMemberForces = AnalyticalResult.GetMaximumComboReactions(Steel_Grav);
 
@@ -331,10 +331,10 @@ namespace BH.Adapter.RAM
             bhomBar.Release.StartRelease.RotationY = new DOFType();
             bhomBar.Release.EndRelease.RotationY = new DOFType();
 
-            if (IBeam.bMajAxisBendFixedStart == 1) { bhomBar.Release.StartRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationX = DOFType.Free; }
-            if (IBeam.bMajAxisBendFixedEnd == 1) { bhomBar.Release.EndRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationX = DOFType.Free; }
-            if (IBeam.bMinAxisBendFixedStart == 1) { bhomBar.Release.StartRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationY = DOFType.Free; }
-            if (IBeam.bMinAxisBendFixedEnd == 1) { bhomBar.Release.EndRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationY = DOFType.Free; }
+            if (ramBeam.bMajAxisBendFixedStart == 1) { bhomBar.Release.StartRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationX = DOFType.Free; }
+            if (ramBeam.bMajAxisBendFixedEnd == 1) { bhomBar.Release.EndRelease.RotationX = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationX = DOFType.Free; }
+            if (ramBeam.bMinAxisBendFixedStart == 1) { bhomBar.Release.StartRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.StartRelease.RotationY = DOFType.Free; }
+            if (ramBeam.bMinAxisBendFixedEnd == 1) { bhomBar.Release.EndRelease.RotationY = DOFType.Fixed; } else { bhomBar.Release.EndRelease.RotationY = DOFType.Free; }
 
             double DCI = Result.dDesignCapacityInteraction;
             double CDI = Result.dCriticalDeflectionInteraction;
@@ -378,18 +378,18 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Bar ToBHoMObject(this IVerticalBrace IVerticalBrace)
+        public static Bar ToBHoMObject(this IVerticalBrace ramVerticalBrace)
         {
 
             // Get the column name
-            string sectionName = IVerticalBrace.strSectionLabel;
+            string sectionName = ramVerticalBrace.strSectionLabel;
 
-            ISectionProperty sectionProperty = ToBHoMSection(IVerticalBrace);
+            ISectionProperty sectionProperty = ToBHoMSection(ramVerticalBrace);
 
             // Get the start and end pts of every column
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
-            IVerticalBrace.GetEndCoordinates(ref startPt, ref endPt);
+            ramVerticalBrace.GetEndCoordinates(ref startPt, ref endPt);
             Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
             Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
 
@@ -399,10 +399,10 @@ namespace BH.Adapter.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData[AdapterIdName] = IVerticalBrace.lUID;
-            bhomBar.CustomData["FrameNumber"] = IVerticalBrace.lLabel;
-            bhomBar.CustomData["FrameType"] = IVerticalBrace.eSeismicFrameType.ToString();
-            bhomBar.CustomData["Material"] = IVerticalBrace.eMaterial.ToString();
+            bhomBar.CustomData[AdapterIdName] = ramVerticalBrace.lUID;
+            bhomBar.CustomData["FrameNumber"] = ramVerticalBrace.lLabel;
+            bhomBar.CustomData["FrameType"] = ramVerticalBrace.eSeismicFrameType.ToString();
+            bhomBar.CustomData["Material"] = ramVerticalBrace.eMaterial.ToString();
             bhomBar.Tags.Add("VerticalBrace");
 
             return bhomBar;
@@ -410,12 +410,12 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Bar ToBHoMObject(IHorizBrace IHorizBrace, ILayoutHorizBrace ILayoutHorizBrace, double dElevation)
+        public static Bar ToBHoMObject(IHorizBrace ramHorizBrace, ILayoutHorizBrace ramLayoutHorizBrace, double dElevation)
         {
 
-            string sectionName = IHorizBrace.strSectionLabel;
+            string sectionName = ramHorizBrace.strSectionLabel;
 
-            ISectionProperty sectionProperty = ToBHoMSection(IHorizBrace);
+            ISectionProperty sectionProperty = ToBHoMSection(ramHorizBrace);
 
             // Get the start and end pts of every brace
             double StartSupportX = new double();
@@ -428,7 +428,7 @@ namespace BH.Adapter.RAM
 
 
             // Get coordinates from ILayout Brace
-            ILayoutHorizBrace.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
+            ramLayoutHorizBrace.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
             Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = StartSupportX, Y = StartSupportY, Z = StoryZ + StartSupportZOffset });
             Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = EndSupportX, Y = EndSupportY, Z = StoryZ + EndSupportZOffset });
 
@@ -437,9 +437,9 @@ namespace BH.Adapter.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData[AdapterIdName] = IHorizBrace.lUID;
-            bhomBar.CustomData["FrameNumber"] = IHorizBrace.lLabel;
-            bhomBar.CustomData["Material"] = IHorizBrace.eMaterial.ToString();
+            bhomBar.CustomData[AdapterIdName] = ramHorizBrace.lUID;
+            bhomBar.CustomData["FrameNumber"] = ramHorizBrace.lLabel;
+            bhomBar.CustomData["Material"] = ramHorizBrace.eMaterial.ToString();
             bhomBar.Tags.Add("HorizontalBrace");
 
             return bhomBar;
@@ -447,19 +447,19 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-        public static Panel ToBHoMObject(IDeck IDeck, IModel IModel, int IStoryUID)
+        public static Panel ToBHoMObject(IDeck ramDeck, IModel ramModel, int ramStoryUID)
         {
 
             //Get panel props
-            EDeckType type = IDeck.eDeckPropType;
+            EDeckType type = ramDeck.eDeckPropType;
 
             //Find polylines of deck in RAM Model
 
             //get count of deck polygons
-            double deckPolyCount = IDeck.GetNumFinalPolygons(IStoryUID);
+            double deckPolyCount = ramDeck.GetNumFinalPolygons(ramStoryUID);
 
             //Initial only gets first outline poly for exterior edge, rest for openings
-            IPoints pplPoints = IDeck.GetFinalPolygon(IStoryUID, 0);
+            IPoints pplPoints = ramDeck.GetFinalPolygon(ramStoryUID, 0);
 
             //Re-add first point to close Polygon
             IPoint first = pplPoints.GetAt(0);
@@ -475,7 +475,7 @@ namespace BH.Adapter.RAM
 
             for (int i = 1; i < deckPolyCount; i++)
             {
-                IPoints openingPts = IDeck.GetFinalPolygon(IStoryUID, i);
+                IPoints openingPts = ramDeck.GetFinalPolygon(ramStoryUID, i);
 
                 //Re-add first point to close Polygon
                 IPoint firstOPt = openingPts.GetAt(0);
@@ -512,15 +512,15 @@ namespace BH.Adapter.RAM
             bhomPanel.Name = type.ToString();
 
             //Get all floor props
-            ICompDeckProps ICompDeckProps = IModel.GetCompositeDeckProps();
-            INonCompDeckProps INonCompDeckProps = IModel.GetNonCompDeckProps();
-            IConcSlabProps IConcSlabProps = IModel.GetConcreteSlabProps();
+            ICompDeckProps ICompDeckProps = ramModel.GetCompositeDeckProps();
+            INonCompDeckProps INonCompDeckProps = ramModel.GetNonCompDeckProps();
+            IConcSlabProps IConcSlabProps = ramModel.GetConcreteSlabProps();
 
             // Get deck section property
             ConstantThickness deck2DProp = new ConstantThickness();
             double deckThickness = 0;
             string deckLabel = "";
-            int deckID = IDeck.lPropID;
+            int deckID = ramDeck.lPropID;
             IMaterialFragment Material = null;
 
             if (type == EDeckType.eDeckType_Composite)
@@ -551,7 +551,7 @@ namespace BH.Adapter.RAM
             deck2DProp.PanelType = PanelType.Slab;
             deck2DProp.Material = Material;
             bhomPanel.Property = deck2DProp;
-            bhomPanel.CustomData[AdapterIdName] = IDeck.lUID;
+            bhomPanel.CustomData[AdapterIdName] = ramDeck.lUID;
 
             return bhomPanel;
         }
