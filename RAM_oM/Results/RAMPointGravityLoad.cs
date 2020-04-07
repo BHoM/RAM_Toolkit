@@ -37,14 +37,14 @@ namespace BH.oM.Adapters.RAM
         /**** Properties                                ****/
         /***************************************************/
 
-        public int ObjectId { get; set; } = 0;
-        public double dist { get; set; } = 0;
-        public double DL { get; set; } = 0;
-        public double RedLL { get; set; } = 0;
-        public double NonRLL { get; set; } = 0;
-        public double StorLL { get; set; } = 0;
-        public double RoofLL { get; set; } = 0;
-        public string type { get; set; } = "";
+        public virtual int ObjectId { get; set; } = 0;
+        public virtual double dist { get; set; } = 0;
+        public virtual double DL { get; set; } = 0;
+        public virtual double RedLL { get; set; } = 0;
+        public virtual double NonRLL { get; set; } = 0;
+        public virtual double StorLL { get; set; } = 0;
+        public virtual double RoofLL { get; set; } = 0;
+        public virtual string type { get; set; } = "";
 
         /***************************************************/
     }
