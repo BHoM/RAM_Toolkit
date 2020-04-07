@@ -37,16 +37,16 @@ namespace BH.oM.Adapters.RAM
         /**** Properties                                ****/
         /***************************************************/
 
-        public int ObjectId { get; set; } = 0;
-        public double dist1 { get; set; } = 0;
-        public double dist2 { get; set; } = 0;
-        public double DL1 { get; set; } = 0;
-        public double DL2 { get; set; } = 0;
-        public double LL1 { get; set; } = 0;
-        public double LL2 { get; set; } = 0;
-        public double PL1 { get; set; } = 0;
-        public double PL2 { get; set; } = 0;
-        public string type { get; set; } = "";
+        public virtual int ObjectId { get; set; } = 0;
+        public virtual double dist1 { get; set; } = 0;
+        public virtual double dist2 { get; set; } = 0;
+        public virtual double DL1 { get; set; } = 0;
+        public virtual double DL2 { get; set; } = 0;
+        public virtual double LL1 { get; set; } = 0;
+        public virtual double LL2 { get; set; } = 0;
+        public virtual double PL1 { get; set; } = 0;
+        public virtual double PL2 { get; set; } = 0;
+        public virtual string type { get; set; } = "";
 
         /***************************************************/
     }

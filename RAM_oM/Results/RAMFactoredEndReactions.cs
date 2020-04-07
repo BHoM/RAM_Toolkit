@@ -38,9 +38,9 @@ namespace BH.oM.Adapters.RAM
         /**** Properties                                ****/
         /***************************************************/
 
-        public int ObjectId { get; set; } = 0;
-        public NodeReaction StartReaction { get; set; } = null;
-        public NodeReaction EndReaction { get; set; } = null;
+        public virtual int ObjectId { get; set; } = 0;
+        public virtual NodeReaction StartReaction { get; set; } = null;
+        public virtual NodeReaction EndReaction { get; set; } = null;
 
         /***************************************************/
     }

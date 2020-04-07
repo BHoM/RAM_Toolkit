@@ -36,8 +36,8 @@ namespace BH.oM.Adapters.RAM
         /**** Properties                                ****/
         /***************************************************/
 
-        public Polyline Contour { get; set; } = null;
-        public UniformLoadSet UniformLoadSet { get; set; } = null;
+        public virtual Polyline Contour { get; set; } = null;
+        public virtual UniformLoadSet UniformLoadSet { get; set; } = null;
 
         /***************************************************/
     }

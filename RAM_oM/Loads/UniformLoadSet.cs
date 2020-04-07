@@ -36,8 +36,8 @@ namespace BH.oM.Adapters.RAM
         /**** Properties                                ****/
         /***************************************************/
 
-        public Dictionary<string, Loadcase> Loadcases { get; set; } = null;
-        public Dictionary<string, double> Loads { get; set; } = null;
+        public virtual Dictionary<string, Loadcase> Loadcases { get; set; } = null;
+        public virtual Dictionary<string, double> Loads { get; set; } = null;
 
         /***************************************************/
     }
