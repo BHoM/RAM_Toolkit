@@ -834,25 +834,26 @@ namespace BH.Adapter.RAM
                 GridLength = 0;
             }
 
-            //Set Grid start offset from system origin
-            double spacing = 0;
-            spacing = ramModelGrid.dCoordinate_Angle;
+
 
             Point gridCoordPoint1 = new Point();
             Point gridCoordPoint2 = new Point();
 
             if (gridSystemType == "eGridOrthogonal")   // code to place grids in orthogonal X and Y
             {
-                //check the orientation to place grides accordingly
+                //Set Grid start offset from system origin
+                double spacing = ramModelGrid.dCoordinate_Angle.FromInch();
+                
+                //check the orientation to place grids accordingly
                 if (gridLineAxis == "eGridXorRadialAxis")
                 {
 
                     // position of first point
-                    gridCoordPoint1.X = gridXoffset + gridLineCoord_Angle; // at the origin point we add the spacing of the grid 
+                    gridCoordPoint1.X = gridXoffset + spacing; // at the origin point we add the spacing of the grid 
                     gridCoordPoint1.Y = gridYoffset + dMinLimit;
                     gridCoordPoint1.Z = 0;
                     // position of second point
-                    gridCoordPoint2.X = gridXoffset + gridLineCoord_Angle;
+                    gridCoordPoint2.X = gridXoffset + spacing;
                     gridCoordPoint2.Y = gridYoffset + GridLength + dMaxLimit;// add the max limit to the origin point to get full length of gridline
                     gridCoordPoint2.Z = 0;
 
@@ -861,11 +862,11 @@ namespace BH.Adapter.RAM
                 {
                     // position of first point
                     gridCoordPoint1.X = gridXoffset + dMinLimit; // at the origin point we add the coordinate of the grid 
-                    gridCoordPoint1.Y = gridYoffset + gridLineCoord_Angle;
+                    gridCoordPoint1.Y = gridYoffset + spacing;
                     gridCoordPoint1.Z = 0;
                     // position of second point
                     gridCoordPoint2.X = gridXoffset + GridLength + dMaxLimit; // add the max limit to the origin point to get full length of gridline
-                    gridCoordPoint2.Y = gridYoffset + gridLineCoord_Angle;
+                    gridCoordPoint2.Y = gridYoffset + spacing;
                     gridCoordPoint2.Z = 0;
 
                 }
@@ -911,7 +912,7 @@ namespace BH.Adapter.RAM
                     Vector cirNormal = new Vector { X = 0, Y = 0, Z = 1 };
                     gridLine.Centre = gridCoordPoint1;
                     gridLine.Normal = cirNormal;
-                    gridLine.Radius = gridLineCoord_Angle;
+                    gridLine.Radius = gridLineCoord_Angle.FromInch();
 
                     //Create a new grid object from the drawn line and return it
                     myGrid = new Grid { Curve = gridLine, Name = gridLineLabel };
