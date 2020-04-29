@@ -49,7 +49,6 @@ namespace BH.Adapter.RAM
         /***************************************************/
         protected override IEnumerable<IBHoMObject> IRead(Type type, IList ids, ActionConfig actionConfig = null)
         {
-
             dynamic elems = null;
             //Choose what to pull out depending on the type. Also see example methods below for pulling out bars and dependencies
             if (type == typeof(Bar))

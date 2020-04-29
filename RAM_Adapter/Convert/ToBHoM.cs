@@ -36,6 +36,7 @@ using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.Results;
 using BH.oM.Adapters.RAM;
+using BH.Engine.Units;
 using RAMDATAACCESSLib;
 
 namespace BH.Adapter.RAM
@@ -44,15 +45,6 @@ namespace BH.Adapter.RAM
     {
         /***************************************************/
         /**** Public Methods                            ****/
-        /***************************************************/
-        /// <summary>
-        //Add methods for converting to BHoM from the specific software types, if possible to do without any BHoM calls
-        //Example:
-        //public static Node ToBHoM(this RAMNode node)
-        //{
-        //    //Insert code for conversion
-        //}
-        /// <summary>
         /***************************************************/
 
         public static List<double> ToLevelElevations(this IModel ramModel)
@@ -70,7 +62,7 @@ namespace BH.Adapter.RAM
 
             for (int i = 0; i < storyCount; i++)
             {
-                StoryElevation = IStories.GetAt(i).dElevation;
+                StoryElevation = IStories.GetAt(i).dElevation.FromInch();
                 RAMLevelHeights.Add(StoryElevation);
             }
             return RAMLevelHeights;
@@ -88,7 +80,7 @@ namespace BH.Adapter.RAM
                 //Get Polyline Pts
                 IPoint IPoint = ramPoints.GetAt(i);
                 IPoint.GetCoordinate(ref SCoordPt);
-                Point controlPt = new BH.oM.Geometry.Point() { X = SCoordPt.dXLoc, Y = SCoordPt.dYLoc, Z = SCoordPt.dZLoc + zShift};
+                Point controlPt = SCoordPt.PointFromRAM();
                 controlPts.Add(controlPt);
             }
 
@@ -213,8 +205,8 @@ namespace BH.Adapter.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             ramColumn.GetEndCoordinates(ref startPt, ref endPt);
-            Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
-            Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
+            Node startNode = Engine.Structure.Create.Node(startPt.PointFromRAM());
+            Node endNode = Engine.Structure.Create.Node(endPt.PointFromRAM());
 
             //Assign section property per bar
             string sectionName = ramColumn.strSectionLabel;
@@ -264,8 +256,8 @@ namespace BH.Adapter.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             ramBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
-            Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
-            Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
+            Node startNode = Engine.Structure.Create.Node(startPt.PointFromRAM());
+            Node endNode = Engine.Structure.Create.Node(endPt.PointFromRAM());
 
             //Assign section property per bar
             string sectionName = ramBeam.strSectionLabel;
@@ -390,8 +382,8 @@ namespace BH.Adapter.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             ramVerticalBrace.GetEndCoordinates(ref startPt, ref endPt);
-            Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = startPt.dXLoc, Y = startPt.dYLoc, Z = startPt.dZLoc });
-            Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = endPt.dXLoc, Y = endPt.dYLoc, Z = endPt.dZLoc });
+            Node startNode = Engine.Structure.Create.Node(startPt.PointFromRAM());
+            Node endNode = Engine.Structure.Create.Node(endPt.PointFromRAM());
 
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
@@ -429,8 +421,8 @@ namespace BH.Adapter.RAM
 
             // Get coordinates from ILayout Brace
             ramLayoutHorizBrace.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
-            Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = StartSupportX, Y = StartSupportY, Z = StoryZ + StartSupportZOffset });
-            Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = EndSupportX, Y = EndSupportY, Z = StoryZ + EndSupportZOffset });
+            Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = StartSupportX.FromInch(), Y = StartSupportY.FromInch(), Z = StoryZ.FromInch() + StartSupportZOffset.FromInch() });
+            Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = EndSupportX.FromInch(), Y = EndSupportY.FromInch(), Z = StoryZ.FromInch() + EndSupportZOffset.FromInch() });
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
@@ -526,7 +518,7 @@ namespace BH.Adapter.RAM
             if (type == EDeckType.eDeckType_Composite)
             {
                 ICompDeckProp DeckProp = ICompDeckProps.Get(deckID);
-                deckThickness = DeckProp.dThickAboveFlutes;
+                deckThickness = DeckProp.dThickAboveFlutes.FromInch();
                 deckLabel = DeckProp.strLabel + " " + deckThickness.ToString();
                 Material = Engine.Structure.Create.Concrete("Composite");
 
@@ -534,14 +526,14 @@ namespace BH.Adapter.RAM
             else if (type == EDeckType.eDeckType_Concrete)
             {
                 IConcSlabProp DeckProp = IConcSlabProps.Get(deckID);
-                deckThickness = DeckProp.dThickness;
+                deckThickness = DeckProp.dThickness.FromInch();
                 deckLabel = DeckProp.strLabel;
                 Material = Engine.Structure.Create.Concrete("Concrete");
             }
             else if (type == EDeckType.eDeckType_NonComposite)
             {
                 INonCompDeckProp DeckProp = INonCompDeckProps.Get(deckID);
-                deckThickness = DeckProp.dEffectiveThickness;
+                deckThickness = DeckProp.dEffectiveThickness.FromInch();
                 deckLabel = DeckProp.strLabel;
                 Material = Engine.Structure.Create.Concrete("NonComposite");
             }
@@ -571,11 +563,11 @@ namespace BH.Adapter.RAM
 
             // Create list of points
             List<Point> corners = new List<Point>();
-            corners.Add(new Point { X = TopstartPt.dXLoc, Y = TopstartPt.dYLoc, Z = TopstartPt.dZLoc });
-            corners.Add(new Point { X = TopendPt.dXLoc, Y = TopendPt.dYLoc, Z = TopendPt.dZLoc });
-            corners.Add(new Point { X = BottomendPt.dXLoc, Y = BottomendPt.dYLoc, Z = BottomendPt.dZLoc });
-            corners.Add(new Point { X = BottomstartPt.dXLoc, Y = BottomstartPt.dYLoc, Z = BottomstartPt.dZLoc });
-            corners.Add(new Point { X = TopstartPt.dXLoc, Y = TopstartPt.dYLoc, Z = TopstartPt.dZLoc });
+            corners.Add(TopstartPt.PointFromRAM());
+            corners.Add(TopendPt.PointFromRAM());
+            corners.Add(BottomendPt.PointFromRAM());
+            corners.Add(BottomstartPt.PointFromRAM());
+            corners.Add(TopstartPt.PointFromRAM());
 
             // Create outline from corner points
             Polyline outline = new Polyline();
@@ -620,7 +612,7 @@ namespace BH.Adapter.RAM
             //Get wall section property
             ConstantThickness wall2DProp = new ConstantThickness();
             string wallLabel = "";
-            double wallThickness = ramWall.dThickness;
+            double wallThickness = ramWall.dThickness.FromInch();
             IMaterialFragment Material = null;
 
             if (ramWall.eMaterial == EMATERIALTYPES.EWallPropConcreteMat)
@@ -657,10 +649,10 @@ namespace BH.Adapter.RAM
         {
 
             // Get the location of the node
-            SCoordinate Location = new SCoordinate();
-            Location = ramNode.sLocation;
+            SCoordinate location = new SCoordinate();
+            location = ramNode.sLocation;
             
-            Node Node = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = Location.dXLoc, Y = Location.dYLoc, Z = Location.dZLoc });
+            Node Node = Engine.Structure.Create.Node(location.PointFromRAM());
 
             IMemberForces IMemberForces = ramNode.GetReactions();
 
@@ -770,8 +762,8 @@ namespace BH.Adapter.RAM
         {
             SCoordinate ramPoint;
             ramPointLoad.GetCoordinate(out ramPoint);
-
-            string ramPointID = ramPoint.dXLoc.ToString() + ", " + ramPoint.dYLoc.ToString() + ", " + ramPoint.dZLoc.ToString() + ", "; // no object id option for RAM nodes, id by coordinates instead
+            Point bhomPoint = ramPoint.PointFromRAM();
+            string ramPointID = bhomPoint.X.ToString() + ", " + bhomPoint.Y.ToString() + ", " + bhomPoint.Z.ToString() + ", "; // no object id option for RAM nodes, id by coordinates instead
             NodeReaction bhomNodeReaction = new NodeReaction
             {
                 ResultCase = ramLoadCase.strLoadCaseGroupLabel + ramLoadCase.strTypeLabel,
@@ -813,8 +805,8 @@ namespace BH.Adapter.RAM
             string gridSystemLabel = ramGridSystem.strLabel;// Set the name of the GridSystem from RAM
             int gridSystemID = ramGridSystem.lUID;    //Set the lUID from RAM
             string gridSystemType = ramGridSystem.eOrientationType.ToString();// Set the orientation type
-            double gridXoffset = ramGridSystem.dXOffset;   // Set the offset of the GridSystem from 0 along the X axis
-            double gridYoffset = ramGridSystem.dYOffset; // Set the offset of the GridSystem from 0 along the Y axis
+            double gridXoffset = ramGridSystem.dXOffset.FromInch();   // Set the offset of the GridSystem from 0 along the X axis
+            double gridYoffset = ramGridSystem.dYOffset.FromInch(); // Set the offset of the GridSystem from 0 along the Y axis
             double gridSystemRotation = ramGridSystem.dRotation; // Set the rotation angle of the GridSystem
             double gridRotAngle = 0;
 
@@ -832,9 +824,9 @@ namespace BH.Adapter.RAM
             double gridLineCoord_Angle = ramModelGrid.dCoordinate_Angle; // the grid coordinate or angle
             string gridLineAxis = ramModelGrid.eAxis.ToString(); // grid line axis , X/Radial Y/Circular 
 
-            double dMaxLimit = ramModelGrid.dMaxLimitValue; // maximum limit specified by the user to which gridline will be drawn from origin
-            double dMinLimit = ramModelGrid.dMinLimitValue; // minimum limit specified by the user to which gridline will be drawn from origin
-            double GridLength = 3000; //default grid length value
+            double dMaxLimit = ramModelGrid.dMaxLimitValue.FromInch(); // maximum limit specified by the user to which gridline will be drawn from origin
+            double dMinLimit = ramModelGrid.dMinLimitValue.FromInch(); // minimum limit specified by the user to which gridline will be drawn from origin
+            double GridLength = 100; //default grid length value
 
             //Set max and min limit values based on if they are used or if -1 is returned
             if (dMaxLimit != 0)
@@ -937,7 +929,7 @@ namespace BH.Adapter.RAM
         {
             Level bhomLevel = new Level
             {
-                Elevation = ramStory.dElevation,
+                Elevation = ramStory.dElevation.FromInch(),
                 Name = ramStory.strLabel
             };
 
@@ -1013,7 +1005,13 @@ namespace BH.Adapter.RAM
             return uniformLoadSet;
         }
 
+
         /***************************************************/
+
+        public static oM.Geometry.Point PointFromRAM(this SCoordinate sc, double zOffset = 0)
+        {
+            return BH.Engine.Geometry.Create.Point(sc.dXLoc.FromInch(), sc.dYLoc.FromInch(), sc.dZLoc.FromInch() + zOffset.FromInch());
+        }
     }
 }
 
