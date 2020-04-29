@@ -25,6 +25,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Geometry.SettingOut;
+using BH.Engine.Units;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
@@ -104,8 +105,8 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
 
-                    double zStart = bar.StartNode.Position().Z - barStory.dElevation;
-                    double zEnd = bar.EndNode.Position().Z - barStory.dElevation;
+                    double zStart = bar.StartNode.Position().Z.ToInch() - barStory.dElevation;
+                    double zEnd = bar.EndNode.Position().Z.ToInch() - barStory.dElevation;
 
                     //  Get critical cant values
                     object isStubCant;
@@ -121,25 +122,19 @@ namespace BH.Adapter.RAM
 
                     if (isStubCant.Equals("True") || isStubCant.Equals("1")) //Check bool per RAM or GH preferred boolean context
                     {
-                        Point startPt, endPt;
+                        SCoordinate startPt, endPt;
                         if (startCant > 0) // Ensure startPt corresponds with support point
                         {
-                            startPt = bar.EndNode.Position();
-                            endPt = bar.StartNode.Position();
+                            startPt = bar.EndNode.Position().ToRAM();
+                            endPt = bar.StartNode.Position().ToRAM();
                         }
                         else
                         {
-                            startPt = bar.StartNode.Position();
-                            endPt = bar.EndNode.Position();
+                            startPt = bar.StartNode.Position().ToRAM();
+                            endPt = bar.EndNode.Position().ToRAM();
                         }
 
-
-                        double xStart = startPt.X;
-                        double yStart = startPt.Y;
-                        double xEnd = endPt.X;
-                        double yEnd = endPt.Y;
-
-                        ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), xStart, yStart, 0, xEnd, yEnd, 0); // No Z offsets, beams flat on closest story
+                        ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), startPt.dXLoc, startPt.dYLoc, 0, endPt.dXLoc, endPt.dYLoc, 0); // No Z offsets, beams flat on closest story
                     }
                     else
                     {
@@ -147,23 +142,25 @@ namespace BH.Adapter.RAM
                         Vector barDir = bar.Tangent(true);
                         Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position(), barDir * startCant);
                         Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), -barDir * endCant);
+                        SCoordinate start = startSupPt.ToRAM();
+                        SCoordinate end = endSupPt.ToRAM();
 
-                        ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), startSupPt.X, startSupPt.Y, 0, endSupPt.X, endSupPt.Y, 0); // No Z offsets, beams flat on closest story
+                        ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0); // No Z offsets, beams flat on closest story
                         if (startSupPt.X < endSupPt.X || (startSupPt.X == endSupPt.X && startSupPt.Y>endSupPt.Y))
                         {
-                            ramBeam.dStartCantilever = startCant;
-                            ramBeam.dEndCantilever = endCant;
+                            ramBeam.dStartCantilever = startCant.ToInch();
+                            ramBeam.dEndCantilever = endCant.ToInch();
                         }
                         else
                         {
-                            ramBeam.dStartCantilever = endCant;
-                            ramBeam.dEndCantilever = startCant;
+                            ramBeam.dStartCantilever = endCant.ToInch();
+                            ramBeam.dEndCantilever = startCant.ToInch();
                         }
                     }
 
                     // Add warning to report distance of snapping to level as required for RAM
                     if (zStart != 0 || zEnd != 0)
-                    {Engine.Reflection.Compute.RecordWarning("Bar " + name + " snapped to level " + barStory.strLabel + ". Bar moved " + Math.Round(zStart,2).ToString() + " at start and " + Math.Round(zEnd,2).ToString() + " at end."); }
+                    {Engine.Reflection.Compute.RecordWarning("Bar " + name + " snapped to level " + barStory.strLabel + ". Bar moved " + Math.Round(zStart,2).ToString() + " inches at start and " + Math.Round(zEnd,2).ToString() + " inches at end."); }
 
                     IBeams beamsOnStory = barStory.GetBeams();
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
@@ -188,12 +185,12 @@ namespace BH.Adapter.RAM
                     List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
                     colNodes.Sort((x, y) => x.Position.Z.CompareTo(y.Position.Z));
 
-                    double xBtm = colNodes[0].Position.X;
-                    double yBtm = colNodes[0].Position.Y;
-                    double zBtm = colNodes[0].Position.Z - barStory.dElevation;
-                    double xTop = colNodes[1].Position.X;
-                    double yTop = colNodes[1].Position.Y;
-                    double zTop = colNodes[1].Position.Z - barStory.dElevation + barStory.dFlrHeight;
+                    double xBtm = colNodes[0].Position.X.ToInch();
+                    double yBtm = colNodes[0].Position.Y.ToInch();
+                    double zBtm = colNodes[0].Position.Z.ToInch() - barStory.dElevation;
+                    double xTop = colNodes[1].Position.X.ToInch();
+                    double yTop = colNodes[1].Position.Y.ToInch();
+                    double zTop = colNodes[1].Position.Z.ToInch() - barStory.dElevation + barStory.dFlrHeight;
 
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
@@ -575,6 +572,7 @@ namespace BH.Adapter.RAM
                 for (int i = 0; i < sortedBhomLevels.Count(); i++)
                 {
                     Level level = sortedBhomLevels.ElementAt(i);
+                    double levelHt = level.Elevation.ToInch();
 
                     // Get elevations and skip if level elevation already in RAM
                     ramStories = m_Model.GetStories();
@@ -584,28 +582,28 @@ namespace BH.Adapter.RAM
                         ramElevs.Add(ramStories.GetAt(j).dElevation);
                     }
 
-                    if (ramElevs.Contains(level.Elevation) != true)
+                    if (ramElevs.Contains(levelHt) != true)
                     {
                         double height;
                         // Ground floor ht = 0 for RAM
                         if (i == 0)
                         {
-                            height = level.Elevation;
+                            height = levelHt;
                         }
                         else
                         {
                             Level lastLevel = sortedBhomLevels.ElementAt(i - 1);
-                            height = level.Elevation - lastLevel.Elevation;
+                            height = levelHt - lastLevel.Elevation.ToInch();
                         }
 
                         int newIndex;
-                        if (ramElevs.FindIndex(x => x > level.Elevation) == -1)
+                        if (ramElevs.FindIndex(x => x > levelHt) == -1)
                         {
                             newIndex = ramElevs.Count();
                         }
                         else
                         {
-                            newIndex = ramElevs.FindIndex(x => x > level.Elevation);
+                            newIndex = ramElevs.FindIndex(x => x > levelHt);
                         }
 
                         List<string> ramFloorTypeNames = new List<string>();
@@ -629,26 +627,24 @@ namespace BH.Adapter.RAM
                         if (newIndex < ramStories.GetCount())
                         {
                             IStory ramStoryAbove = ramStories.GetAt(newIndex);
-                            ramStoryAbove.dFlrHeight = ramStoryAbove.dElevation - level.Elevation;
+                            ramStoryAbove.dFlrHeight = ramStoryAbove.dElevation - levelHt;
                         }
                         if (newIndex > 0 && ramStories.GetCount() > 0)
                         {
                             IStory ramStoryBelow = ramStories.GetAt(newIndex - 1);
-                            height = level.Elevation - ramStoryBelow.dElevation;
+                            height = levelHt - ramStoryBelow.dElevation;
 
                         }
 
                         // Insert story at index
                         ramStories.InsertAt(newIndex, ramFloorType.lUID, level.Name, height);
                     }
-
                 }
 
                 //Save file
                 m_IDBIO.SaveDatabase();
 
             }
-
             return true;
 
         }
@@ -754,19 +750,19 @@ namespace BH.Adapter.RAM
 
 
             //  Get Grid System Offset
-            double minY = XGrids[0].Curve.IStartPoint().Y;
-            double minX = YGrids[0].Curve.IStartPoint().X;
+            double minY = XGrids[0].Curve.IStartPoint().Y.ToInch();
+            double minX = YGrids[0].Curve.IStartPoint().X.ToInch();
 
             foreach (Grid XGrid in XGrids)
             {
-                double gridY = XGrid.Curve.IStartPoint().Y;
+                double gridY = XGrid.Curve.IStartPoint().Y.ToInch();
                 if (gridY < minY)
                     minY = gridY;
             }
 
             foreach (Grid YGrid in YGrids)
             {
-                double gridX = YGrid.Curve.IStartPoint().X;
+                double gridX = YGrid.Curve.IStartPoint().X.ToInch();
                 if (gridX < minX)
                     minX = gridX;
             }

@@ -39,26 +39,17 @@ namespace BH.Adapter.RAM
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
-        //Add methods for converting From BHoM to the specific software types, if possible to do without any BHoM calls
-        //Example:
-        //public static RAMNode ToRAM(this Node node)
-        //{
-        //    //Insert code for convertion
-        //}
-        /***************************************************/
 
         public static ILayoutBeam ToRAM(this Bar bar, ILayoutBeams iLayoutBeams)
         {
             ILayoutBeam iLayoutBeam = iLayoutBeams.GetAt(0);
 
-            double xStart = bar.StartNode.Position().X;
-            double yStart = bar.StartNode.Position().Y;
-            double xEnd = bar.EndNode.Position().X;
-            double yEnd = bar.EndNode.Position().Y;
+            SCoordinate start = bar.StartNode.Position().ToRAM();
+            SCoordinate end = bar.EndNode.Position().ToRAM();
 
             //Set support coordinates and name
             //CAUTION: different from actual end points and cantilevers hardcoded
-            iLayoutBeam.SetLayoutCoordinates(xStart, yStart, 0, xEnd, yEnd, 0, 0, 0);
+            iLayoutBeam.SetLayoutCoordinates(start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0, 0, 0);
             iLayoutBeam.strSectionLabel = bar.SectionProperty.DescriptionOrName();
 
             return iLayoutBeam;
@@ -69,9 +60,9 @@ namespace BH.Adapter.RAM
         public static SCoordinate ToRAM(this Point point)
         {
             SCoordinate pt = new SCoordinate();
-            pt.dXLoc = point.X;
-            pt.dYLoc = point.Y;
-            pt.dZLoc = point.Z;
+            pt.dXLoc = point.X.ToInch();
+            pt.dYLoc = point.Y.ToInch();
+            pt.dZLoc = point.Z.ToInch();
             return pt;
         }
 
@@ -96,7 +87,7 @@ namespace BH.Adapter.RAM
             {
                 case StructuralUsage1D.Beam:
                     //Use lowest end elevation
-                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
                     break;
                 case StructuralUsage1D.Column:
                     object isHanging;
@@ -105,16 +96,16 @@ namespace BH.Adapter.RAM
 
                     if (isHanging.Equals("True") || isHanging.Equals("1")) //Hanging Column to be placed on its btm level.
                     {
-                        elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                        elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
                     }
                     else  //Column to be placed on the level it supports.
                     {
-                        elev = Math.Max(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                        elev = Math.Max(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
                     }
                     break;
                 default:
                     //Use lowest end elevation
-                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z);
+                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
                     break;
             }
 
@@ -139,7 +130,7 @@ namespace BH.Adapter.RAM
 
         public static IStory GetStory(this Point point, IStories ramStories)
         {
-            double elev = point.Z;
+            double elev = point.Z.ToInch();
 
             //There must be a better way to iterate over IStories
             List<IStory> storeys = new List<IStory>();
@@ -170,7 +161,7 @@ namespace BH.Adapter.RAM
             }
 
             // Get elevation of panel per max elevation
-            elev = panelHeights.Max();
+            elev = panelHeights.Max().ToInch();
 
             //There must be a better way to iterate over IStories
             List<IStory> storeys = new List<IStory>();
