@@ -29,6 +29,7 @@ using BH.oM.Structure.MaterialFragments;
 using BH.Engine.Structure;
 using BH.Engine.Geometry;
 using RAMDATAACCESSLib;
+using BH.Engine.Units;
 
 
 namespace BH.Adapter.RAM
