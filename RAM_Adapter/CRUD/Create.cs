@@ -167,7 +167,7 @@ namespace BH.Adapter.RAM
 
                     IBeams beamsOnStory = barStory.GetBeams();
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
-                    beam.strSectionLabel = bar.SectionProperty.Name;
+                    beam.strSectionLabel = bar.SectionProperty.DescriptionOrName();
                     // beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze; deprecated in API 
                 }
                 catch
@@ -219,7 +219,7 @@ namespace BH.Adapter.RAM
                     //Set column properties
                     IColumns colsOnStory = barStory.GetColumns();
                     IColumn column = colsOnStory.Get(ramColumn.lUID);
-                    column.strSectionLabel = bar.SectionProperty.Name;
+                    column.strSectionLabel = bar.SectionProperty.DescriptionOrName();
                     column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
                 }
                 catch

@@ -58,7 +58,7 @@ namespace BH.Adapter.RAM
             //Set support coordinates and name
             //CAUTION: different from actual end points and cantilevers hardcoded
             iLayoutBeam.SetLayoutCoordinates(xStart, yStart, 0, xEnd, yEnd, 0, 0, 0);
-            iLayoutBeam.strSectionLabel = bar.SectionProperty.Name;
+            iLayoutBeam.strSectionLabel = bar.SectionProperty.DescriptionOrName();
 
             return iLayoutBeam;
         }
