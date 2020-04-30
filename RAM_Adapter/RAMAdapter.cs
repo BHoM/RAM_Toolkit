@@ -68,7 +68,7 @@ namespace BH.Adapter.RAM
                         // Create DB
                         m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "Grasshopper");
                         CloseDatabase();
-                        Engine.Reflection.Compute.RecordNote("No filepath provided. File saved to" + m_filePath);
+                        Engine.Reflection.Compute.RecordNote("No filepath provided. File saved to  " + m_filePath);
                     }
                     catch
                     {

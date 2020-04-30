@@ -273,8 +273,8 @@ namespace BH.Adapter.RAM
             // Unique RAM ID
             bhomBar.CustomData[AdapterIdName] = ramBeam.lUID;
             bhomBar.CustomData["FrameNumber"] = ramBeam.lLabel;
-            bhomBar.CustomData["StartCantilever"] = ramBeam.dStartCantilever.ToString();
-            bhomBar.CustomData["EndCantilever"] = ramBeam.dEndCantilever.ToString();
+            bhomBar.CustomData["StartCantilever"] = ramBeam.dStartCantilever.ToInch().ToString();
+            bhomBar.CustomData["EndCantilever"] = ramBeam.dEndCantilever.ToInch().ToString();
             bhomBar.CustomData["IsStubCantilever"] = ramLayoutBeam.IsStubCantilever();
             bhomBar.CustomData["FrameType"] = ramBeam.eFramingType.ToString();
             bhomBar.CustomData["Material"] = ramBeam.eMaterial.ToString();

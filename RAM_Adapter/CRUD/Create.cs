@@ -164,7 +164,7 @@ namespace BH.Adapter.RAM
 
                     IBeams beamsOnStory = barStory.GetBeams();
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
-                    beam.strSectionLabel = bar.SectionProperty.DescriptionOrName();
+                    beam.strSectionLabel = bar.SectionProperty.Name;
                     // beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze; deprecated in API 
                 }
                 catch
@@ -216,7 +216,7 @@ namespace BH.Adapter.RAM
                     //Set column properties
                     IColumns colsOnStory = barStory.GetColumns();
                     IColumn column = colsOnStory.Get(ramColumn.lUID);
-                    column.strSectionLabel = bar.SectionProperty.DescriptionOrName();
+                    column.strSectionLabel = bar.SectionProperty.Name;
                     column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
                 }
                 catch
@@ -372,7 +372,7 @@ namespace BH.Adapter.RAM
                     {
                         Point startPt = crv.IStartPoint();
                         Point endPt = crv.IEndPoint();
-                        ramSlabEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
+                        ramSlabEdges.Add(startPt.X.ToInch(), startPt.Y.ToInch(), endPt.X.ToInch(), endPt.Y.ToInch(), 0);
                     }
 
                     List<Opening> panelOpenings = panel.Openings;
@@ -400,7 +400,7 @@ namespace BH.Adapter.RAM
                         {
                             Point startPt = crv.IStartPoint();
                             Point endPt = crv.IEndPoint();
-                            ramOpeningEdges.Add(startPt.X, startPt.Y, endPt.X, endPt.Y, 0);
+                            ramOpeningEdges.Add(startPt.X.ToInch(), startPt.Y.ToInch(), endPt.X.ToInch(), endPt.Y.ToInch(), 0);
                         }
                     }
 
@@ -456,7 +456,7 @@ namespace BH.Adapter.RAM
 
                 try
                 {
-                    double thickness = 6; // default thickness
+                    double thickness = 0.2; // default thickness
                     if (wallPanel.Property is ConstantThickness)
                     {
                         ConstantThickness prop = (ConstantThickness)wallPanel.Property;
@@ -483,13 +483,13 @@ namespace BH.Adapter.RAM
                     {
                         ramStory = ramStories.GetAt(i);
                         // If wall crosses level, add wall to ILayoutWalls for that level
-                        if (Math.Round(wallMax.Z, 0) >= ramStory.dElevation && Math.Round(wallMin.Z, 0) < ramStory.dElevation)
+                        if (Math.Round(wallMax.Z.ToInch(), 0) >= ramStory.dElevation && Math.Round(wallMin.Z.ToInch(), 0) < ramStory.dElevation)
                         {
                             ramFloorType = ramStory.GetFloorType();
                             
                             //Get ILayoutWalls of FloorType and add wall
                             ILayoutWalls ramLayoutWalls = ramFloorType.GetLayoutWalls();
-                            ILayoutWall ramLayoutWall = ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X, wallMin.Y, 0, 0, wallMax.X, wallMax.Y, 0, 0, thickness);
+                            ILayoutWall ramLayoutWall = ramLayoutWalls.Add(EMATERIALTYPES.EWallPropConcreteMat, wallMin.X.ToInch(), wallMin.Y.ToInch(), 0, 0, wallMax.X.ToInch(), wallMax.Y.ToInch(), 0, 0, thickness.ToInch());
 
                             //Set lateral
                             ramLayoutWall.eFramingType = EFRAMETYPE.MemberIsLateral;
@@ -519,7 +519,7 @@ namespace BH.Adapter.RAM
 
                                 //Add opening to RAM
                                 IRawWallOpenings ramWallOpenings = ramWall.GetRawOpenings();
-                                ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX, distZ, openWidth, openHt);
+                                ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX.ToInch(), distZ.ToInch(), openWidth.ToInch(), openHt.ToInch());
                             }
                         }
                     }
@@ -774,13 +774,13 @@ namespace BH.Adapter.RAM
             foreach (Grid XGrid in XGrids)
             {
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(XGrid.Curve as dynamic, 10);
-                ramModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y-minY);
+                ramModelGridsXY.Add(XGrid.Name, EGridAxis.eGridYorCircularAxis, gridLine.StartPoint().Y.ToInch()-minY);
             }
 
             foreach (Grid YGrid in YGrids)
             {
                 gridLine = Engine.Geometry.Modify.CollapseToPolyline(YGrid.Curve as dynamic, 10);
-                ramModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X-minX);
+                ramModelGridsXY.Add(YGrid.Name, EGridAxis.eGridXorRadialAxis, gridLine.StartPoint().X.ToInch()-minX);
             }
 
             foreach (Grid cGrid in circGrids)
