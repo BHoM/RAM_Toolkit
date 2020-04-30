@@ -310,7 +310,7 @@ namespace BH.Adapter.RAM
             // Add camber to Custom Data
             if (Camber > Double.MinValue)
             {
-                bhomBar.CustomData["Camber"] = Camber.ToString();
+                bhomBar.CustomData["Camber"] = Camber.FromInch().ToString();
             }
 
             // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
