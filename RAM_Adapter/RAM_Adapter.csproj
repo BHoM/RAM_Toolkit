@@ -60,9 +60,11 @@
     </Reference>
     <Reference Include="Data_oM">
       <HintPath>..\..\BHoM\Build\Data_oM.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Dimensional_oM">
       <HintPath>..\..\BHoM\Build\Dimensional_oM.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Geometry_Engine">
       <HintPath>..\..\BHoM_Engine\Build\Geometry_Engine.dll</HintPath>
@@ -79,10 +81,6 @@
     <Reference Include="Physical_oM">
       <HintPath>..\..\BHoM\Build\Physical_oM.dll</HintPath>
       <Private>False</Private>
-    </Reference>
-    <Reference Include="RAM_oM, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\RAM_oM\bin\Debug\RAM_oM.dll</HintPath>
     </Reference>
     <Reference Include="Reflection_Engine">
       <HintPath>..\..\BHoM_Engine\Build\Reflection_Engine.dll</HintPath>
@@ -104,6 +102,10 @@
       <HintPath>..\..\BHoM\Build\Structure_oM.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Units_Engine">
+      <HintPath>..\..\BHoM\Build\Units_Engine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -112,9 +114,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Units_Engine">
-      <HintPath>..\..\Localisation_Toolkit\Build\Units_Engine.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdapterActions\_Pullmethods\ReadResults.cs" />
@@ -137,6 +136,11 @@
       <Project>{5e10ac78-dcb1-4cd8-bba5-5d33fdffaf8b}</Project>
       <Name>RAM_Engine</Name>
       <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\RAM_oM\RAM_oM.csproj">
+      <Project>{26d0ff3a-d1c7-428c-9517-8cf0ae9a7a8f}</Project>
+      <Name>RAM_oM</Name>
+	  <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
