@@ -103,7 +103,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Units_Engine">
-      <HintPath>..\..\BHoM\Build\Units_Engine.dll</HintPath>
+      <HintPath>..\..\Localisation_Toolkit\Build\Units_Engine.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
