@@ -132,19 +132,19 @@
     <Compile Include="Types\DependencyTypes.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\RAM_Engine\RAM_Engine.csproj">
-      <Project>{5e10ac78-dcb1-4cd8-bba5-5d33fdffaf8b}</Project>
+      <Project>{3d6ef1e1-51ea-4bea-9247-caa7df62bd61}</Project>
       <Name>RAM_Engine</Name>
       <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\RAM_oM\RAM_oM.csproj">
       <Project>{26d0ff3a-d1c7-428c-9517-8cf0ae9a7a8f}</Project>
       <Name>RAM_oM</Name>
-	  <Private>False</Private>
+      <Private>False</Private>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
