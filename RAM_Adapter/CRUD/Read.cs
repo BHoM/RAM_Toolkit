@@ -27,13 +27,11 @@ using System.Linq;
 using BH.oM.Adapters.RAM;
 using BH.oM.Adapter;
 using BH.oM.Base;
-using BH.oM.Common;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.Results;
 using BH.oM.Structure.Loads;
-using BH.oM.Common.Materials;
 using BH.oM.Structure.MaterialFragments;
 using RAMDATAACCESSLib;
 using System.IO;
@@ -180,7 +178,7 @@ namespace BH.Adapter.RAM
 
             List<ISectionProperty> ISectionProperties = new List<ISectionProperty>();
 
-            Material defaultbhomMat = new Material();
+            //Material defaultbhomMat = new Material();
 
             ISectionProperty sec2b = new ExplicitSection();
             //sec2b.Material = BH.Engine.Common.Create.Material("otherSteel", MaterialType.Steel, 210000, 0.3, 0.00012, 78500);

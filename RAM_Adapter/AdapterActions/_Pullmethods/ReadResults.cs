@@ -28,7 +28,7 @@ using BH.oM.Geometry.SettingOut;
 using BH.oM.Base;
 using BH.oM.Data.Requests;
 using BH.oM.Adapter;
-using BH.oM.Common;
+using BH.oM.Analytical.Results;
 using BH.oM.Structure.Results;
 
 namespace BH.Adapter.RAM
