@@ -764,17 +764,24 @@ namespace BH.Adapter.RAM
             ramPointLoad.GetCoordinate(out ramPoint);
             Point bhomPoint = ramPoint.PointFromRAM();
             string ramPointID = bhomPoint.X.ToString() + ", " + bhomPoint.Y.ToString() + ", " + bhomPoint.Z.ToString() + ", "; // no object id option for RAM nodes, id by coordinates instead
-            NodeReaction bhomNodeReaction = new NodeReaction
-            {
-                ResultCase = ramLoadCase.strLoadCaseGroupLabel + ramLoadCase.strTypeLabel,
-                ObjectId = ramPointID,
-                FX = ramPointLoad.dFx,
-                FY = ramPointLoad.dFy,
-                FZ = ramPointLoad.dFz,
-                MX = ramPointLoad.dMxx,
-                MY = ramPointLoad.dMyy,
-                MZ = ramPointLoad.dMzz
-            };
+
+            //TODO: resolve below identifiers extractable through the API
+            int mode = -1;
+            double timeStep = 0;
+
+            NodeReaction bhomNodeReaction = new NodeReaction(
+                ramPointID,
+                ramLoadCase.strLoadCaseGroupLabel + ramLoadCase.strTypeLabel,
+                mode,
+                timeStep,
+                Basis.XY,
+                ramPointLoad.dFx,
+                ramPointLoad.dFy,
+                ramPointLoad.dFz,
+                ramPointLoad.dMxx,
+                ramPointLoad.dMyy,
+                ramPointLoad.dMzz
+                );
 
             return bhomNodeReaction;
         }
@@ -783,16 +790,7 @@ namespace BH.Adapter.RAM
 
         public static NodeReaction ToBHoMObject(this IMemberForce ramForce)
         {
-            NodeReaction bhomNodeReaction = new NodeReaction
-            {
-                FX = ramForce.dAxial,
-                FY = ramForce.dShearMinor,
-                FZ = ramForce.dShearMajor,
-                MX = ramForce.dTorsion,
-                MY = ramForce.dMomentMajor,
-                MZ = ramForce.dMomentMinor
-            };
-
+            NodeReaction bhomNodeReaction = new NodeReaction("", "", -1, 0, Basis.XY, ramForce.dAxial, ramForce.dShearMinor, ramForce.dShearMajor, ramForce.dTorsion, ramForce.dMomentMajor, ramForce.dMomentMinor);
             return bhomNodeReaction;
         }
 
