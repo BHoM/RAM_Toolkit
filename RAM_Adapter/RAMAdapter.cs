@@ -78,7 +78,8 @@ namespace BH.Adapter.RAM
                 else
                 {
                     //modify file path to ensure its validity
-                    string filePathMod = filePath.Replace("\\\\", "\\");
+                    string filePathMod = filePath.Replace("\"", "");
+                    filePathMod = filePathMod.Replace("\\\\", "\\");
                     filePathMod = filePathMod.Replace("\r\n", "");
                     filePathMod = filePathMod.Replace("RSS", "rss");
                     filePath = filePathMod;
