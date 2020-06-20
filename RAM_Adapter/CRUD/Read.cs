@@ -36,6 +36,7 @@ using BH.oM.Structure.MaterialFragments;
 using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry.SettingOut;
+using BH.Engine.Units;
 
 
 namespace BH.Adapter.RAM
@@ -210,25 +211,68 @@ namespace BH.Adapter.RAM
 
         private List<ISurfaceProperty> ReadISurfaceProperties(List<string> ids = null)
         {
-            //Implement code for reading materials
 
-            List<ISurfaceProperty> IProps = new List<ISurfaceProperty>();
+            List<ISurfaceProperty> propList = new List<ISurfaceProperty>();
 
-            //Material steel = BMaterialType.Steel, 210000, 0.3, 0.00012, 78500);
+            ICompDeckProps compDeckProps = m_Model.GetCompositeDeckProps();
+            for (int i = 0; i < compDeckProps.GetCount(); i++)
+            {
+                ICompDeckProp DeckProp = compDeckProps.GetAt(i);
+                double deckThickness = DeckProp.dEffectiveThickness.FromInch();
+                double concThickness = DeckProp.dThickAboveFlutes.FromInch();
+                double deckProfileThickness = deckThickness - concThickness;
+                string deckLabel = DeckProp.strLabel;
+                string deckProfileName = DeckProp.strDeckType;
+                IMaterialFragment material = Engine.Structure.Create.Concrete("Concrete Over Deck");
 
-            ISurfaceProperty IProp = (ISurfaceProperty) new ConstantThickness();
-            IProp.Name = "default";
-            //IProp.Type = MaterialType.Concrete;
+                Ribbed deck2DProp = new Ribbed();
+                deck2DProp.Name = deckLabel;
+                deck2DProp.Thickness = concThickness;
+                deck2DProp.PanelType = PanelType.Slab;
+                deck2DProp.Material = material;
+                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
+                deck2DProp.CustomData["DeckProfileName"] = deckProfileName;
+                deck2DProp.Spacing = 4 * deckProfileThickness;
+                deck2DProp.StemWidth = 1.5 * deckProfileThickness;
+                deck2DProp.TotalDepth = deckThickness;
+                propList.Add(deck2DProp);
+            }
 
-            //Set the custom data to return if created
-            //srfProp.CustomData[AdapterIdName] = ramProp.lUID;
+            IConcSlabProps concSlabProps = m_Model.GetConcreteSlabProps();
+            for (int i = 0; i < concSlabProps.GetCount(); i++)
+            {
+                IConcSlabProp DeckProp = concSlabProps.GetAt(i);
+                double deckThickness = DeckProp.dThickness.FromInch();
+                string deckLabel = DeckProp.strLabel;
+                IMaterialFragment material = Engine.Structure.Create.Concrete("Concrete");
 
-            IProps.Add(IProp);
+                ConstantThickness deck2DProp = new ConstantThickness();
+                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
+                deck2DProp.Name = deckLabel;
+                deck2DProp.Material = material;
+                deck2DProp.Thickness = deckThickness;
+                deck2DProp.PanelType = PanelType.Slab;
+                propList.Add(deck2DProp);
+            }
 
-            return IProps;
+            INonCompDeckProps nonCompDeckProps = m_Model.GetNonCompDeckProps();
+            for (int i = 0; i < nonCompDeckProps.GetCount(); i++)
+            {
+                INonCompDeckProp DeckProp = nonCompDeckProps.GetAt(i);
+                double deckThickness = DeckProp.dEffectiveThickness.FromInch();
+                string deckLabel = DeckProp.strLabel;
+                IMaterialFragment material = Engine.Structure.Create.Steel("Metal Deck");
 
-            //throw new NotImplementedException();
+                ConstantThickness deck2DProp = new ConstantThickness();
+                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
+                deck2DProp.Name = deckLabel;
+                deck2DProp.Material = material;
+                deck2DProp.Thickness = deckThickness;
+                deck2DProp.PanelType = PanelType.Slab;
+                propList.Add(deck2DProp);
+            }
 
+            return propList;
         }
 
         /***************************************************/
@@ -276,7 +320,10 @@ namespace BH.Adapter.RAM
         /***************************************************/
 
         private List<Panel> ReadPanels(List<string> ids = null)
-        {            
+        {
+            //Get dictionary of surface properties with ids
+            Dictionary<string, ISurfaceProperty> bhomProperties = ReadISurfaceProperties().ToDictionary(x => x.CustomData[AdapterIdName].ToString());
+
             //Implement code for reading panels
             List<Panel> bhomPanels = new List<Panel>();
 
@@ -308,22 +355,21 @@ namespace BH.Adapter.RAM
 
                 int numDecks = IDecks.GetCount();
 
-
                 // Convert Floors
                 for (int j = 0; j < numDecks; j++)
                 {
                     IDeck IDeck = IDecks.GetAt(j);
                     try
                     {
-                        Panel Panel = BH.Adapter.RAM.Convert.ToBHoMObject(IDeck, m_Model, IStoryUID);
-                        bhomPanels.Add(Panel);
+                        Panel panel = BH.Adapter.RAM.Convert.ToBHoMObject(IDeck, m_Model, IStoryUID);
+                        panel.Property = bhomProperties[IDeck.lPropID.ToString()];
+                        bhomPanels.Add(panel);
                     }
                     catch
                     {
                         BH.Engine.Reflection.Compute.RecordWarning("This story has no slab edges defined. IStoryUID: " + IStoryUID);
                     }
                 }
-
             }
 
             return bhomPanels;
