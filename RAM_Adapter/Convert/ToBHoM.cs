@@ -503,46 +503,68 @@ namespace BH.Adapter.RAM
             bhomPanel.Tags = tag;
             bhomPanel.Name = type.ToString();
 
-            //Get all floor props
-            ICompDeckProps ICompDeckProps = ramModel.GetCompositeDeckProps();
-            INonCompDeckProps INonCompDeckProps = ramModel.GetNonCompDeckProps();
-            IConcSlabProps IConcSlabProps = ramModel.GetConcreteSlabProps();
-
             // Get deck section property
-            ConstantThickness deck2DProp = new ConstantThickness();
             double deckThickness = 0;
             string deckLabel = "";
             int deckID = ramDeck.lPropID;
-            IMaterialFragment Material = null;
+            IMaterialFragment material = null;
 
             if (type == EDeckType.eDeckType_Composite)
             {
+                ICompDeckProps ICompDeckProps = ramModel.GetCompositeDeckProps();
                 ICompDeckProp DeckProp = ICompDeckProps.Get(deckID);
-                deckThickness = DeckProp.dThickAboveFlutes.FromInch();
-                deckLabel = DeckProp.strLabel + " " + deckThickness.ToString();
-                Material = Engine.Structure.Create.Concrete("Composite");
+                deckThickness = DeckProp.dEffectiveThickness.FromInch();
+                double concThickness = DeckProp.dThickAboveFlutes.FromInch();
+                double deckProfileThickness = deckThickness - concThickness;
+                deckLabel = DeckProp.strLabel;
+                string deckProfileName = DeckProp.strDeckType;
+                material = Engine.Structure.Create.Concrete("Concrete Over Deck");
 
+                Ribbed deck2DProp = new Ribbed();
+                deck2DProp.Name = deckLabel;
+                deck2DProp.Thickness = concThickness;
+                deck2DProp.PanelType = PanelType.Slab;
+                deck2DProp.Material = material;
+                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
+                deck2DProp.CustomData["DeckProfileName"] = deckProfileName;
+                deck2DProp.Spacing = 4*deckProfileThickness;
+                deck2DProp.StemWidth = 1.5*deckProfileThickness;
+                deck2DProp.TotalDepth = deckThickness;
+                bhomPanel.Property = deck2DProp;
             }
             else if (type == EDeckType.eDeckType_Concrete)
             {
+                IConcSlabProps IConcSlabProps = ramModel.GetConcreteSlabProps();
                 IConcSlabProp DeckProp = IConcSlabProps.Get(deckID);
                 deckThickness = DeckProp.dThickness.FromInch();
                 deckLabel = DeckProp.strLabel;
-                Material = Engine.Structure.Create.Concrete("Concrete");
+                material = Engine.Structure.Create.Concrete("Concrete");
+
+                ConstantThickness deck2DProp = new ConstantThickness();
+                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
+                deck2DProp.Name = deckLabel;
+                deck2DProp.Material = material;
+                deck2DProp.Thickness = deckThickness;
+                deck2DProp.PanelType = PanelType.Slab;
+                bhomPanel.Property = deck2DProp;
             }
             else if (type == EDeckType.eDeckType_NonComposite)
             {
+                INonCompDeckProps INonCompDeckProps = ramModel.GetNonCompDeckProps();
                 INonCompDeckProp DeckProp = INonCompDeckProps.Get(deckID);
                 deckThickness = DeckProp.dEffectiveThickness.FromInch();
                 deckLabel = DeckProp.strLabel;
-                Material = Engine.Structure.Create.Concrete("NonComposite");
-            }
+                material = Engine.Structure.Create.Concrete("Concrete");
 
-            deck2DProp.Name = deckLabel;
-            deck2DProp.Thickness = deckThickness;
-            deck2DProp.PanelType = PanelType.Slab;
-            deck2DProp.Material = Material;
-            bhomPanel.Property = deck2DProp;
+                ConstantThickness deck2DProp = new ConstantThickness();
+                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
+                deck2DProp.Name = deckLabel;
+                deck2DProp.Material = material;
+                deck2DProp.Thickness = deckThickness;
+                deck2DProp.PanelType = PanelType.Slab;
+                bhomPanel.Property = deck2DProp;
+            }
+            
             bhomPanel.CustomData[AdapterIdName] = ramDeck.lUID;
 
             return bhomPanel;
@@ -585,7 +607,6 @@ namespace BH.Adapter.RAM
                 IRawWallOpening check = rawOpenings.GetAt(0);
             }
 
-
             for (int i = 0; i < IFinalWallOpenings.GetCount(); i++)
             {
                 IFinalWallOpening IFinalWallOpening = IFinalWallOpenings.GetAt(i);
@@ -617,12 +638,12 @@ namespace BH.Adapter.RAM
 
             if (ramWall.eMaterial == EMATERIALTYPES.EWallPropConcreteMat)
             {
-                wallLabel = "Concrete " + wallThickness.ToString();
+                wallLabel = "Concrete " + ramWall.dThickness.ToString() + " in";
                 Material = Engine.Structure.Create.Concrete("Concrete");
             }
             else
             {
-                wallLabel = "Other " + wallThickness.ToString();
+                wallLabel = "Other " + ramWall.dThickness.ToString() + " in";
                 Material = Engine.Structure.Create.Concrete("Other");
             }
 
