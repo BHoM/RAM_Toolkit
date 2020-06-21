@@ -80,7 +80,7 @@ namespace BH.Adapter.RAM
                 //Get Polyline Pts
                 IPoint IPoint = ramPoints.GetAt(i);
                 IPoint.GetCoordinate(ref SCoordPt);
-                Point controlPt = SCoordPt.PointFromRAM();
+                Point controlPt = SCoordPt.PointFromRAM(zShift);
                 controlPts.Add(controlPt);
             }
 
