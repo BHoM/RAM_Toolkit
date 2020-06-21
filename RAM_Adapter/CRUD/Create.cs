@@ -529,13 +529,13 @@ namespace BH.Adapter.RAM
 
                                     Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());
                                     double distX = Math.Sqrt(Math.Pow(closestOpenPt.X - wallMin.X, 2) + Math.Pow(closestOpenPt.Y - wallMin.Y, 2));
-                                    double distZ = openBounds.Min.Z - (ramStory.dElevation - ramStory.dFlrHeight);
+                                    double distZinch = openBounds.Min.Z.ToInch() - (ramStory.dElevation - ramStory.dFlrHeight);
                                     double openWidth = Math.Sqrt(Math.Pow(openBounds.Max.X - openBounds.Min.X, 2) + Math.Pow(openBounds.Max.Y - openBounds.Min.Y, 2));
                                     double openHt = openBounds.Max.Z - openBounds.Min.Z;
 
                                     //Add opening to RAM
                                     IRawWallOpenings ramWallOpenings = ramWall.GetRawOpenings();
-                                    ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX.ToInch(), distZ.ToInch(), openWidth.ToInch(), openHt.ToInch());
+                                    ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX.ToInch(), distZinch, openWidth.ToInch(), openHt.ToInch());
                                 }
                             }
                         }
