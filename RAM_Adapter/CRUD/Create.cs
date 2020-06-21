@@ -513,26 +513,30 @@ namespace BH.Adapter.RAM
                             // Find opening location, width, and height from outline and apply                      
                             foreach (Opening open in wallPanel.Openings)
                             {
-
                                 PolyCurve openOutline = open.Outline();
-
-                                //Get opening on wall extents
-                                if (!(outline.IsContaining(openOutline, false)))
-                                {
-                                    openOutline = outline.BooleanIntersection(openOutline)[0];
-                                    Engine.Reflection.Compute.RecordWarning("Panel " + name + " opening intersects wall boundary. Boolean intersection was used to get opening extents on panel.");
-                                }
-
                                 BoundingBox openBounds = BH.Engine.Geometry.Query.Bounds(openOutline);
-                                Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());
-                                double distX = Math.Sqrt(Math.Pow(closestOpenPt.X - wallMin.X, 2) + Math.Pow(closestOpenPt.Y - wallMin.Y, 2));
-                                double distZ = openBounds.Min.Z - (ramStory.dElevation - ramStory.dFlrHeight);
-                                double openWidth = Math.Sqrt(Math.Pow(openBounds.Max.X - openBounds.Min.X, 2) + Math.Pow(openBounds.Max.Y - openBounds.Min.Y, 2));
-                                double openHt = openBounds.Max.Z - openBounds.Min.Z;
+                                Point openMin = openBounds.Min;
+                                Point openMax = openBounds.Max;
 
-                                //Add opening to RAM
-                                IRawWallOpenings ramWallOpenings = ramWall.GetRawOpenings();
-                                ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX.ToInch(), distZ.ToInch(), openWidth.ToInch(), openHt.ToInch());
+                                if ((openMin.Z.ToInch() >= ramStory.dElevation - ramStory.dFlrHeight && openMin.Z.ToInch() < ramStory.dElevation) || (openMax.Z.ToInch() >= ramStory.dElevation - ramStory.dFlrHeight && openMax.Z.ToInch() < ramStory.dElevation))
+                                {
+                                    //Get opening on wall extents
+                                    if (!(outline.IsContaining(openOutline, false)))
+                                    {
+                                        openOutline = outline.BooleanIntersection(openOutline)[0];
+                                        Engine.Reflection.Compute.RecordWarning("Panel " + name + " opening intersects wall boundary. Boolean intersection was used to get opening extents on panel.");
+                                    }
+
+                                    Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());
+                                    double distX = Math.Sqrt(Math.Pow(closestOpenPt.X - wallMin.X, 2) + Math.Pow(closestOpenPt.Y - wallMin.Y, 2));
+                                    double distZ = openBounds.Min.Z - (ramStory.dElevation - ramStory.dFlrHeight);
+                                    double openWidth = Math.Sqrt(Math.Pow(openBounds.Max.X - openBounds.Min.X, 2) + Math.Pow(openBounds.Max.Y - openBounds.Min.Y, 2));
+                                    double openHt = openBounds.Max.Z - openBounds.Min.Z;
+
+                                    //Add opening to RAM
+                                    IRawWallOpenings ramWallOpenings = ramWall.GetRawOpenings();
+                                    ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX.ToInch(), distZ.ToInch(), openWidth.ToInch(), openHt.ToInch());
+                                }
                             }
                         }
                     }
