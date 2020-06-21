@@ -259,49 +259,62 @@ namespace BH.Adapter.RAM
         {
             foreach (ISurfaceProperty srfProp in srfProps)
             {
-                try
+                if (srfProp is Ribbed)
                 {
-                    ICompDeckProps ramCompDeckProps = m_Model.GetCompositeDeckProps();
+                    Ribbed compProp = (Ribbed)srfProp;
+                    ICompDeckProp ramProp;
 
-                    int existingProp = 0;
-
-                    //Check if load set already exists
-                    for (int i = 0; i < ramCompDeckProps.GetCount(); i++)
+                    //Validity check for ribbed properties thickness above flutes
+                    if (compProp.Thickness < 2.0.FromInch())
                     {
-                        ICompDeckProp ramProp = ramCompDeckProps.GetAt(i);
-                        if (ramProp.strLabel == srfProp.Name)
-                        {
-                            existingProp = ramProp.lUID;
-                        }
+                        Engine.Reflection.Compute.RecordError("Deck property " + srfProp.Name + " has an invalid thickness. Thickness was automatically changed to 2 inches in order to ensure required shear stud engagement per RAM.");
+                        compProp.Thickness = 2.0.FromInch();
                     }
-
-                    if (existingProp == 0)
+                    ICompDeckProps compDeckProps = m_Model.GetCompositeDeckProps();
+                    try
                     {
-                        //Add the Deck prop if it does not already exist
-                        string deckName = srfProp.Name;
-                        string deckType = "ASC 3W";
-                        double thickness = 3; // above deck
-                        double studLength = 4.5;
-                       
-                        ICompDeckProp ramProp = ramCompDeckProps.Add2(deckName, deckType, thickness, studLength);
+                        ramProp = compDeckProps.Add2(compProp.Name, Engine.Reflection.Query.PropertyValue(compProp, "DeckProfileName").ToString(), compProp.Thickness.ToInch(), compProp.TotalDepth.ToInch() - 1.5);
 
-                        //Set the custom data to return if created
                         srfProp.CustomData[AdapterIdName] = ramProp.lUID;
                     }
-                    else
+                    catch
                     {
-                        //Set the custom data to return if already existing
-                        srfProp.CustomData[AdapterIdName] = existingProp;
+                        Engine.Reflection.Compute.RecordWarning("Deck label for surface property " + srfProp.Name + " not found or invalid for specified thickness. Using default deck profile. Please provide a valid deck name from the RAM Deck Table as a property on the SurfaceProperty named DeckProfileName.");
+                        ramProp = compDeckProps.Add2(compProp.Name, "ASC 3W", compProp.Thickness.ToInch(), 4.5);
+
+                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
                     }
                 }
-                catch
+                else if (srfProp is ConstantThickness && !(srfProp.Material is Steel))
                 {
-                    CreateElementError("Panel Deck Property", srfProp.Name);
+                    ConstantThickness prop = (ConstantThickness)srfProp;
+                    if (prop.PanelType != PanelType.Wall)  //Wall surface properties are created on a per wall element basis
+                    {
+                        IConcSlabProps concSlabProps = m_Model.GetConcreteSlabProps();
+                        IConcSlabProp ramProp;
+                        ramProp = concSlabProps.Add(prop.Name, prop.Thickness.ToInch(), prop.Thickness.ToInch() * prop.Material.Density.ToPoundPerCubicFoot());
+
+                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
+                    }
+
+                }
+                else if (srfProp is ConstantThickness && srfProp.Material is Steel)
+                {
+                    ConstantThickness prop = (ConstantThickness)srfProp;
+                    if (prop.PanelType != PanelType.Wall)  //Wall surface properties are created on a per wall element basis
+                    {
+                        INonCompDeckProps nonCompDeckProps = m_Model.GetNonCompDeckProps();
+                        INonCompDeckProp ramProp;
+
+                        ramProp = nonCompDeckProps.Add(prop.Name);
+                        ramProp.dEffectiveThickness = prop.Thickness.ToInch();
+
+                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
+                    }
                 }
             }
 
             return true;
-
         }
 
         /***************************************************/
