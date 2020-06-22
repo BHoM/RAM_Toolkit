@@ -56,92 +56,67 @@ namespace BH.Adapter.RAM
                 m_Application = new RamDataAccess1();
                 m_IDBIO = null;
 
-                //CASE01 :  if NO filepath is provided and NO .rss file exists 
-                // Initialize to interface (CREATE NEW MODEL in RAM data folder by default)
-
-                if (filePath == "")
+                //Validate Filepath
+                if (filePath == "" || !File.Exists(filePath)) //No filepath given - set to default location
                 {
-                    m_filePath = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\BHoM_Model.rss";
+                    Directory.CreateDirectory(filePath);
+
+                    if (Path.GetFileName(filePath) == "")
+                        filePath = Path.Combine(filePath, "BHoM_Model.rss");
+                    m_filePath = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Data\BHoM_Model.rss"; ;
                     try
                     {
                         m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                         // Create DB
-                        m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "Grasshopper");
+                        m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "BHoM");
                         CloseDatabase();
-                        Engine.Reflection.Compute.RecordNote("No filepath provided. File saved to  " + m_filePath);
                     }
                     catch
                     {
                         Engine.Reflection.Compute.RecordError("Cannot create RAM database, check that a compatible version of RAM is installed");
                     }
                 }
-                else
+                else if (File.Exists(filePath))
                 {
-                    //modify file path to ensure its validity
-                    string filePathMod = filePath.Replace("\"", "");
-                    filePathMod = filePathMod.Replace("\\\\", "\\");
-                    filePathMod = filePathMod.Replace("\r\n", "");
-                    filePathMod = filePathMod.Replace("RSS", "rss");
-                    filePath = filePathMod;
-                    
-                    //check if after modification file exists
-                    //if the file does not exist create a new file at the location
-                    if (!File.Exists(filePath))
+                    // if an .rss file is provided
+                    // Initialize to interface (OF EXISTING MODEL)
+
+                    string fileNameRAM = Path.ChangeExtension(filePath, "ram");
+                    string fileNameDbSdf = Path.ChangeExtension(filePath, "db.sdf");
+                    //Two possible working dirs depending on install
+                    string filePathWorkingDir1 = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Working\";
+                    string filePathWorkingDir2 = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Data\Working\";
+                    string filePathTempRAMFile1 = Path.Combine(filePathWorkingDir1, fileNameRAM);
+                    string filePathTempRAMFile2 = Path.Combine(filePathWorkingDir2, fileNameRAM);
+                    string filePathTempDBFile1 = Path.Combine(filePathWorkingDir1, fileNameDbSdf);
+                    string filePathTempDBFile2 = Path.Combine(filePathWorkingDir2, fileNameDbSdf);
+
+                    //Delete .ram file in working directory if it exists
+                    if (File.Exists(filePathTempRAMFile1))
                     {
-                        m_filePath = filePath;
-                        try
-                        {
-                            m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-                            // Create DB
-                            m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "Grasshopper");
-                            CloseDatabase();
-                        }
-                        catch
-                        {
-                            Engine.Reflection.Compute.RecordError("Cannot create RAM database, check that a compatible version of RAM is installed");
-                        }
+                        File.Delete(filePathTempRAMFile1);
                     }
-                    else if (File.Exists(filePath))
+                    if (File.Exists(filePathTempRAMFile2))
                     {
-                        // if an .rss file is provided
-                        // Initialize to interface (OF EXISTING MODEL)
-
-                        string fileName = Path.GetFileName(filePath);
-                        string fileNameRAM = fileName.Replace(".rss", ".ram");
-                        string fileNameDbSdf = fileName.Replace(".rss", ".db.sdf");
-                        //Two possible working dirs depending on install
-                        string filePathWorkingDir1 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Working\\";
-                        string filePathWorkingDir2 = "C:\\ProgramData\\Bentley\\Engineering\\RAM Structural System\\Data\\Working\\";
-                        string filePathTempRAMFile1 = filePathWorkingDir1 + fileNameRAM;
-                        string filePathTempRAMFile2 = filePathWorkingDir2 + fileNameRAM;
-                        string filePathTempDBFile1 = filePathWorkingDir1 + fileNameDbSdf;
-                        string filePathTempDBFile2 = filePathWorkingDir2 + fileNameDbSdf;
-
-                        //Delete .ram file in working directory if it exists
-                        if (File.Exists(filePathTempRAMFile1))
-                        {
-                            File.Delete(filePathTempRAMFile1);
-                        }
-                        if (File.Exists(filePathTempRAMFile2))
-                        {
-                            File.Delete(filePathTempRAMFile2);
-                        }
-
-                        //Check if temp db.sdf file is read-only
-                        if (File.Exists(filePathTempDBFile1))
-                        {
-                            try { File.Delete(filePathTempDBFile1); }
-                            catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
-                        }
-                        if (File.Exists(filePathTempDBFile2))
-                        {
-                            try { File.Delete(filePathTempDBFile2); }
-                            catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
-                        }
-
-                        m_filePath = filePath;
+                        File.Delete(filePathTempRAMFile2);
                     }
+
+                    //Check if temp db.sdf file is read-only
+                    if (File.Exists(filePathTempDBFile1))
+                    {
+                        try { File.Delete(filePathTempDBFile1); }
+                        catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+                    }
+                    if (File.Exists(filePathTempDBFile2))
+                    {
+                        try { File.Delete(filePathTempDBFile2); }
+                        catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+                    }
+
+                    m_filePath = Path.ChangeExtension(filePath, "rss");
                 }
+                else
+                    Engine.Reflection.Compute.RecordError("Could not understand FilePath.");
             }
         }
 
