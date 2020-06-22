@@ -59,10 +59,6 @@ namespace BH.Adapter.RAM
                 //Validate Filepath
                 if (filePath == "" || !File.Exists(filePath)) //No filepath given - set to default location
                 {
-                    Directory.CreateDirectory(filePath);
-
-                    if (Path.GetFileName(filePath) == "")
-                        filePath = Path.Combine(filePath, "BHoM_Model.rss");
                     m_filePath = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Data\BHoM_Model.rss"; ;
                     try
                     {
