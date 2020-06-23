@@ -58,14 +58,16 @@ namespace BH.Adapter.RAM
 
                 //Validate Filepath
                 if (filePath == "" || !File.Exists(filePath)) //No filepath given - set to default location
-                {
-                    m_filePath = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Data\BHoM_Model.rss"; ;
+                {                   
+                    m_filePath = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Data\BHoM_Model.rss";
+                    ClearTempFiles(m_filePath);
                     try
                     {
                         m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                         // Create DB
                         m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "BHoM");
                         CloseDatabase();
+                        Engine.Reflection.Compute.RecordNote("Filepath not provided or is invalid. New file created at " + m_filePath + ".");
                     }
                     catch
                     {
@@ -77,37 +79,7 @@ namespace BH.Adapter.RAM
                     // if an .rss file is provided
                     // Initialize to interface (OF EXISTING MODEL)
 
-                    string fileNameRAM = Path.ChangeExtension(filePath, "ram");
-                    string fileNameDbSdf = Path.ChangeExtension(filePath, "db.sdf");
-                    //Two possible working dirs depending on install
-                    string filePathWorkingDir1 = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Working\";
-                    string filePathWorkingDir2 = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Data\Working\";
-                    string filePathTempRAMFile1 = Path.Combine(filePathWorkingDir1, fileNameRAM);
-                    string filePathTempRAMFile2 = Path.Combine(filePathWorkingDir2, fileNameRAM);
-                    string filePathTempDBFile1 = Path.Combine(filePathWorkingDir1, fileNameDbSdf);
-                    string filePathTempDBFile2 = Path.Combine(filePathWorkingDir2, fileNameDbSdf);
-
-                    //Delete .ram file in working directory if it exists
-                    if (File.Exists(filePathTempRAMFile1))
-                    {
-                        File.Delete(filePathTempRAMFile1);
-                    }
-                    if (File.Exists(filePathTempRAMFile2))
-                    {
-                        File.Delete(filePathTempRAMFile2);
-                    }
-
-                    //Check if temp db.sdf file is read-only
-                    if (File.Exists(filePathTempDBFile1))
-                    {
-                        try { File.Delete(filePathTempDBFile1); }
-                        catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
-                    }
-                    if (File.Exists(filePathTempDBFile2))
-                    {
-                        try { File.Delete(filePathTempDBFile2); }
-                        catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
-                    }
+                    ClearTempFiles(filePath);
 
                     m_filePath = Path.ChangeExtension(filePath, "rss");
                 }
@@ -170,6 +142,43 @@ namespace BH.Adapter.RAM
             System.IO.File.Delete(m_filePath.Replace(".rss", ".usr"));
             return true;
         }
+
+        private bool ClearTempFiles(string filePath)
+        {
+            string fileNameRAM = Path.ChangeExtension(filePath, "ram");
+            string fileNameDbSdf = Path.ChangeExtension(filePath, "db.sdf");
+            //Two possible working dirs depending on install
+            string filePathWorkingDir1 = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Working\";
+            string filePathWorkingDir2 = @"C:\ProgramData\Bentley\Engineering\RAM Structural System\Data\Working\";
+            string filePathTempRAMFile1 = Path.Combine(filePathWorkingDir1, fileNameRAM);
+            string filePathTempRAMFile2 = Path.Combine(filePathWorkingDir2, fileNameRAM);
+            string filePathTempDBFile1 = Path.Combine(filePathWorkingDir1, fileNameDbSdf);
+            string filePathTempDBFile2 = Path.Combine(filePathWorkingDir2, fileNameDbSdf);
+
+            //Delete .ram file in working directory if it exists
+            if (File.Exists(filePathTempRAMFile1))
+            {
+                File.Delete(filePathTempRAMFile1);
+            }
+            if (File.Exists(filePathTempRAMFile2))
+            {
+                File.Delete(filePathTempRAMFile2);
+            }
+
+            //Check if temp db.sdf file is read-only
+            if (File.Exists(filePathTempDBFile1))
+            {
+                try { File.Delete(filePathTempDBFile1); }
+                catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+            }
+            if (File.Exists(filePathTempDBFile2))
+            {
+                try { File.Delete(filePathTempDBFile2); }
+                catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+            }
+            return true;
+        }
+
 
 
         /***************************************************/

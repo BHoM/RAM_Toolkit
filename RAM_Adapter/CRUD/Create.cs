@@ -314,6 +314,9 @@ namespace BH.Adapter.RAM
                 }
             }
 
+            //Save file
+            m_IDBIO.SaveDatabase();
+
             return true;
         }
 
@@ -518,7 +521,7 @@ namespace BH.Adapter.RAM
                                 Point openMin = openBounds.Min;
                                 Point openMax = openBounds.Max;
 
-                                if ((openMin.Z.ToInch() >= ramStory.dElevation - ramStory.dFlrHeight && openMin.Z.ToInch() < ramStory.dElevation) || (openMax.Z.ToInch() >= ramStory.dElevation - ramStory.dFlrHeight && openMax.Z.ToInch() < ramStory.dElevation))
+                                if ((openMin.Z.ToInch() >= ramStory.dElevation - ramStory.dFlrHeight) && (openMin.Z.ToInch() < ramStory.dElevation))
                                 {
                                     //Get opening on wall extents
                                     if (!(outline.IsContaining(openOutline, false)))
