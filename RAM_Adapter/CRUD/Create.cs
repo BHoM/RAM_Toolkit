@@ -148,13 +148,13 @@ namespace BH.Adapter.RAM
                         ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0); // No Z offsets, beams flat on closest story
                         if (startSupPt.X < endSupPt.X || (startSupPt.X == endSupPt.X && startSupPt.Y>endSupPt.Y))
                         {
-                            ramBeam.dStartCantilever = startCant.ToInch();
-                            ramBeam.dEndCantilever = endCant.ToInch();
+                            ramBeam.dStartCantilever = startCant.FromInch();
+                            ramBeam.dEndCantilever = endCant.FromInch();
                         }
                         else
                         {
-                            ramBeam.dStartCantilever = endCant.ToInch();
-                            ramBeam.dEndCantilever = startCant.ToInch();
+                            ramBeam.dStartCantilever = endCant.FromInch();
+                            ramBeam.dEndCantilever = startCant.FromInch();
                         }
                     }
 
