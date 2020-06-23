@@ -213,16 +213,28 @@ namespace BH.Adapter.RAM
         {
 
             List<ISurfaceProperty> propList = new List<ISurfaceProperty>();
+            ISteelCriteria steelCriteria = m_Model.GetSteelCriteria();
+            IDeckTableEntries deckProfiles = steelCriteria.GetDeckTableEntries();
 
             ICompDeckProps compDeckProps = m_Model.GetCompositeDeckProps();
             for (int i = 0; i < compDeckProps.GetCount(); i++)
             {
                 ICompDeckProp DeckProp = compDeckProps.GetAt(i);
-                double deckThickness = DeckProp.dEffectiveThickness.FromInch();
-                double concThickness = DeckProp.dThickAboveFlutes.FromInch();
-                double deckProfileThickness = deckThickness - concThickness;
                 string deckLabel = DeckProp.strLabel;
                 string deckProfileName = DeckProp.strDeckType;
+                IDeckTableEntry profile = null;
+
+                for (int j = 0; j < deckProfiles.GetCount(); j++) // find ram deck profile to get props
+                {
+                    profile = deckProfiles.GetAt(j);
+                    if (profile.strDeckName == deckLabel)
+                    { break;}
+                }
+
+                double concThickness = DeckProp.dThickAboveFlutes.FromInch();
+                double deckProfileThickness = profile.dTD.FromInch();
+                double deckThickness = concThickness + deckProfileThickness;
+
                 IMaterialFragment material = Engine.Structure.Create.Concrete("Concrete Over Deck");
 
                 Ribbed deck2DProp = new Ribbed();
@@ -232,8 +244,8 @@ namespace BH.Adapter.RAM
                 deck2DProp.Material = material;
                 deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
                 deck2DProp.CustomData["DeckProfileName"] = deckProfileName;
-                deck2DProp.Spacing = 4 * deckProfileThickness;
-                deck2DProp.StemWidth = 1.5 * deckProfileThickness;
+                deck2DProp.Spacing = profile.dRSpac;
+                deck2DProp.StemWidth = profile.dWR;
                 deck2DProp.TotalDepth = deckThickness;
                 propList.Add(deck2DProp);
             }
