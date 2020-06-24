@@ -292,7 +292,7 @@ namespace BH.Adapter.RAM
                     {
                         IConcSlabProps concSlabProps = m_Model.GetConcreteSlabProps();
                         IConcSlabProp ramProp;
-                        ramProp = concSlabProps.Add(prop.Name, prop.Thickness.ToInch(), prop.Thickness.ToInch() * prop.Material.Density.ToPoundPerCubicFoot());
+                        ramProp = concSlabProps.Add(prop.Name, prop.Thickness.ToInch(), prop.Thickness.ToFoot() * prop.Material.Density.ToPoundPerCubicInch());
 
                         srfProp.CustomData[AdapterIdName] = ramProp.lUID;
                     }
