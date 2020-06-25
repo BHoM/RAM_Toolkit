@@ -537,7 +537,7 @@ namespace BH.Adapter.RAM
             List<ICurve> wallOpeningPLs = new List<ICurve>();
             List<Opening> bhomWallOpenings = new List<Opening>();
 
-            // Create openings (disabled, causing database freeze)
+            // Create openings
             IFinalWallOpenings IFinalWallOpenings = ramWall.GetFinalOpenings();
             IRawWallOpenings rawOpenings = ramWall.GetRawOpenings();
             if (rawOpenings.GetCount() > 0)

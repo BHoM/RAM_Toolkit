@@ -523,22 +523,46 @@ namespace BH.Adapter.RAM
 
                                 if ((openMin.Z.ToInch() >= ramStory.dElevation - ramStory.dFlrHeight) && (openMin.Z.ToInch() < ramStory.dElevation))
                                 {
-                                    //Get opening on wall extents
-                                    if (!(outline.IsContaining(openOutline, false)))
+                                    IFinalWallOpenings ramWallOpenings = ramWall.GetFinalOpenings();
+
+                                    int openOverlapCount = 0;
+
+                                    for (int j = 0; i < ramWallOpenings.GetCount(); j++)
                                     {
-                                        openOutline = outline.BooleanIntersection(openOutline)[0];
-                                        Engine.Reflection.Compute.RecordWarning("Panel " + name + " opening intersects wall boundary. Boolean intersection was used to get opening extents on panel.");
+                                        IFinalWallOpening testOpen = ramWallOpenings.GetAt(j);
+                                        IPoints openingPts = testOpen.GetOpeningVertices();
+
+                                        //Re-add first point to close Polygon
+                                        IPoint firstOPt = openingPts.GetAt(0);
+                                        SCoordinate firstOCoord = new SCoordinate();
+                                        firstOPt.GetCoordinate(ref firstOCoord);
+                                        openingPts.Add(firstOCoord);
+
+                                        Polyline wallOpeningOutline = openingPts.ToPolyline();
+                                        List<Point> intPts = wallOpeningOutline.ICurveIntersections(openOutline);
+                                        if (wallOpeningOutline.IsContaining(openOutline) || openOutline.IsContaining(wallOpeningOutline) || intPts.Count > 0)
+                                        { openOverlapCount += 1; }
                                     }
 
-                                    Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());
-                                    double distX = Math.Sqrt(Math.Pow(closestOpenPt.X - wallMin.X, 2) + Math.Pow(closestOpenPt.Y - wallMin.Y, 2));
-                                    double distZinch = openBounds.Min.Z.ToInch() - (ramStory.dElevation - ramStory.dFlrHeight);
-                                    double openWidth = Math.Sqrt(Math.Pow(openBounds.Max.X - openBounds.Min.X, 2) + Math.Pow(openBounds.Max.Y - openBounds.Min.Y, 2));
-                                    double openHt = openBounds.Max.Z - openBounds.Min.Z;
+                                    if (openOverlapCount == 0)
+                                    {
+                                        //Get opening on wall extents
+                                        if (!(outline.IsContaining(openOutline, false)))
+                                        {
+                                            openOutline = outline.BooleanIntersection(openOutline)[0];
+                                            Engine.Reflection.Compute.RecordWarning("Panel " + name + " opening intersects wall boundary. Boolean intersection was used to get opening extents on panel.");
+                                        }
 
-                                    //Add opening to RAM
-                                    IRawWallOpenings ramWallOpenings = ramWall.GetRawOpenings();
-                                    ramWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX.ToInch(), distZinch, openWidth.ToInch(), openHt.ToInch());
+                                        Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());
+                                        double distX = Math.Sqrt(Math.Pow(closestOpenPt.X - wallMin.X, 2) + Math.Pow(closestOpenPt.Y - wallMin.Y, 2));
+                                        double distZinch = openBounds.Min.Z.ToInch() - (ramStory.dElevation - ramStory.dFlrHeight);
+                                        double openWidth = Math.Sqrt(Math.Pow(openBounds.Max.X - openBounds.Min.X, 2) + Math.Pow(openBounds.Max.Y - openBounds.Min.Y, 2));
+                                        double openHt = openBounds.Max.Z - openBounds.Min.Z;
+
+                                        //Add opening to RAM
+                                        IRawWallOpenings ramRawWallOpenings = ramWall.GetRawOpenings();
+                                        ramRawWallOpenings.Add(EDA_MEMBER_LOC.eBottomStart, distX.ToInch(), distZinch, openWidth.ToInch(), openHt.ToInch());
+                                    }
                                 }
                             }
                         }
@@ -592,17 +616,20 @@ namespace BH.Adapter.RAM
                 for (int i = 0; i < sortedBhomLevels.Count(); i++)
                 {
                     Level level = sortedBhomLevels.ElementAt(i);
-                    double levelHt = level.Elevation.ToInch();
+                    double levelHtDbl = level.Elevation.ToInch();
+                    double levelHt = Math.Round(levelHtDbl, 3);
 
                     // Get elevations and skip if level elevation already in RAM
                     ramStories = m_Model.GetStories();
                     List<double> ramElevs = new List<double>();
+                    List<string> ramStoryNames = new List<string>();
                     for (int j = 0; j < ramStories.GetCount(); j++)
                     {
                         ramElevs.Add(ramStories.GetAt(j).dElevation);
+                        ramStoryNames.Add(ramStories.GetAt(j).strLabel);
                     }
 
-                    if (ramElevs.Contains(levelHt) != true)
+                    if (ramElevs.Contains(levelHt) != true && ramStoryNames.Contains(level.Name) != true)
                     {
                         double height;
                         // Ground floor ht = 0 for RAM
@@ -631,9 +658,10 @@ namespace BH.Adapter.RAM
                         Boolean floorTypeExists = false;
                         for (int j = 0; j < ramFloorTypes.GetCount(); j++)
                         {
-                            if (ramFloorTypes.GetAt(j).strLabel == level.Name)
+                            IFloorType testFloorType = ramFloorTypes.GetAt(j);
+                            if (testFloorType.strLabel == level.Name)
                             {
-                                ramFloorType = ramFloorTypes.GetAt(j);
+                                ramFloorType = testFloorType;
                                 floorTypeExists = true;
                             }
                         }
@@ -653,7 +681,6 @@ namespace BH.Adapter.RAM
                         {
                             IStory ramStoryBelow = ramStories.GetAt(newIndex - 1);
                             height = levelHt - ramStoryBelow.dElevation;
-
                         }
 
                         // Insert story at index
