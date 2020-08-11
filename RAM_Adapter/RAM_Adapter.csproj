@@ -112,7 +112,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AdapterActions\_Pullmethods\ReadResults.cs" />
     <Compile Include="Convert\AdapterIdName.cs" />
     <Compile Include="Convert\ToBHoM.cs" />
     <Compile Include="Convert\ToRAM.cs" />

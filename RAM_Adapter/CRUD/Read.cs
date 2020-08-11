@@ -33,6 +33,8 @@ using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.Results;
 using BH.oM.Structure.Loads;
 using BH.oM.Structure.MaterialFragments;
+using BH.oM.Structure.Requests;
+using BH.oM.Analytical.Results;
 using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry.SettingOut;
@@ -78,6 +80,11 @@ namespace BH.Adapter.RAM
                 elems = ReadContourLoadSets(ids as dynamic);
             else if (type == typeof(UniformLoadSet))
                 elems = ReadUniformLoadSets(ids as dynamic);
+            if (typeof(IResult).IsAssignableFrom(type))
+            {
+                Modules.Structure.ErrorMessages.ReadResultsError(type);
+                return null;
+            }
 
             return elems;
         }
