@@ -26,7 +26,7 @@ using System.Linq;
 using BH.Engine;
 using BH.oM.Geometry;
 using BH.oM.Physical;
-using BH.oM.Geometry.ShapeProfiles;
+using BH.oM.Spatial.ShapeProfiles;
 using BH.oM.Structure.MaterialFragments;
 using BH.oM.Geometry.SettingOut;
 using BH.oM.Structure.Elements;
