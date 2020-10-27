@@ -28,6 +28,7 @@ using System.Threading.Tasks;
 using BH.Adapter;
 using BH.Engine.Adapters.RAM;
 using RAMDATAACCESSLib;
+using BH.oM.Adapters.RAM;
 using System.IO;
 using System.Net.NetworkInformation;
 
@@ -46,7 +47,7 @@ namespace BH.Adapter.RAM
 
             if (active)
             {
-                AdapterIdName = BH.Adapter.RAM.Convert.AdapterIdName;   //Set the "AdapterId" to "SoftwareName_id". Generally stored as a constant string in the convert class in the SoftwareName_Engine
+                AdapterIdFragmentType = typeof(RAMId);   //Set the AdapterIdType to RAMId to get RAM Fragment Data
 
                 BH.Adapter.Modules.Structure.ModuleLoader.LoadModules(this);
                 SetupDependencies();

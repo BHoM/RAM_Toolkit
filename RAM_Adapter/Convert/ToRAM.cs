@@ -51,7 +51,6 @@ namespace BH.Adapter.RAM
             //CAUTION: different from actual end points and cantilevers hardcoded
             iLayoutBeam.SetLayoutCoordinates(start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0, 0, 0);
             iLayoutBeam.strSectionLabel = bar.SectionProperty.DescriptionOrName();
-
             return iLayoutBeam;
         }
 

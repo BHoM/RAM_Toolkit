@@ -39,6 +39,7 @@ using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry.SettingOut;
 using BH.Engine.Units;
+using BH.Engine.Adapter;
 
 
 namespace BH.Adapter.RAM
@@ -249,11 +250,15 @@ namespace BH.Adapter.RAM
                 deck2DProp.Thickness = concThickness;
                 deck2DProp.PanelType = PanelType.Slab;
                 deck2DProp.Material = material;
-                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
                 deck2DProp.CustomData["DeckProfileName"] = deckProfileName;
                 deck2DProp.Spacing = profile.dRSpac;
                 deck2DProp.StemWidth = profile.dWR;
                 deck2DProp.TotalDepth = deckThickness;
+
+                // Unique RAM ID
+                RAMId RAMId = new RAMId();
+                RAMId.Id = DeckProp.lUID;
+                deck2DProp.SetAdapterId(RAMId);
                 propList.Add(deck2DProp);
             }
 
@@ -266,12 +271,16 @@ namespace BH.Adapter.RAM
                 IMaterialFragment material = Engine.Structure.Create.Concrete("Concrete");
 
                 ConstantThickness deck2DProp = new ConstantThickness();
-                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
                 deck2DProp.Name = deckLabel;
                 deck2DProp.Material = material;
                 deck2DProp.Thickness = deckThickness;
                 deck2DProp.PanelType = PanelType.Slab;
                 propList.Add(deck2DProp);
+
+                // Unique RAM ID
+                RAMId RAMId = new RAMId();
+                RAMId.Id = DeckProp.lUID;
+                deck2DProp.SetAdapterId(RAMId);
             }
 
             INonCompDeckProps nonCompDeckProps = m_Model.GetNonCompDeckProps();
@@ -283,12 +292,16 @@ namespace BH.Adapter.RAM
                 IMaterialFragment material = Engine.Structure.Create.Steel("Metal Deck");
 
                 ConstantThickness deck2DProp = new ConstantThickness();
-                deck2DProp.CustomData[AdapterIdName] = DeckProp.lUID;
                 deck2DProp.Name = deckLabel;
                 deck2DProp.Material = material;
                 deck2DProp.Thickness = deckThickness;
                 deck2DProp.PanelType = PanelType.Slab;
                 propList.Add(deck2DProp);
+
+                // Unique RAM ID
+                RAMId RAMId = new RAMId();
+                RAMId.Id = DeckProp.lUID;
+                deck2DProp.SetAdapterId(RAMId);
             }
 
             return propList;
@@ -341,7 +354,7 @@ namespace BH.Adapter.RAM
         private List<Panel> ReadPanels(List<string> ids = null)
         {
             //Get dictionary of surface properties with ids
-            Dictionary<string, ISurfaceProperty> bhomProperties = ReadISurfaceProperties().ToDictionary(x => x.CustomData[AdapterIdName].ToString());
+            Dictionary<string, ISurfaceProperty> bhomProperties = ReadISurfaceProperties().ToDictionary(x => GetAdapterId(x).ToString());
 
             //Implement code for reading panels
             List<Panel> bhomPanels = new List<Panel>();
@@ -400,7 +413,7 @@ namespace BH.Adapter.RAM
         {
             //Implement code for reading Contour Load Sets
             List<ContourLoadSet> bhomContourLoadSets = new List<ContourLoadSet>();
-            Dictionary<int, UniformLoadSet> bhomUniformLoadSets = ReadUniformLoadSets().ToDictionary(x => (int)x.CustomData[AdapterIdName]);
+            Dictionary<int, UniformLoadSet> bhomUniformLoadSets = ReadUniformLoadSets().ToDictionary(x => (int)GetAdapterId(x));
 
             //Get stories
             IStories IStories = m_Model.GetStories();

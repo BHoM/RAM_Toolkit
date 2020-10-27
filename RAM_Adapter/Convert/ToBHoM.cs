@@ -23,10 +23,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using BH.Engine;
 using BH.oM.Geometry;
-using BH.oM.Physical;
-using BH.oM.Spatial.ShapeProfiles;
 using BH.oM.Structure.MaterialFragments;
 using BH.oM.Geometry.SettingOut;
 using BH.oM.Structure.Elements;
@@ -38,6 +35,10 @@ using BH.oM.Structure.Results;
 using BH.oM.Adapters.RAM;
 using BH.Engine.Units;
 using RAMDATAACCESSLib;
+using BH.Engine.Adapter;
+using BH.oM.Adapter;
+using BH.Engine.Geometry;
+using BH.Engine.Structure;
 
 namespace BH.Adapter.RAM
 {
@@ -207,7 +208,7 @@ namespace BH.Adapter.RAM
             ramColumn.GetEndCoordinates(ref startPt, ref endPt);
             Node startNode = Engine.Structure.Create.Node(startPt.PointFromRAM());
             Node endNode = Engine.Structure.Create.Node(endPt.PointFromRAM());
-
+            
             //Assign section property per bar
             string sectionName = ramColumn.strSectionLabel;
 
@@ -235,12 +236,13 @@ namespace BH.Adapter.RAM
             bhomBar.OrientationAngle = 0;
 
             // Add RAM Unique ID, custom Data
-            bhomBar.CustomData[AdapterIdName] = ramColumn.lUID;
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramColumn.lUID;
+            bhomBar.SetAdapterId(RAMId);
             bhomBar.CustomData["FrameNumber"] = ramColumn.lLabel;
             bhomBar.CustomData["FrameType"] = ramColumn.eFramingType.ToString();
             bhomBar.CustomData["Material"] = ramColumn.eMaterial.ToString();
             bhomBar.CustomData["IsHangingColumn"] = ramColumn.bHanger;
-
 
             bhomBar.Tags.Add("Column");
 
@@ -271,7 +273,9 @@ namespace BH.Adapter.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData[AdapterIdName] = ramBeam.lUID;
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramBeam.lUID;
+            bhomBar.SetAdapterId(RAMId);
             bhomBar.CustomData["FrameNumber"] = ramBeam.lLabel;
             bhomBar.CustomData["StartCantilever"] = ramBeam.dStartCantilever.FromInch().ToString();
             bhomBar.CustomData["EndCantilever"] = ramBeam.dEndCantilever.FromInch().ToString();
@@ -391,7 +395,9 @@ namespace BH.Adapter.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData[AdapterIdName] = ramVerticalBrace.lUID;
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramVerticalBrace.lUID;
+            bhomBar.SetAdapterId(RAMId);
             bhomBar.CustomData["FrameNumber"] = ramVerticalBrace.lLabel;
             bhomBar.CustomData["FrameType"] = ramVerticalBrace.eSeismicFrameType.ToString();
             bhomBar.CustomData["Material"] = ramVerticalBrace.eMaterial.ToString();
@@ -429,7 +435,9 @@ namespace BH.Adapter.RAM
             bhomBar.OrientationAngle = 0;
 
             // Unique RAM ID
-            bhomBar.CustomData[AdapterIdName] = ramHorizBrace.lUID;
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramLayoutHorizBrace.lUID;
+            bhomBar.SetAdapterId(RAMId);
             bhomBar.CustomData["FrameNumber"] = ramHorizBrace.lLabel;
             bhomBar.CustomData["Material"] = ramHorizBrace.eMaterial.ToString();
             bhomBar.Tags.Add("HorizontalBrace");
@@ -502,8 +510,10 @@ namespace BH.Adapter.RAM
 
             bhomPanel.Tags = tag;
             bhomPanel.Name = type.ToString();
-            
-            bhomPanel.CustomData[AdapterIdName] = ramDeck.lUID;
+
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramDeck.lUID;
+            bhomPanel.SetAdapterId(RAMId);
 
             return bhomPanel;
         }
@@ -595,7 +605,9 @@ namespace BH.Adapter.RAM
             bhomPanel.Name = ramWall.lLabel.ToString();
 
             // Add custom data
-            bhomPanel.CustomData[AdapterIdName] = ramWall.lUID;
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramWall.lUID;
+            bhomPanel.SetAdapterId(RAMId);
             bhomPanel.Tags.Add("Wall");
 
             return bhomPanel;
@@ -768,7 +780,9 @@ namespace BH.Adapter.RAM
             double gridRotAngle = 0;
 
             // Add the properties of the GridSystem as CustomData 
-            myGrid.CustomData.Add(AdapterIdName, gridSystemID);
+            RAMId RAMId = new RAMId();
+            RAMId.Id = gridSystemID;
+            myGrid.SetAdapterId(RAMId);
             myGrid.CustomData.Add("RAMLabel", gridSystemLabel);
             myGrid.CustomData.Add("RamGridType", gridSystemType);
             myGrid.CustomData.Add("xOffset", gridXoffset);
@@ -912,7 +926,9 @@ namespace BH.Adapter.RAM
             };
 
             // Unique RAM ID
-            srfLoad.CustomData[AdapterIdName] = ramSrfLoadSet.lUID;
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramSrfLoadSet.lUID;
+            srfLoad.SetAdapterId(RAMId);
 
             return srfLoad;
         }
@@ -956,9 +972,11 @@ namespace BH.Adapter.RAM
             };
 
             uniformLoadSet.Name = ramSrfLoadPropSet.strLabel;
-            
+
             // Unique RAM ID
-            uniformLoadSet.CustomData[AdapterIdName] = ramSrfLoadPropSet.lUID;
+            RAMId RAMId = new RAMId();
+            RAMId.Id = ramSrfLoadPropSet.lUID;
+            uniformLoadSet.SetAdapterId(RAMId);
 
             return uniformLoadSet;
         }
