@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Geometry.SettingOut;
 using BH.Engine.Units;
+using BH.Engine.Adapter;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
@@ -53,7 +54,7 @@ namespace BH.Adapter.RAM
 
         protected override bool ICreate<T>(IEnumerable<T> objects, ActionConfig actionConfig = null)
         {
-            bool success = true;        //boolean returning if the creation was successful or not
+            bool success = true;        //Boolean returning if the creation was successful or not
 
             // Create objects per type
             if (objects.Count() > 0)
@@ -100,6 +101,8 @@ namespace BH.Adapter.RAM
 
                 try
                 {
+                    RAMId RAMId = new RAMId();
+
                     IStory barStory = bar.GetStory(StructuralUsage1D.Beam, ramStories);
 
                     IFloorType ramFloorType = barStory.GetFloorType();
@@ -166,6 +169,8 @@ namespace BH.Adapter.RAM
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
                     beam.strSectionLabel = bar.SectionProperty.Name;
                     // beam.EAnalyzeFlag = EAnalyzeFlag.eAnalyze; deprecated in API 
+                    RAMId.Id = beam.lUID;
+                    bar.SetAdapterId(RAMId);
                 }
                 catch
                 {
@@ -180,6 +185,8 @@ namespace BH.Adapter.RAM
 
                 try
                 {
+                    RAMId RAMId = new RAMId();
+
                     IStory barStory = bar.GetStory(StructuralUsage1D.Column, ramStories);
                     
                     List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
@@ -218,6 +225,8 @@ namespace BH.Adapter.RAM
                     IColumn column = colsOnStory.Get(ramColumn.lUID);
                     column.strSectionLabel = bar.SectionProperty.Name;
                     column.EAnalyzeFlag = EAnalyzeFlag.eAnalyze;
+                    RAMId.Id = column.lUID;
+                    bar.SetAdapterId(RAMId);
                 }
                 catch
                 {
@@ -259,6 +268,7 @@ namespace BH.Adapter.RAM
         {
             foreach (ISurfaceProperty srfProp in srfProps)
             {
+                RAMId RAMId = new RAMId();
                 if (srfProp is Ribbed)
                 {
                     Ribbed compProp = (Ribbed)srfProp;
@@ -274,16 +284,13 @@ namespace BH.Adapter.RAM
                     try
                     {
                         ramProp = compDeckProps.Add2(compProp.Name, Engine.Reflection.Query.PropertyValue(compProp, "DeckProfileName").ToString(), compProp.Thickness.ToInch(), compProp.TotalDepth.ToInch() - 1.5);
-
-                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
                     }
                     catch
                     {
                         Engine.Reflection.Compute.RecordWarning("Deck label for surface property " + srfProp.Name + " not found or invalid for specified thickness. Using default deck profile. Please provide a valid deck name from the RAM Deck Table as a property on the SurfaceProperty named DeckProfileName.");
                         ramProp = compDeckProps.Add2(compProp.Name, "ASC 3W", compProp.Thickness.ToInch(), 4.5);
-
-                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
                     }
+                    RAMId.Id = ramProp.lUID;
                 }
                 else if (srfProp is ConstantThickness && !(srfProp.Material is Steel))
                 {
@@ -293,10 +300,8 @@ namespace BH.Adapter.RAM
                         IConcSlabProps concSlabProps = m_Model.GetConcreteSlabProps();
                         IConcSlabProp ramProp;
                         ramProp = concSlabProps.Add(prop.Name, prop.Thickness.ToInch(), prop.Material.Density.ToPoundPerCubicFoot());
-
-                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
-                    }
-
+                        RAMId.Id = ramProp.lUID;
+                    }                    
                 }
                 else if (srfProp is ConstantThickness && srfProp.Material is Steel)
                 {
@@ -308,10 +313,10 @@ namespace BH.Adapter.RAM
 
                         ramProp = nonCompDeckProps.Add(prop.Name);
                         ramProp.dEffectiveThickness = prop.Thickness.ToInch();
-
-                        srfProp.CustomData[AdapterIdName] = ramProp.lUID;
+                        RAMId.Id = ramProp.lUID;
                     }
                 }
+                srfProp.SetAdapterId(RAMId);
             }
 
             //Save file
@@ -362,6 +367,7 @@ namespace BH.Adapter.RAM
             // Cycle through floors and create on story
             foreach (Panel panel in floors)
             {
+                RAMId RAMId = new RAMId();
                 string name = panel.Name;
                 PolyCurve outlineExternal = panel.Outline();
                 ramStory = panel.GetStory(ramStories);
@@ -428,7 +434,8 @@ namespace BH.Adapter.RAM
                         ctrlPoints.Add(ctrlPoints.Last().Clone());
                     }
 
-                    int deckProplUID = (int)panel.Property.CustomData[AdapterIdName];
+                    ISurfaceProperty srfProp = panel.Property;
+                    int deckProplUID = GetAdapterId<int>(srfProp);
 
                     //Add decks, then set deck points per outline
                     IDecks ramDecks = ramFloorType.GetDecks();
@@ -917,12 +924,16 @@ namespace BH.Adapter.RAM
                             ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()];
                         }
                         //Set the custom data to return if created
-                        loadSet.CustomData[AdapterIdName] = ramLoadSet.lUID;
+                        RAMId RAMId = new RAMId();
+                        RAMId.Id = ramLoadSet.lUID;
+                        loadSet.SetAdapterId(RAMId);
                     }
                     else
                     {
                         //Set the custom data to return if already existing
-                        loadSet.CustomData[AdapterIdName] = existingLoadPropSetID;
+                        RAMId RAMId = new RAMId();
+                        RAMId.Id = existingLoadPropSetID;
+                        loadSet.SetAdapterId(RAMId);
                     }
                 }
                 catch
@@ -975,7 +986,8 @@ namespace BH.Adapter.RAM
                     }
                     ramLoad.SetPoints(verticePoints);
 
-                    ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterIdName];
+                    //ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterIdName];
+                    ramLoad.lPropertySetUID = (int)GetAdapterId(load.UniformLoadSet);
                 }
 
                 catch

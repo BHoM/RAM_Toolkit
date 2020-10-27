@@ -1,4 +1,4 @@
-/*
+﻿/*
  * This file is part of the Buildings and Habitats object Model (BHoM)
  * Copyright (c) 2015 - 2020, the respective contributors. All rights reserved.
  *
@@ -20,15 +20,33 @@
  * along with this code. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>.      
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace BH.Adapter.RAM
+using BH.oM.Base;
+using System.ComponentModel;
+
+namespace BH.oM.Adapters.RAM
 {
-    public static partial class Convert
+    public class RAMId : IAdapterId
     {
-        public const string AdapterIdName = "RAM_id";
+        /***************************************************/
+        /**** Public Properties                         ****/
+        /***************************************************/
+
+        [Description("Id or multi-ids of the element as assigned in RAM.")]
+        public virtual object Id { get; set; }
+
+        [Description("Represents if the element is a stub cantilever in RAM")]
+        public virtual bool IsStubCantilever{ get; set; } = false;
+
+        [Description("Represents the start cantilever distance (if applicable) in RAM")]
+        public virtual double StartCantilever { get; set; } = double.NaN;
+
+        [Description("Represents the end cantilever distance (if applicable) in RAM")]
+        public virtual double EndCantilever { get; set; } = double.NaN;
+
+        [Description("Represents if the element is a hanging column in RAM")]
+        public virtual bool IsHangingColumn { get; set; } = false;
+
+        /***************************************************/
     }
 }
-
