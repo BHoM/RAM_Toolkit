@@ -239,10 +239,14 @@ namespace BH.Adapter.RAM
             RAMId RAMId = new RAMId();
             RAMId.Id = ramColumn.lUID;
             bhomBar.SetAdapterId(RAMId);
-            bhomBar.CustomData["FrameNumber"] = ramColumn.lLabel;
-            bhomBar.CustomData["FrameType"] = ramColumn.eFramingType.ToString();
-            bhomBar.CustomData["Material"] = ramColumn.eMaterial.ToString();
-            bhomBar.CustomData["IsHangingColumn"] = ramColumn.bHanger;
+
+            //Add Frame Data fragment
+            RAMFrameData ramFrameData = new RAMFrameData();
+            ramFrameData.FrameNumber = ramColumn.lLabel;
+            ramFrameData.FrameType = ramColumn.eFramingType.ToString();
+            ramFrameData.Material = ramColumn.eMaterial.ToString();
+            ramFrameData.IsHangingColumn = (ramColumn.bHanger == 1);
+            bhomBar.Fragments.Add(ramFrameData);
 
             bhomBar.Tags.Add("Column");
 
@@ -276,13 +280,14 @@ namespace BH.Adapter.RAM
             RAMId RAMId = new RAMId();
             RAMId.Id = ramBeam.lUID;
             bhomBar.SetAdapterId(RAMId);
-            bhomBar.CustomData["FrameNumber"] = ramBeam.lLabel;
-            bhomBar.CustomData["StartCantilever"] = ramBeam.dStartCantilever.FromInch().ToString();
-            bhomBar.CustomData["EndCantilever"] = ramBeam.dEndCantilever.FromInch().ToString();
-            bhomBar.CustomData["IsStubCantilever"] = ramLayoutBeam.IsStubCantilever();
-            bhomBar.CustomData["FrameType"] = ramBeam.eFramingType.ToString();
-            bhomBar.CustomData["Material"] = ramBeam.eMaterial.ToString();
-            
+
+            RAMFrameData ramFrameData = new RAMFrameData();
+            ramFrameData.FrameNumber = ramBeam.lLabel;
+            ramFrameData.StartCantilever = ramBeam.dStartCantilever.FromInch();
+            ramFrameData.EndCantilever = ramBeam.dEndCantilever.FromInch();
+            ramFrameData.IsStubCantilever = (ramLayoutBeam.IsStubCantilever() == 1);
+            ramFrameData.FrameType = ramBeam.eFramingType.ToString();
+            ramFrameData.Material = ramBeam.eMaterial.ToString();         
 
             bhomBar.Tags.Add("Beam");
 
@@ -293,7 +298,7 @@ namespace BH.Adapter.RAM
 
             int numStudSegments = new int();
             ppalNumStuds.GetSize(ref numStudSegments);
-            double Camber = ramBeam.dCamber;
+            double camber = ramBeam.dCamber;
             int studCount = 0;
 
             IAnalyticalResult AnalyticalResult = ramBeam.GetAnalyticalResult();
@@ -308,13 +313,13 @@ namespace BH.Adapter.RAM
                 string segStudStr = segStudCount.ToString();
                 int segStudNum = System.Convert.ToInt16(segStudStr);
                 studCount += segStudNum;
-                bhomBar.CustomData["Studs"] = studCount.ToString();
+                ramFrameData.Studs = studCount;
             }
 
             // Add camber to Custom Data
-            if (Camber > Double.MinValue)
+            if (camber > Double.MinValue)
             {
-                bhomBar.CustomData["Camber"] = Camber.FromInch().ToString();
+                ramFrameData.Camber = camber.FromInch();
             }
 
             // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
@@ -334,40 +339,12 @@ namespace BH.Adapter.RAM
 
             double DCI = Result.dDesignCapacityInteraction;
             double CDI = Result.dCriticalDeflectionInteraction;
-            
+
             // Add DCI and CDI data
-            bhomBar.CustomData["DesignCapacityInteraction"] = DCI;
-            bhomBar.CustomData["CriticalDeflectionInteraction"] = CDI;
+            ramFrameData.DesignCapacityInteraction = DCI;
+            ramFrameData.CriticalDeflectionInteraction = CDI;
 
-            //// Add reactions to custom data //NOTE: Commented out because it seems to be interfering with "push" (when updating?), sometimes affecting exploding of custom data
-            //if (IMemberForces != null)
-            //{
-            //    IMemberForce Force1 = IMemberForces.GetAt(0);
-            //    IMemberForce Force2 = IMemberForces.GetAt(1);
-
-            //    double Axial1 = Force1.dAxial;
-            //    double MomentMaj1 = Force1.dMomentMajor;
-            //    double ShearMinor1 = Force1.dShearMinor;
-
-            //    double Axial2 = Force2.dAxial;
-            //    double MomentMaj2 = Force2.dMomentMajor;
-            //    double ShearMinor2 = Force2.dShearMinor;
-
-            //    bhomBar.CustomData.Add("Reac1 Axial", Axial1);
-            //    bhomBar.CustomData.Add("Reac1 Moment", MomentMaj1);
-            //    bhomBar.CustomData.Add("Reac1 Shear", ShearMinor1);
-            //    bhomBar.CustomData.Add("Reac2 Axial", Axial2);
-            //    bhomBar.CustomData.Add("Reac2 Moment", MomentMaj2);
-            //    bhomBar.CustomData.Add("Reac2 Shear", ShearMinor2);
-            //} else
-            //{
-            //    bhomBar.CustomData.Add("Reac1 Axial", null);
-            //    bhomBar.CustomData.Add("Reac1 Moment", null);
-            //    bhomBar.CustomData.Add("Reac1 Shear", null);
-            //    bhomBar.CustomData.Add("Reac2 Axial", null);
-            //    bhomBar.CustomData.Add("Reac2 Moment", null);
-            //    bhomBar.CustomData.Add("Reac2 Shear", null);
-            //}
+            bhomBar.Fragments.Add(ramFrameData);
 
             return bhomBar;
         }
@@ -398,9 +375,14 @@ namespace BH.Adapter.RAM
             RAMId RAMId = new RAMId();
             RAMId.Id = ramVerticalBrace.lUID;
             bhomBar.SetAdapterId(RAMId);
-            bhomBar.CustomData["FrameNumber"] = ramVerticalBrace.lLabel;
-            bhomBar.CustomData["FrameType"] = ramVerticalBrace.eSeismicFrameType.ToString();
-            bhomBar.CustomData["Material"] = ramVerticalBrace.eMaterial.ToString();
+
+            //Add Frame Data fragment
+            RAMFrameData ramFrameData = new RAMFrameData();
+            ramFrameData.FrameNumber = ramVerticalBrace.lLabel;
+            ramFrameData.FrameType = ramVerticalBrace.eSeismicFrameType.ToString();
+            ramFrameData.Material = ramVerticalBrace.eMaterial.ToString();
+            bhomBar.Fragments.Add(ramFrameData);
+
             bhomBar.Tags.Add("VerticalBrace");
 
             return bhomBar;
@@ -438,8 +420,13 @@ namespace BH.Adapter.RAM
             RAMId RAMId = new RAMId();
             RAMId.Id = ramLayoutHorizBrace.lUID;
             bhomBar.SetAdapterId(RAMId);
-            bhomBar.CustomData["FrameNumber"] = ramHorizBrace.lLabel;
-            bhomBar.CustomData["Material"] = ramHorizBrace.eMaterial.ToString();
+
+            //Add Frame Data fragment
+            RAMFrameData ramFrameData = new RAMFrameData();
+            ramFrameData.FrameNumber = ramLayoutHorizBrace.lLabel;
+            ramFrameData.Material = ramLayoutHorizBrace.eMaterial.ToString();
+            bhomBar.Fragments.Add(ramFrameData);
+
             bhomBar.Tags.Add("HorizontalBrace");
 
             return bhomBar;
@@ -623,13 +610,15 @@ namespace BH.Adapter.RAM
             SCoordinate location = new SCoordinate();
             location = ramNode.sLocation;
             
-            Node Node = Engine.Structure.Create.Node(location.PointFromRAM());
+            Node node = Engine.Structure.Create.Node(location.PointFromRAM());
 
             IMemberForces IMemberForces = ramNode.GetReactions();
 
             // Collect all member forces at node, tracked by index; should these be combined?
             for (int i = 0; i < IMemberForces.GetCount(); i++)
             {
+                RAMNodeForceData ramNodeForceData = new RAMNodeForceData();
+
                 IMemberForce IMemberForce = IMemberForces.GetAt(i);
                 double axial = IMemberForce.dAxial;
                 double loc = IMemberForce.dLocation;
@@ -641,17 +630,19 @@ namespace BH.Adapter.RAM
                 string loadcaseID = IMemberForce.lLoadCaseID.ToString();
 
                 //Set by member number--is there a way to do this in nested lists instead?
-                Node.CustomData.Add("Axial" + i.ToString(), axial);
-                Node.CustomData.Add("Location" + i.ToString(), loc);
-                Node.CustomData.Add("Moment Major" + i.ToString(), momMaj);
-                Node.CustomData.Add("Moment Minor" + i.ToString(), momMin);
-                Node.CustomData.Add("Shear Major" + i.ToString(), shearMaj);
-                Node.CustomData.Add("Shear Minor" + i.ToString(), shearMin);
-                Node.CustomData.Add("Torsion" + i.ToString(), torsion);
-                Node.CustomData.Add("Loadcase_ID" + i.ToString(), loadcaseID);
+                ramNodeForceData.Axial = axial;
+                ramNodeForceData.Location = loc;
+                ramNodeForceData.MomMaj = momMaj;
+                ramNodeForceData.MomMin = momMin;
+                ramNodeForceData.ShearMaj = shearMaj;
+                ramNodeForceData.ShearMin = shearMin;
+                ramNodeForceData.Torsion = torsion;
+                ramNodeForceData.LoadcaseID = loadcaseID;
+
+                node.Fragments.Add(ramNodeForceData);
             }
 
-            return Node;
+            return node;
         }
 
         /***************************************************/
@@ -779,15 +770,17 @@ namespace BH.Adapter.RAM
             double gridSystemRotation = ramGridSystem.dRotation; // Set the rotation angle of the GridSystem
             double gridRotAngle = 0;
 
-            // Add the properties of the GridSystem as CustomData 
+            // Add the properties of the GridSystem as a fragment
             RAMId RAMId = new RAMId();
             RAMId.Id = gridSystemID;
             myGrid.SetAdapterId(RAMId);
-            myGrid.CustomData.Add("RAMLabel", gridSystemLabel);
-            myGrid.CustomData.Add("RamGridType", gridSystemType);
-            myGrid.CustomData.Add("xOffset", gridXoffset);
-            myGrid.CustomData.Add("yOffset", gridYoffset);
-            myGrid.CustomData.Add("RamGridRotation", gridSystemRotation);
+
+            RAMGridData ramGridData = new RAMGridData();
+            ramGridData.Label = gridSystemLabel;
+            ramGridData.Type = gridSystemType;
+            ramGridData.XOffset = gridXoffset;
+            ramGridData.YOffset = gridYoffset;
+            ramGridData.Rotation = gridSystemRotation;
 
             //Get info for each grid line
             int gridLinelUID = ramModelGrid.lUID; //unique ID od of the grid line object

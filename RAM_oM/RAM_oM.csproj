@@ -57,6 +57,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Fragments\RAMDeckData.cs" />
+    <Compile Include="Fragments\RAMGridData.cs" />
+    <Compile Include="Fragments\RAMNodeForceData.cs" />
+    <Compile Include="Fragments\RAMFrameData.cs" />
     <Compile Include="Fragments\RAMId.cs" />
     <Compile Include="Loads\ContourLoadSet.cs" />
     <Compile Include="RAMLoadCases.cs" />

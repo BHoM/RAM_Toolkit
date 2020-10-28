@@ -36,6 +36,7 @@ using RAMDATAACCESSLib;
 using System.IO;
 using BH.oM.Geometry;
 using BH.Engine.Geometry;
+using BH.Engine.Base;
 using BH.Engine.Structure;
 using BH.Adapter.RAM;
 using BH.oM.Adapters.RAM;
@@ -111,18 +112,18 @@ namespace BH.Adapter.RAM
                     double zStart = bar.StartNode.Position().Z.ToInch() - barStory.dElevation;
                     double zEnd = bar.EndNode.Position().Z.ToInch() - barStory.dElevation;
 
-                    //  Get critical cant values
-                    object isStubCant;
-                    bar.CustomData.TryGetValue("IsStubCantilever", out isStubCant);
-                    isStubCant = isStubCant == null ? "" : isStubCant.ToString();
-                    object startCantObj;
-                    object endCantObj;
-                    bar.CustomData.TryGetValue("StartCantilever", out startCantObj);
-                    bar.CustomData.TryGetValue("EndCantilever", out endCantObj);
-                    double startCant, endCant;
-                    double.TryParse(startCantObj == null ? "" : startCantObj.ToString(), out startCant);
-                    double.TryParse(endCantObj == null ? "" : endCantObj.ToString(), out endCant);
-
+                    //  Get beam fragment cantilever data
+                    double startCant = 0;
+                    double endCant = 0;
+                    bool isStubCant = false;
+                    RAMFrameData ramFrameData = bar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+                    if (ramFrameData != null)
+                    {
+                        startCant = ramFrameData.StartCantilever;
+                        endCant = ramFrameData.EndCantilever;
+                        isStubCant = ramFrameData.IsStubCantilever;
+                    }
+                    
                     if (isStubCant.Equals("True") || isStubCant.Equals("1")) //Check bool per RAM or GH preferred boolean context
                     {
                         SCoordinate startPt, endPt;
@@ -202,9 +203,14 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutColumns ramColumns = ramFloorType.GetLayoutColumns();
                     ILayoutColumn ramColumn;
-                    object isHanging;
-                    bar.CustomData.TryGetValue("IsHangingColumn", out isHanging);
-                    isHanging = isHanging == null ? "" : isHanging.ToString();
+
+                    //  Get RAM column data
+                    bool isHanging = false;
+                    RAMFrameData ramFrameData = bar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+                    if (ramFrameData != null)
+                    {
+                        isHanging = ramFrameData.IsHangingColumn;
+                    }
 
                     if (isHanging.Equals("True") || isHanging.Equals("1")) //Check bool per RAM or GH preferred boolean context
                     {
@@ -986,7 +992,6 @@ namespace BH.Adapter.RAM
                     }
                     ramLoad.SetPoints(verticePoints);
 
-                    //ramLoad.lPropertySetUID = (int)load.UniformLoadSet.CustomData[AdapterIdName];
                     ramLoad.lPropertySetUID = (int)GetAdapterId(load.UniformLoadSet);
                 }
 

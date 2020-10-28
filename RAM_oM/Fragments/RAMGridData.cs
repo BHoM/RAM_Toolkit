@@ -26,17 +26,26 @@ using System.ComponentModel;
 
 namespace BH.oM.Adapters.RAM
 {
-    public class RAMId : IAdapterId
+    public class RAMGridData : IFragment
     {
         /***************************************************/
         /**** Public Properties                         ****/
         /***************************************************/
 
-        [Description("Id or multi-ids of the element as assigned in RAM.")]
-        public virtual object Id { get; set; }
+        [Description("Represents Grid System label as per RAM")]
+        public virtual string Label { get; set; } = null;
 
-        [Description("The RAM FloorType that the element belongs to.")]
-        public virtual string FloorType { get; set; } = null;
+        [Description("Represents Grid System type as per RAM")]
+        public virtual string Type { get; set; } = null;
+
+        [Description("Represents Grid System X offset")]
+        public virtual double XOffset { get; set; } = 0;
+
+        [Description("Represents Grid System Y offset")]
+        public virtual double YOffset { get; set; } = 0;
+
+        [Description("Represents Grid System rotation")]
+        public virtual double Rotation { get; set; } = 0;
 
         /***************************************************/
     }

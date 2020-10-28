@@ -45,8 +45,7 @@ namespace BH.Adapter.RAM
 
             // If unset, set the pushType to AdapterSettings' value (base AdapterSettings default is FullCRUD).
             if (pushType == PushType.AdapterDefault)
-                pushType = m_AdapterSettings.DefaultPushType;
-            
+                pushType = m_AdapterSettings.DefaultPushType;            
             
             //Filter out levels for others
             IEnumerable<object> levels = objects.Where(x => x is Level);
