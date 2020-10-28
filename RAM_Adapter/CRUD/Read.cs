@@ -40,7 +40,7 @@ using System.IO;
 using BH.oM.Geometry.SettingOut;
 using BH.Engine.Units;
 using BH.Engine.Adapter;
-
+using BH.Engine.Base;
 
 namespace BH.Adapter.RAM
 {
@@ -142,7 +142,12 @@ namespace BH.Adapter.RAM
                 {
                     IColumn IColumn = IColumns.GetAt(j);
                     Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IColumn);
-                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
+                    RAMFrameData ramFrameData = bhomBar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+                    if (ramFrameData != null)
+                    {
+                        ramFrameData.FloorType = IFloorType.strLabel;
+                        bhomBar.Fragments.AddOrReplace(ramFrameData);
+                    }    
                     bhomBars.Add(bhomBar);
                 }
 
@@ -152,7 +157,12 @@ namespace BH.Adapter.RAM
                     IBeam IBeam = IBeams.GetAt(j);
                     ILayoutBeam ILayoutBeam = ILayoutBeams.GetAt(j);
                     Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IBeam, ILayoutBeam, dElevation);
-                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
+                    RAMFrameData ramFrameData = bhomBar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+                    if (ramFrameData != null)
+                    {
+                        ramFrameData.FloorType = IFloorType.strLabel;
+                        bhomBar.Fragments.AddOrReplace(ramFrameData);
+                    }
                     bhomBars.Add(bhomBar);
                 }
 
@@ -161,7 +171,12 @@ namespace BH.Adapter.RAM
                 {
                     IVerticalBrace IVerticalBrace = IVBraces.GetAt(j);
                     Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IVerticalBrace);
-                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
+                    RAMFrameData ramFrameData = bhomBar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+                    if (ramFrameData != null)
+                    {
+                        ramFrameData.FloorType = IFloorType.strLabel;
+                        bhomBar.Fragments.AddOrReplace(ramFrameData);
+                    }
                     bhomBars.Add(bhomBar);
                 }
 
@@ -171,7 +186,12 @@ namespace BH.Adapter.RAM
                     IHorizBrace IHorizBrace = IHorizBraces.GetAt(j);
                     ILayoutHorizBrace ILayoutHorizBrace = ILayoutHorizBraces.GetAt(j);
                     Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IHorizBrace, ILayoutHorizBrace, dElevation);
-                    bhomBar.CustomData["FloorType"] = IFloorType.strLabel;
+                    RAMFrameData ramFrameData = bhomBar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+                    if (ramFrameData != null)
+                    {
+                        ramFrameData.FloorType = IFloorType.strLabel;
+                        bhomBar.Fragments.AddOrReplace(ramFrameData);
+                    }
                     bhomBars.Add(bhomBar);
                 }
             }
@@ -250,15 +270,19 @@ namespace BH.Adapter.RAM
                 deck2DProp.Thickness = concThickness;
                 deck2DProp.PanelType = PanelType.Slab;
                 deck2DProp.Material = material;
-                deck2DProp.CustomData["DeckProfileName"] = deckProfileName;
                 deck2DProp.Spacing = profile.dRSpac;
                 deck2DProp.StemWidth = profile.dWR;
                 deck2DProp.TotalDepth = deckThickness;
-
+                
                 // Unique RAM ID
                 RAMId RAMId = new RAMId();
                 RAMId.Id = DeckProp.lUID;
                 deck2DProp.SetAdapterId(RAMId);
+
+                RAMDeckData ramDeckData = new RAMDeckData();
+                ramDeckData.DeckProfileName = deckProfileName;
+                deck2DProp.Fragments.Add(ramDeckData);
+
                 propList.Add(deck2DProp);
             }
 

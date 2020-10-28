@@ -26,17 +26,35 @@ using System.ComponentModel;
 
 namespace BH.oM.Adapters.RAM
 {
-    public class RAMId : IAdapterId
+    public class RAMNodeForceData : IFragment
     {
         /***************************************************/
         /**** Public Properties                         ****/
         /***************************************************/
 
-        [Description("Id or multi-ids of the element as assigned in RAM.")]
-        public virtual object Id { get; set; }
+        [Description("Member Force axial at node per RAM")]
+        public virtual double Axial { get; set; } = double.NaN;
 
-        [Description("The RAM FloorType that the element belongs to.")]
-        public virtual string FloorType { get; set; } = null;
+        [Description("Node distance location along member per RAM")]
+        public virtual double Location { get; set; } = double.NaN;
+
+        [Description("Member Force moment maximum at node per RAM")]
+        public virtual double MomMaj { get; set; } = double.NaN;
+
+        [Description("Member Force moment minimum at node per RAM")]
+        public virtual double MomMin { get; set; } = double.NaN;
+
+        [Description("Member Force shear maximum at node per RAM")]
+        public virtual double ShearMaj { get; set; } = double.NaN;
+
+        [Description("Member Force shear minimum at node per RAM")]
+        public virtual double ShearMin { get; set; } = double.NaN;
+
+        [Description("Member Force Torsion at node per RAM")]
+        public virtual double Torsion { get; set; } = double.NaN;
+
+        [Description("Represents Loadcase ID as per RAM")]
+        public virtual string LoadcaseID { get; set; } = null;
 
         /***************************************************/
     }

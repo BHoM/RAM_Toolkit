@@ -26,17 +26,14 @@ using System.ComponentModel;
 
 namespace BH.oM.Adapters.RAM
 {
-    public class RAMId : IAdapterId
+    public class RAMDeckData : IFragment
     {
         /***************************************************/
         /**** Public Properties                         ****/
         /***************************************************/
 
-        [Description("Id or multi-ids of the element as assigned in RAM.")]
-        public virtual object Id { get; set; }
-
-        [Description("The RAM FloorType that the element belongs to.")]
-        public virtual string FloorType { get; set; } = null;
+        [Description("Deck profile name as per RAM")]
+        public virtual string DeckProfileName { get; set; } = null;
 
         /***************************************************/
     }

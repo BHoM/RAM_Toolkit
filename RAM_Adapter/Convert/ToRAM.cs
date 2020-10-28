@@ -25,8 +25,10 @@ using System.Collections.Generic;
 using System.Linq;
 using BH.oM.Structure.Elements;
 using BH.oM.Geometry;
+using BH.oM.Adapters.RAM;
 using BH.oM.Structure.MaterialFragments;
 using BH.Engine.Structure;
+using BH.Engine.Base;
 using BH.Engine.Geometry;
 using RAMDATAACCESSLib;
 using BH.Engine.Units;
@@ -89,9 +91,13 @@ namespace BH.Adapter.RAM
                     elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
                     break;
                 case StructuralUsage1D.Column:
-                    object isHanging;
-                    bar.CustomData.TryGetValue("IsHangingColumn", out isHanging);
-                    isHanging = isHanging == null ? "" : isHanging.ToString();
+                    //  Get RAM column data
+                    bool isHanging = false;
+                    RAMFrameData ramFrameData = bar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+                    if (ramFrameData != null)
+                    {
+                        isHanging = ramFrameData.IsHangingColumn;
+                    }
 
                     if (isHanging.Equals("True") || isHanging.Equals("1")) //Hanging Column to be placed on its btm level.
                     {

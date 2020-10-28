@@ -38,12 +38,19 @@ namespace BH.Adapter.RAM
     {
 
         /***************************************************/
+        /**** Public Properties                         ****/
+        /***************************************************/
+
+        public const string ID = "RAM_id";
+        
+        /***************************************************/
         /**** Constructors                              ****/
         /***************************************************/
 
         //Add any applicable constructors here, such as linking to a specific file or anything else as well as linking to that file through the (if existing) com link via the API
         public RAMAdapter(string filePath = "", bool active = false)
         {
+            m_AdapterSettings.UseAdapterId = false;
 
             if (active)
             {
