@@ -32,7 +32,7 @@ namespace BH.oM.Adapters.RAM
         /**** Public Properties                         ****/
         /***************************************************/
 
-        [Description("Id or multi-ids of the element as assigned in RAM.")]
+        [Description("lUID of the element as assigned in RAM.")]
         public virtual object Id { get; set; }
 
         [Description("The RAM FloorType that the element belongs to.")]
