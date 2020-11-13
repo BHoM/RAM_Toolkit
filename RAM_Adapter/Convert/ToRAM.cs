@@ -157,7 +157,7 @@ namespace BH.Adapter.RAM
             List<Point> panelPoints = new List<Point>();
             
             // Get heights of wall and floor corners to create levels
-            PolyCurve panelOutline = Engine.Structure.Query.Outline(panel);
+            PolyCurve panelOutline = Engine.Spatial.Query.OutlineCurve(panel);
             panelPoints = panelOutline.DiscontinuityPoints();
 
             foreach (Point pt in panelPoints)

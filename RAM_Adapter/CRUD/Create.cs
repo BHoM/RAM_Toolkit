@@ -38,6 +38,7 @@ using BH.oM.Geometry;
 using BH.Engine.Geometry;
 using BH.Engine.Base;
 using BH.Engine.Structure;
+using BH.Engine.Spatial;
 using BH.Adapter.RAM;
 using BH.oM.Adapters.RAM;
 using BH.oM.Adapter;
@@ -375,7 +376,7 @@ namespace BH.Adapter.RAM
             {
                 RAMId RAMId = new RAMId();
                 string name = panel.Name;
-                PolyCurve outlineExternal = panel.Outline();
+                PolyCurve outlineExternal = panel.OutlineCurve();
                 ramStory = panel.GetStory(ramStories);
                 ramFloorType = ramStory.GetFloorType();
 
@@ -407,7 +408,7 @@ namespace BH.Adapter.RAM
 
                     foreach (Opening opening in panelOpenings)
                     {
-                        PolyCurve outlineOpening = opening.Outline();
+                        PolyCurve outlineOpening = opening.OutlineCurve();
                         openingOutlines.Add(outlineOpening);
                     }
 
@@ -493,7 +494,7 @@ namespace BH.Adapter.RAM
                     }
 
                     // Find outline of planar panel
-                    PolyCurve outline = BH.Engine.Structure.Query.Outline(wallPanel);
+                    PolyCurve outline = BH.Engine.Spatial.Query.OutlineCurve(wallPanel);
                     List<Point> wallPts = outline.DiscontinuityPoints();
                     List<Point> sortedWallPts = wallPts.OrderBy(p => p.X).ToList();
                     Point leftPt = sortedWallPts.First();
@@ -529,7 +530,7 @@ namespace BH.Adapter.RAM
                             // Find opening location, width, and height from outline and apply                      
                             foreach (Opening open in wallPanel.Openings)
                             {
-                                PolyCurve openOutline = open.Outline();
+                                PolyCurve openOutline = open.OutlineCurve();
                                 BoundingBox openBounds = BH.Engine.Geometry.Query.Bounds(openOutline);
                                 Point openMin = openBounds.Min;
                                 Point openMax = openBounds.Max;
