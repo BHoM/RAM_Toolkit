@@ -27,6 +27,7 @@ using System.Linq;
 using BH.oM.Geometry.SettingOut;
 using BH.Engine.Units;
 using BH.Engine.Adapter;
+using BH.Engine.Reflection;
 using BH.oM.Structure.Elements;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
@@ -276,7 +277,10 @@ namespace BH.Adapter.RAM
             foreach (ISurfaceProperty srfProp in srfProps)
             {
                 RAMId RAMId = new RAMId();
-                if (srfProp is Ribbed)
+
+                if ( BH.Engine.Reflection.Query.PropertyValue(srfProp, "Name") == null)
+                { Engine.Reflection.Compute.RecordWarning("A surface property has no name and was not created. Please provide named properties for all surface properties."); }
+                else if (srfProp is Ribbed)
                 {
                     Ribbed compProp = (Ribbed)srfProp;
                     ICompDeckProp ramProp;
@@ -304,10 +308,10 @@ namespace BH.Adapter.RAM
                     ConstantThickness prop = (ConstantThickness)srfProp;
                     if (prop.PanelType != PanelType.Wall)  //Wall surface properties are created on a per wall element basis
                     {
-                        IConcSlabProps concSlabProps = m_Model.GetConcreteSlabProps();
-                        IConcSlabProp ramProp;
-                        ramProp = concSlabProps.Add(prop.Name, prop.Thickness.ToInch(), prop.Material.Density.ToPoundPerCubicFoot());
-                        RAMId.Id = ramProp.lUID;
+                            IConcSlabProps concSlabProps = m_Model.GetConcreteSlabProps();
+                            IConcSlabProp ramProp;
+                            ramProp = concSlabProps.Add(prop.Name, prop.Thickness.ToInch(), prop.Material.Density.ToPoundPerCubicFoot());
+                            RAMId.Id = ramProp.lUID;
                     }                    
                 }
                 else if (srfProp is ConstantThickness && srfProp.Material is Steel)
