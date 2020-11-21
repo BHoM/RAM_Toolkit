@@ -294,7 +294,13 @@ namespace BH.Adapter.RAM
                     ICompDeckProps compDeckProps = m_Model.GetCompositeDeckProps();
                     try
                     {
-                        ramProp = compDeckProps.Add2(compProp.Name, Engine.Reflection.Query.PropertyValue(compProp, "DeckProfileName").ToString(), compProp.Thickness.ToInch(), compProp.TotalDepth.ToInch() - 1.5);
+                        string deckName = "";
+                        if (compProp.GetAllFragments(typeof(RAMDeckData)) != null)
+                        {
+                            RAMDeckData deckFrag = compProp.GetAllFragments(typeof(RAMDeckData))[0] as RAMDeckData;
+                            deckName = deckFrag.DeckProfileName;
+                        }
+                        ramProp = compDeckProps.Add2(compProp.Name, deckName, compProp.Thickness.ToInch(), compProp.TotalDepth.ToInch() - 1.5);
                     }
                     catch
                     {
@@ -440,7 +446,7 @@ namespace BH.Adapter.RAM
                     // Create Deck 
                     List<Point> ctrlPoints = cwOutline.ControlPoints();
 
-                    if (ctrlPoints.First() != ctrlPoints.Last())
+                    if (ctrlPoints.First().Distance(ctrlPoints.Last())>Tolerance.Distance)
                     {
                         ctrlPoints.Add(ctrlPoints.Last().Clone());
                     }
