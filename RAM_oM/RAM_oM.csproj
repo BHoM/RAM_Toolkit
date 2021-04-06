@@ -62,9 +62,7 @@
     <Compile Include="Fragments\RAMNodeForceData.cs" />
     <Compile Include="Fragments\RAMFrameData.cs" />
     <Compile Include="Fragments\RAMId.cs" />
-    <Compile Include="Loads\ContourLoadSet.cs" />
     <Compile Include="RAMLoadCases.cs" />
-    <Compile Include="Loads\UniformLoadSet.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Results\RAMLineGravityLoad.cs" />
     <Compile Include="Results\RAMPointGravityLoad.cs" />

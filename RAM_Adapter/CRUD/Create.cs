@@ -901,35 +901,50 @@ namespace BH.Adapter.RAM
                         //Add the loadset if it does not already exist
                         ISurfaceLoadPropertySet ramLoadSet = ramSurfaceLoadPropertySets.Add(loadSet.Name);
 
-                        ramLoadSet.dConstDeadLoad = loadSet.Loads[ELoadCaseType.ConstructionDeadLCa.ToString()];
-                        ramLoadSet.dConstLiveLoad = loadSet.Loads[ELoadCaseType.ConstructionLiveLCa.ToString()];
-                        ramLoadSet.dDeadLoad = loadSet.Loads[ELoadCaseType.DeadLCa.ToString()];
-                        ramLoadSet.dMassDeadLoad = loadSet.Loads[ELoadCaseType.MassDeadLCa.ToString()];
-                        ramLoadSet.dPartitionLoad = loadSet.Loads[ELoadCaseType.PartitionLCa.ToString()];
+                        foreach (UniformLoadSetRecord loadRecord in loadSet.Loads)
+                        {
+                            switch (loadRecord.Name)
+                            {
+                                case "ConstructionDeadLCa":
+                                    ramLoadSet.dConstDeadLoad = loadRecord.Load;
+                                    break;
+                                case "ConstructionLiveLCa":
+                                    ramLoadSet.dConstLiveLoad = loadRecord.Load;
+                                    break;
+                                case "DeadLCa":
+                                    ramLoadSet.dDeadLoad = loadRecord.Load;
+                                    break;
+                                case "MassDeadLCa":
+                                    ramLoadSet.dMassDeadLoad = loadRecord.Load;
+                                    break;
+                                case "PartitionLCa":
+                                    ramLoadSet.dPartitionLoad = loadRecord.Load;
+                                    break;
+                                case "LiveLCa":
+                                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveReducibleLCa;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    break;
+                                case "LiveStorageLCa":
+                                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveStorageLCa;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    break;
+                                case "LiveUnReducibleLCa":
+                                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveUnReducibleLCa;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    break;
+                                case "LiveRoofLCa":
+                                    ramLoadSet.eLiveLoadType = ELoadCaseType.LiveRoofLCa;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    break;
+                                default:
+                                    Engine.Reflection.Compute.RecordWarning($"the record {loadRecord.Name} in {loadSet.Name} was not recognized. Create your UniformLoadSet using CreateRAMUniformLoadSet() in the RAM toolkit!");
+                                    break;
+                            }
+                        };
 
                         //Check which live load case has been applied, to set load type. Not currently checking if more than one has been set.
-                        Engine.Reflection.Compute.RecordNote("If more than one live load has been set, only the first one will be applied");
+                        Engine.Reflection.Compute.RecordNote("If more than one live load has been set, only the last one will be applied");
 
-                        if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveLCa.ToString()))
-                        {
-                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveReducibleLCa;
-                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()];
-                        }
-                        else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveStorageLCa.ToString()))
-                        {
-                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveStorageLCa;
-                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()];
-                        }
-                        else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveUnReducibleLCa.ToString()))
-                        {
-                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveUnReducibleLCa;
-                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()];
-                        }
-                        else if (loadSet.Loads.ContainsKey(ELoadCaseType.LiveRoofLCa.ToString()))
-                        {
-                            ramLoadSet.eLiveLoadType = ELoadCaseType.LiveRoofLCa;
-                            ramLoadSet.dLiveLoad = loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()];
-                        }
                         //Set the custom data to return if created
                         RAMId RAMId = new RAMId();
                         RAMId.Id = ramLoadSet.lUID;

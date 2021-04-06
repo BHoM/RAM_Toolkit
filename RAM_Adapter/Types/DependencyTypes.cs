@@ -22,6 +22,7 @@
 
 
 using BH.oM.Structure.Elements;
+using BH.oM.Structure.Loads;
 using BH.oM.Structure.SectionProperties;
 using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.MaterialFragments;

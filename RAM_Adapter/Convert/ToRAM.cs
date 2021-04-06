@@ -32,6 +32,7 @@ using BH.Engine.Base;
 using BH.Engine.Geometry;
 using RAMDATAACCESSLib;
 using BH.Engine.Units;
+using BH.oM.Adapters.RAM;
 
 
 namespace BH.Adapter.RAM
@@ -180,7 +181,29 @@ namespace BH.Adapter.RAM
 
         /***************************************************/
 
-}
+        public static RAMLiveLoadTypes ToRAM(this ELoadCaseType caseType)
+        {
+            switch (caseType)
+            {
+                case ELoadCaseType.LiveLCa:
+                    return RAMLiveLoadTypes.LiveReducibleLCa;
+                case ELoadCaseType.LiveReducibleLCa:
+                    return RAMLiveLoadTypes.LiveReducibleLCa;
+                case ELoadCaseType.LiveStorageLCa:
+                    return RAMLiveLoadTypes.LiveStorageLCa;
+                case ELoadCaseType.LiveUnReducibleLCa:
+                    return RAMLiveLoadTypes.LiveUnReducibleLCa;
+                case ELoadCaseType.LiveRoofLCa:
+                    return RAMLiveLoadTypes.LiveRoofLCa;
+                default:
+                    Engine.Reflection.Compute.RecordWarning($"Could not convert ELoadCaseType {caseType} to Live Load Type. It might be a non-live load type, but I'm converting it as non-reducible to be safe.");
+                    return RAMLiveLoadTypes.LiveUnReducibleLCa;
+            }
+        }
+
+        /***************************************************/
+
+    }
 
 }
 

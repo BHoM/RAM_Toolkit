@@ -42,35 +42,17 @@ namespace BH.Engine.Adapters.RAM
             UniformLoadSet loadSet = new UniformLoadSet
             {
                 Name = name,
-                Loads = new Dictionary<string, double>
+                Loads = new List<UniformLoadSetRecord>
                 {
-                    { ELoadCaseType.DeadLCa.ToString(), sdl },
-                    { ELoadCaseType.ConstructionDeadLCa.ToString(), cdl },
-                    { ELoadCaseType.PartitionLCa.ToString(), partition },
-                    { ELoadCaseType.ConstructionLiveLCa.ToString(), cll },
-                    { ELoadCaseType.MassDeadLCa.ToString(), massDl }
+                    new UniformLoadSetRecord(){ Name = ELoadCaseType.DeadLCa.ToString(), Load = sdl },
+                    new UniformLoadSetRecord(){ Name = ELoadCaseType.ConstructionDeadLCa.ToString(), Load = cdl },
+                    new UniformLoadSetRecord(){ Name = ELoadCaseType.PartitionLCa.ToString(), Load = partition },
+                    new UniformLoadSetRecord(){ Name = ELoadCaseType.ConstructionLiveLCa.ToString(), Load = cll },
+                    new UniformLoadSetRecord(){ Name = ELoadCaseType.MassDeadLCa.ToString(), Load = massDl },
+                    //Live loads are special:
+                    new UniformLoadSetRecord(){ Name = llType.ToString(), Load = liveLoad}
                 }
             };
-
-            switch (llType)
-            {
-                case RAMLiveLoadTypes.LiveReducibleLCa:
-                    loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()] = liveLoad;
-                    break;
-                case RAMLiveLoadTypes.LiveStorageLCa:
-                    loadSet.Loads[ELoadCaseType.LiveStorageLCa.ToString()] = liveLoad;
-                    break;
-                case RAMLiveLoadTypes.LiveUnReducibleLCa:
-                    loadSet.Loads[ELoadCaseType.LiveUnReducibleLCa.ToString()] = liveLoad;
-                    break;
-                case RAMLiveLoadTypes.LiveRoofLCa:
-                    loadSet.Loads[ELoadCaseType.LiveRoofLCa.ToString()] = liveLoad;
-                    break;
-                default:
-                    Engine.Reflection.Compute.RecordWarning("Could not understand llType. 0 = Reducible, 1 = Storage, 2 = Non-reducible, 3 = Roof. Assumed Live Reducible.");
-                    loadSet.Loads[ELoadCaseType.LiveReducibleLCa.ToString()] = liveLoad;
-                    break;
-            }
 
             return loadSet;
 
