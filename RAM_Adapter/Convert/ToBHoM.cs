@@ -36,6 +36,7 @@ using BH.oM.Adapters.RAM;
 using BH.Engine.Units;
 using RAMDATAACCESSLib;
 using BH.Engine.Adapter;
+using BH.Engine.Adapters.RAM;
 using BH.oM.Adapter;
 using BH.Engine.Geometry;
 using BH.Engine.Structure;
@@ -930,41 +931,17 @@ namespace BH.Adapter.RAM
 
         public static UniformLoadSet ToBHoMObject(this ISurfaceLoadPropertySet ramSrfLoadPropSet)
         {
-            Dictionary<string, double> loads = new Dictionary<string, double>();
-            ELoadCaseType liveType = ELoadCaseType.LiveReducibleLCa;
 
-            switch (ramSrfLoadPropSet.eLiveLoadType)
-            {
-                case ELoadCaseType.LiveUnReducibleLCa:
-                    liveType = ELoadCaseType.LiveUnReducibleLCa;
-                    break;
-                case ELoadCaseType.LiveReducibleLCa:
-                    liveType = ELoadCaseType.LiveReducibleLCa;
-                    break;
-                case ELoadCaseType.LiveRoofLCa:
-                    liveType = ELoadCaseType.LiveRoofLCa;
-                    break;
-                case ELoadCaseType.LiveStorageLCa:
-                    liveType = ELoadCaseType.LiveStorageLCa;
-                    break;
-                default:
-                    Engine.Reflection.Compute.RecordWarning("Live load type did not match expectations. Using Live Non-Reducible.");
-                    break;
-            }
-
-            loads.Add(ELoadCaseType.ConstructionDeadLCa.ToString(), ramSrfLoadPropSet.dConstDeadLoad);
-            loads.Add(ELoadCaseType.ConstructionLiveLCa.ToString(), ramSrfLoadPropSet.dConstLiveLoad);
-            loads.Add(ELoadCaseType.DeadLCa.ToString(), ramSrfLoadPropSet.dDeadLoad);
-            loads.Add(liveType.ToString(), ramSrfLoadPropSet.dConstLiveLoad);
-            loads.Add(ELoadCaseType.MassDeadLCa.ToString(), ramSrfLoadPropSet.dMassDeadLoad);
-            loads.Add(ELoadCaseType.PartitionLCa.ToString(), ramSrfLoadPropSet.dPartitionLoad);
-
-            UniformLoadSet uniformLoadSet = new UniformLoadSet
-            {
-                Loads = loads
-            };
-
-            uniformLoadSet.Name = ramSrfLoadPropSet.strLabel;
+            UniformLoadSet uniformLoadSet = Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(
+                ramSrfLoadPropSet.dDeadLoad,
+                ramSrfLoadPropSet.dConstDeadLoad,
+                ramSrfLoadPropSet.dConstLiveLoad,
+                ramSrfLoadPropSet.eLiveLoadType.ToRAM(),
+                ramSrfLoadPropSet.dPartitionLoad,
+                ramSrfLoadPropSet.dConstLiveLoad,
+                ramSrfLoadPropSet.dMassDeadLoad,
+                ramSrfLoadPropSet.strLabel
+                );
 
             // Unique RAM ID
             RAMId RAMId = new RAMId();
