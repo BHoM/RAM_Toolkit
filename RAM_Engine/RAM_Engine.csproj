@@ -90,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Versioning42.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RAM_oM\RAM_oM.csproj">
