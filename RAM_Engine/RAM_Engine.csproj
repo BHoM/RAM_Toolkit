@@ -7,7 +7,7 @@
     <ProjectGuid>{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BH.Engine.RAM</RootNamespace>
+    <RootNamespace>BH.Engine.Adapters.RAM</RootNamespace>
     <AssemblyName>RAM_Engine</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
