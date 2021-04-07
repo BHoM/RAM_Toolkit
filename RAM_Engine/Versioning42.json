@@ -1,0 +1,26 @@
+{
+  "Namespace": {
+    "ToNew": {
+
+    },
+    "ToOld": {
+
+    }
+  },
+  "Type": {
+    "ToNew": {
+    },
+    "ToOld": {
+    }
+  },
+  "Property": {
+    "ToNew": {
+    },
+    "ToOld": {
+    }
+  },
+  "MessageForDeleted": {
+      "BH.Engine.Adapters.RAM.Create.CreateContourLoadSet(UniformLoadSet, Polyline, string)":
+      "This method has been removed as it provides no additional functionality to the default create method"
+  }
+}
