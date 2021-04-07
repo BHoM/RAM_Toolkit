@@ -20,7 +20,7 @@
     }
   },
   "MessageForDeleted": {
-      "BH.Engine.Adapters.RAM.Create.CreateContourLoadSet(UniformLoadSet, Polyline, string)":
+      "BH.Engine.Adapters.RAM.CreateContourLoadSet(UniformLoadSet, Polyline, string)":
       "This method has been removed as it provides no additional functionality to the default create method"
   }
 }
