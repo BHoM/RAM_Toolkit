@@ -901,40 +901,46 @@ namespace BH.Adapter.RAM
                         //Add the loadset if it does not already exist
                         ISurfaceLoadPropertySet ramLoadSet = ramSurfaceLoadPropertySets.Add(loadSet.Name);
 
+                        int liveCount = 0;
+
                         foreach (UniformLoadSetRecord loadRecord in loadSet.Loads)
                         {
                             switch (loadRecord.Name)
                             {
                                 case "ConstructionDeadLCa":
-                                    ramLoadSet.dConstDeadLoad = loadRecord.Load;
+                                    ramLoadSet.dConstDeadLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
                                     break;
                                 case "ConstructionLiveLCa":
-                                    ramLoadSet.dConstLiveLoad = loadRecord.Load;
+                                    ramLoadSet.dConstLiveLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
                                     break;
                                 case "DeadLCa":
-                                    ramLoadSet.dDeadLoad = loadRecord.Load;
+                                    ramLoadSet.dDeadLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
                                     break;
                                 case "MassDeadLCa":
-                                    ramLoadSet.dMassDeadLoad = loadRecord.Load;
+                                    ramLoadSet.dMassDeadLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
                                     break;
                                 case "PartitionLCa":
-                                    ramLoadSet.dPartitionLoad = loadRecord.Load;
+                                    ramLoadSet.dPartitionLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
                                     break;
                                 case "LiveLCa":
                                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveReducibleLCa;
-                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
+                                    liveCount++;
                                     break;
                                 case "LiveStorageLCa":
                                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveStorageLCa;
-                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
+                                    liveCount++;
                                     break;
                                 case "LiveUnReducibleLCa":
                                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveUnReducibleLCa;
-                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
+                                    liveCount++;
                                     break;
                                 case "LiveRoofLCa":
                                     ramLoadSet.eLiveLoadType = ELoadCaseType.LiveRoofLCa;
-                                    ramLoadSet.dLiveLoad = loadRecord.Load;
+                                    ramLoadSet.dLiveLoad = loadRecord.Load.ToKilopoundForcePerSquareInch();
+                                    liveCount++;
                                     break;
                                 default:
                                     Engine.Reflection.Compute.RecordWarning($"the record {loadRecord.Name} in {loadSet.Name} was not recognized. Create your UniformLoadSet using CreateRAMUniformLoadSet() in the RAM toolkit!");
@@ -942,8 +948,10 @@ namespace BH.Adapter.RAM
                             }
                         };
 
-                        //Check which live load case has been applied, to set load type. Not currently checking if more than one has been set.
-                        Engine.Reflection.Compute.RecordNote("If more than one live load has been set, only the last one will be applied");
+                        if (liveCount > 1)
+                        {
+                            Engine.Reflection.Compute.RecordWarning("More than one live load has been set; only the last one will be applied");
+                        }
 
                         //Set the custom data to return if created
                         RAMId RAMId = new RAMId();

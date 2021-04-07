@@ -468,7 +468,6 @@ namespace BH.Adapter.RAM
 
         private List<UniformLoadSet> ReadUniformLoadSets(List<string> ids = null)
         {
-            //Implement code for reading Contour Load Sets
             List<UniformLoadSet> bhomUniformLoadSets = new List<UniformLoadSet>();
 
             ISurfaceLoadPropertySets RAMLoadSets = m_Model.GetSurfaceLoadPropertySets();
