@@ -931,15 +931,25 @@ namespace BH.Adapter.RAM
 
         public static UniformLoadSet ToBHoMObject(this ISurfaceLoadPropertySet ramSrfLoadPropSet)
         {
+            RAMLiveLoadTypes liveType = RAMLiveLoadTypes.LiveUnReducibleLCa;
+
+            if (ramSrfLoadPropSet.eLiveLoadType != ELoadCaseType.DeadLCa)
+            {
+                liveType = ramSrfLoadPropSet.eLiveLoadType.ToBHoM();
+            }
+            else 
+            {
+                Engine.Reflection.Compute.RecordWarning($"Live Load type for load set {ramSrfLoadPropSet.strLabel} was set as Dead. This usually means that no live load is applied in RAM; check results.");
+            }
 
             UniformLoadSet uniformLoadSet = Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(
-                ramSrfLoadPropSet.dDeadLoad,
-                ramSrfLoadPropSet.dConstDeadLoad,
-                ramSrfLoadPropSet.dConstLiveLoad,
-                ramSrfLoadPropSet.eLiveLoadType.ToRAM(),
-                ramSrfLoadPropSet.dPartitionLoad,
-                ramSrfLoadPropSet.dConstLiveLoad,
-                ramSrfLoadPropSet.dMassDeadLoad,
+                ramSrfLoadPropSet.dDeadLoad.FromKilopoundForcePerSquareInch(),
+                ramSrfLoadPropSet.dConstDeadLoad.FromKilopoundForcePerSquareInch(),
+                ramSrfLoadPropSet.dConstLiveLoad.FromKilopoundForcePerSquareInch(),
+                liveType,
+                ramSrfLoadPropSet.dPartitionLoad.FromKilopoundForcePerSquareInch(),
+                ramSrfLoadPropSet.dConstLiveLoad.FromKilopoundForcePerSquareInch(),
+                ramSrfLoadPropSet.dMassDeadLoad.FromKilopoundForcePerSquareInch(),
                 ramSrfLoadPropSet.strLabel
                 );
 
@@ -949,6 +959,28 @@ namespace BH.Adapter.RAM
             uniformLoadSet.SetAdapterId(RAMId);
 
             return uniformLoadSet;
+        }
+
+        /***************************************************/
+
+        public static RAMLiveLoadTypes ToBHoM(this ELoadCaseType caseType)
+        {
+            switch (caseType)
+            {
+                case ELoadCaseType.LiveLCa:
+                    return RAMLiveLoadTypes.LiveReducibleLCa;
+                case ELoadCaseType.LiveReducibleLCa:
+                    return RAMLiveLoadTypes.LiveReducibleLCa;
+                case ELoadCaseType.LiveStorageLCa:
+                    return RAMLiveLoadTypes.LiveStorageLCa;
+                case ELoadCaseType.LiveUnReducibleLCa:
+                    return RAMLiveLoadTypes.LiveUnReducibleLCa;
+                case ELoadCaseType.LiveRoofLCa:
+                    return RAMLiveLoadTypes.LiveRoofLCa;
+                default:
+                    Engine.Reflection.Compute.RecordWarning($"Could not convert ELoadCaseType {caseType} to Live Load Type. It might be a non-live load type, but I'm converting it as non-reducible to be safe.");
+                    return RAMLiveLoadTypes.LiveUnReducibleLCa;
+            }
         }
 
         /***************************************************/
