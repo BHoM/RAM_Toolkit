@@ -13,6 +13,14 @@
     "ToOld": {
     }
   },
+  "Method": {
+    "ToNew": {
+      "BH.Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(double, double, double, RAMLiveLoadTypes, double, double, double, string)": "BH.Engine.Adapters.RAM.Create.UniformLoadSet(double, double, double, RAMLiveLoadTypes, double, double, double, string)"
+    },
+    "ToOld": {
+      "BH.Engine.Adapters.RAM.Create.UniformLoadSet(double, double, double, RAMLiveLoadTypes, double, double, double, string)": "BH.Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(double, double, double, RAMLiveLoadTypes, double, double, double, string)"
+    }
+  },
   "Property": {
     "ToNew": {
     },
