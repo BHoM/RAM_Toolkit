@@ -942,7 +942,7 @@ namespace BH.Adapter.RAM
                 Engine.Reflection.Compute.RecordWarning($"Live Load type for load set {ramSrfLoadPropSet.strLabel} was set as Dead. This usually means that no live load is applied in RAM; check results.");
             }
 
-            UniformLoadSet uniformLoadSet = Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(
+            UniformLoadSet uniformLoadSet = Engine.Adapters.RAM.Create.UniformLoadSet(
                 ramSrfLoadPropSet.dDeadLoad.FromKilopoundForcePerSquareInch(),
                 ramSrfLoadPropSet.dConstDeadLoad.FromKilopoundForcePerSquareInch(),
                 ramSrfLoadPropSet.dConstLiveLoad.FromKilopoundForcePerSquareInch(),
