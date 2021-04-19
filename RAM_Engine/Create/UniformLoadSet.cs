@@ -30,13 +30,15 @@ using BH.oM.Structure.Loads;
 using BH.oM.Adapters.RAM;
 using RAMDATAACCESSLib;
 using BH.Engine.Reflection;
+using BH.oM.Reflection.Attributes;
 
 
 namespace BH.Engine.Adapters.RAM
 {
     public static partial class Create
     {
-        public static UniformLoadSet UniformLoadSet(double sdl, double cdl, double liveLoad, RAMLiveLoadTypes llType, double partition, double cll, double massDl, string name = "")
+        [PreviousVersion("4.2","BH.Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(System.Double, System.Double, System.Double, BH.oM.Adapters.RAM.RAMLiveLoadTypes, System.Double, System.Double, System.Double, System.String)")]
+        public static UniformLoadSet RAMUniformLoadSet(double sdl, double cdl, double liveLoad, RAMLiveLoadTypes llType, double partition, double cll, double massDl, string name = "")
         {
 
             UniformLoadSet loadSet = new UniformLoadSet
