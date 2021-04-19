@@ -31,6 +31,7 @@ using BH.oM.Adapters.RAM;
 using RAMDATAACCESSLib;
 using BH.Engine.Reflection;
 using BH.oM.Reflection.Attributes;
+using System.ComponentModel;
 
 
 namespace BH.Engine.Adapters.RAM
@@ -38,6 +39,16 @@ namespace BH.Engine.Adapters.RAM
     public static partial class Create
     {
         [PreviousVersion("4.2","BH.Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(System.Double, System.Double, System.Double, BH.oM.Adapters.RAM.RAMLiveLoadTypes, System.Double, System.Double, System.Double, System.String)")]
+        [Description("Creates a UniformLoadSet specifically for use in RAM. RAM has built-in loadcases, so other loadcases must be mapped to them.")]
+        [Input("sdl", "post-composite dead load which is applied to cured concrete decks, i.e. (assuming self weight of slab is set to be counted in the Self-Weight Criteria menu).")]
+        [Input("cdl", "pre-composite dead load including any allowance for ponding (assuming self weight of slab is set to be counted in the Self-Weight Criteria menu).")]
+        [Input("liveLoad","loads to be applied post composite such as occupancy loads. These should generally be entered without reduction.")]
+        [Input("llType","sets a flag for which type of live load has been entered, which impacts how the program will apply reduction or combine with snow loading.")]
+        [Input("partition","additional live loads such as partitions which will not be reduced, regardless of the value of llType.")]
+        [Input("cll", "live loads from construction activities which will be present during the pre-composite stage.")]
+        [Input("massDl", "dead loads which contribute to lateral mass of the building, does not include self weight of modelled elements provided Self-Weight is accounted for in the Criteria. Generally this value will be similar to the SDL value")]
+        [Input("name", "A useful and descriptive name which will be used in RAM to refer to this set of loads.")]
+        [Output("a set of area loads suitable for pushing to RAM.")]
         public static UniformLoadSet RAMUniformLoadSet(double sdl, double cdl, double liveLoad, RAMLiveLoadTypes llType, double partition, double cll, double massDl, string name = "")
         {
 
