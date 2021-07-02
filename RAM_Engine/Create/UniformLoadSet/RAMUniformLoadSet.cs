@@ -38,7 +38,6 @@ namespace BH.Engine.Adapters.RAM
 {
     public static partial class Create
     {
-        [PreviousVersion("4.2","BH.Engine.Adapters.RAM.Create.CreateRAMUniformLoadSet(System.Double, System.Double, System.Double, BH.oM.Adapters.RAM.RAMLiveLoadTypes, System.Double, System.Double, System.Double, System.String)")]
         [Description("Creates a UniformLoadSet specifically for use in RAM. RAM has built-in loadcases, so other loadcases must be mapped to them.")]
         [Input("sdl", "post-composite dead load which is applied to cured concrete decks, i.e. (assuming self weight of slab is set to be counted in the Self-Weight Criteria menu).")]
         [Input("cdl", "pre-composite dead load including any allowance for ponding (assuming self weight of slab is set to be counted in the Self-Weight Criteria menu).")]
