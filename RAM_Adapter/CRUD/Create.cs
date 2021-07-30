@@ -438,7 +438,7 @@ namespace BH.Adapter.RAM
 
                     if (ctrlPoints.First() != ctrlPoints.Last())
                     {
-                        ctrlPoints.Add(ctrlPoints.Last().Clone());
+                        ctrlPoints.Add(ctrlPoints.Last().DeepClone());
                     }
 
                     ISurfaceProperty srfProp = panel.Property;
@@ -990,7 +990,7 @@ namespace BH.Adapter.RAM
                     List<Point> loadPoints = load.Contour.ControlPoints();
                     if (loadPoints.First() != loadPoints.Last())
                     {
-                        loadPoints.Add(loadPoints.Last().Clone());
+                        loadPoints.Add(loadPoints.Last().DeepClone());
                     }
 
                     //Find the layout to apply to
