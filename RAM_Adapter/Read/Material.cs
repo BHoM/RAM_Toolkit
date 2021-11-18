@@ -21,28 +21,43 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using BH.oM.Adapters.RAM;
+using BH.oM.Adapter;
 using BH.oM.Base;
+using BH.oM.Structure.Elements;
+using BH.oM.Structure.SectionProperties;
+using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.Results;
-using BH.oM.Geometry;
+using BH.oM.Structure.Loads;
+using BH.oM.Structure.MaterialFragments;
+using BH.oM.Structure.Requests;
+using BH.oM.Analytical.Results;
+using RAMDATAACCESSLib;
+using System.IO;
+using BH.oM.Geometry.SettingOut;
+using BH.Engine.Units;
+using BH.Engine.Adapter;
+using BH.Engine.Base;
 
-namespace BH.oM.Adapters.RAM
+namespace BH.Adapter.RAM
 {
-
-    public class RAMFactoredEndReactions : BHoMObject
+    public partial class RAMAdapter
     {
-        /***************************************************/
-        /**** Properties                                ****/
-        /***************************************************/
 
-        public virtual int ObjectId { get; set; } = 0;
-        public virtual NodeReaction StartReaction { get; set; } = null;
-        public virtual NodeReaction EndReaction { get; set; } = null;
+        private List<IMaterialFragment> ReadMaterials(List<string> ids = null)
+        {
+            //TODO: Implement code for reading materials from RAM if not handled per element
 
-        /***************************************************/
+            List<IMaterialFragment> Materials = new List<IMaterialFragment>();
+
+            IMaterialFragment defaultMat = Engine.Structure.Create.Steel("Default");
+
+            Materials.Add(defaultMat);
+
+            return Materials;
+        }
     }
 }
-

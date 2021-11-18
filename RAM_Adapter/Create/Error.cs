@@ -21,71 +21,64 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using BH.oM.Structure.Elements;
-using BH.oM.Geometry;
-using BH.oM.Adapters.RAM;
-using BH.oM.Structure.MaterialFragments;
-using BH.Engine.Structure;
-using BH.Engine.Base;
-using BH.Engine.Geometry;
-using RAMDATAACCESSLib;
+using BH.oM.Geometry.SettingOut;
 using BH.Engine.Units;
+using BH.Engine.Adapter;
+using BH.oM.Structure.Elements;
+using BH.oM.Structure.SectionProperties;
+using BH.oM.Structure.SurfaceProperties;
+using BH.oM.Structure.Constraints;
+using BH.oM.Structure.MaterialFragments;
+using RAMDATAACCESSLib;
+using System.IO;
+using BH.oM.Geometry;
+using BH.Engine.Geometry;
+using BH.Engine.Base;
+using BH.Engine.Structure;
+using BH.Engine.Spatial;
+using BH.Adapter.RAM;
+using BH.oM.Adapters.RAM;
+using BH.oM.Adapter;
+using BH.oM.Structure.Loads;
 
 
 namespace BH.Adapter.RAM
 {
-    public static partial class Convert
+    public partial class RAMAdapter
     {
         /***************************************************/
-        /**** Public Methods                            ****/
-        /***************************************************/
 
-        public static ILayoutBeam ToRAM(this Bar bar, ILayoutBeams iLayoutBeams)
+        private void CreateElementError(string elemType, string elemName)
         {
-            ILayoutBeam iLayoutBeam = iLayoutBeams.GetAt(0);
-
-            SCoordinate start = bar.StartNode.Position().ToRAM();
-            SCoordinate end = bar.EndNode.Position().ToRAM();
-
-            //Set support coordinates and name
-            //CAUTION: different from actual end points and cantilevers hardcoded
-            iLayoutBeam.SetLayoutCoordinates(start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0, 0, 0);
-            iLayoutBeam.strSectionLabel = bar.SectionProperty.DescriptionOrName();
-            return iLayoutBeam;
+            Engine.Reflection.Compute.RecordError("Failed to create the element of type " + elemType + ", with id: " + elemName);
         }
 
         /***************************************************/
 
-        public static SCoordinate ToRAM(this Point point)
+        private void CreatePropertyError(string failedProperty, string elemType, string elemName)
         {
-            SCoordinate pt = new SCoordinate();
-            pt.dXLoc = point.X.ToInch();
-            pt.dYLoc = point.Y.ToInch();
-            pt.dZLoc = point.Z.ToInch();
-            return pt;
+            CreatePropertyEvent(failedProperty, elemType, elemName, oM.Reflection.Debugging.EventType.Error);
         }
 
         /***************************************************/
 
-        public static EMATERIALTYPES ToRAM(this IMaterialFragment bhMaterial)
+        private void CreatePropertyWarning(string failedProperty, string elemType, string elemName)
         {
-            switch (bhMaterial.IMaterialType())
-            {
-                case MaterialType.Concrete:
-                    return EMATERIALTYPES.EConcreteMat;
-                case MaterialType.Steel:
-                    return EMATERIALTYPES.ESteelMat;
-                default:
-                    return EMATERIALTYPES.ESteelMat;
-            }
+            CreatePropertyEvent(failedProperty, elemType, elemName, oM.Reflection.Debugging.EventType.Warning);
         }
 
         /***************************************************/
 
+        private void CreatePropertyEvent(string failedProperty, string elemType, string elemName, oM.Reflection.Debugging.EventType eventType)
+        {
+            Engine.Reflection.Compute.RecordEvent("Failed to set property " + failedProperty + " for the " + elemType + " with id: " + elemName, eventType);
+        }
+
+        /***************************************************/
     }
-
 }
 
 

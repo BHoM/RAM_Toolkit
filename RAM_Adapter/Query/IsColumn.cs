@@ -36,53 +36,19 @@ using BH.Engine.Units;
 
 namespace BH.Adapter.RAM
 {
-    public static partial class Convert
+    public static partial class Query
     {
         /***************************************************/
         /**** Public Methods                            ****/
         /***************************************************/
 
-        public static ILayoutBeam ToRAM(this Bar bar, ILayoutBeams iLayoutBeams)
+        public static bool IsColumn(this Bar bar, IStories stories)
         {
-            ILayoutBeam iLayoutBeam = iLayoutBeams.GetAt(0);
+            IStory startStory = bar.StartNode.GetStory(stories);
+            IStory endStory = bar.EndNode.GetStory(stories);
 
-            SCoordinate start = bar.StartNode.Position().ToRAM();
-            SCoordinate end = bar.EndNode.Position().ToRAM();
-
-            //Set support coordinates and name
-            //CAUTION: different from actual end points and cantilevers hardcoded
-            iLayoutBeam.SetLayoutCoordinates(start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0, 0, 0);
-            iLayoutBeam.strSectionLabel = bar.SectionProperty.DescriptionOrName();
-            return iLayoutBeam;
+            return !startStory.Equals(endStory);
         }
-
-        /***************************************************/
-
-        public static SCoordinate ToRAM(this Point point)
-        {
-            SCoordinate pt = new SCoordinate();
-            pt.dXLoc = point.X.ToInch();
-            pt.dYLoc = point.Y.ToInch();
-            pt.dZLoc = point.Z.ToInch();
-            return pt;
-        }
-
-        /***************************************************/
-
-        public static EMATERIALTYPES ToRAM(this IMaterialFragment bhMaterial)
-        {
-            switch (bhMaterial.IMaterialType())
-            {
-                case MaterialType.Concrete:
-                    return EMATERIALTYPES.EConcreteMat;
-                case MaterialType.Steel:
-                    return EMATERIALTYPES.ESteelMat;
-                default:
-                    return EMATERIALTYPES.ESteelMat;
-            }
-        }
-
-        /***************************************************/
 
     }
 
