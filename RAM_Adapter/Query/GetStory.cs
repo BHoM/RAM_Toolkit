@@ -80,6 +80,9 @@ namespace BH.Adapter.RAM
 
             double elev = point.ToRAM().dZLoc;
 
+            if (elev == 0)
+                return null;
+
             //There must be a better way to iterate over IStories
             List <IStory> storeys = new List<IStory>();
             int numStories = ramStories.GetCount();

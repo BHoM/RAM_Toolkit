@@ -191,21 +191,20 @@ namespace BH.Adapter.RAM
                     ILayoutColumn ramColumn;
 
                     //  Get RAM column data
-                    bool isHanging = false;
                     RAMFrameData ramFrameData = bar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
 
-                    if (ramFrameData.IsHangingColumn && ramFrameData.IsHangingColumn) //Check bool per RAM or GH preferred boolean context
+                    if (ramFrameData != null && ramFrameData.IsHangingColumn) //Check bool per RAM or GH preferred boolean context
                     {
-                        ramColumn = ramColumns.Add3(bar.SectionProperty.Material.ToRAM(), btm.dXLoc, btm.dYLoc, top.dXLoc, top.dXLoc, 0, 0, 1); //No Z offsets, cols start and end at stories
+                        ramColumn = ramColumns.Add3(bar.SectionProperty.Material.ToRAM(), btm.dXLoc, btm.dYLoc, top.dXLoc, top.dYLoc, 0, 0, 1); //No Z offsets, cols start and end at stories
                     }
                     else if (bar.IsVertical())
                     {
                         //Failing if no section property is provided
-                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), top.dXLoc, top.dXLoc, 0, 0); //No Z offsets, cols start and end at stories
+                        ramColumn = ramColumns.Add(bar.SectionProperty.Material.ToRAM(), top.dXLoc, top.dYLoc, 0, 0); //No Z offsets, cols start and end at stories
                     }
                     else
                     {
-                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), top.dXLoc, top.dXLoc, btm.dXLoc, btm.dYLoc, 0, 0); //No Z offsets, cols start and end at stories
+                        ramColumn = ramColumns.Add2(bar.SectionProperty.Material.ToRAM(), top.dXLoc, top.dYLoc, btm.dXLoc, btm.dYLoc, 0, 0); //No Z offsets, cols start and end at stories
                     }
 
                     //Set column properties

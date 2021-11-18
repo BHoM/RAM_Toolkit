@@ -143,7 +143,8 @@
     <Compile Include="Read\Level.cs" />
     <Compile Include="Read\Results.cs" />
     <Compile Include="Read\_Read.cs" />
-    <Compile Include="Update\UpdateObjects.cs" />
+    <Compile Include="Update\Bar.cs" />
+    <Compile Include="Update\_Update.cs" />
     <Compile Include="RAMAdapter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Types\Comparer.cs" />

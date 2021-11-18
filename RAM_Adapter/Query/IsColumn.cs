@@ -44,14 +44,16 @@ namespace BH.Adapter.RAM
 
         public static bool IsColumn(this Bar bar, IStories stories)
         {
+            if (bar.IsVertical()) return true; // it's vertical, it's a column. Don't waste my time.
+
             IStory startStory = bar.StartNode.GetStory(stories);
             IStory endStory = bar.EndNode.GetStory(stories);
 
-            return !startStory.Equals(endStory);
+            if (startStory is null ^ endStory is null) return true; // one of the ends is at zero elevation, so it's a column.
+            if (startStory is null && endStory is null) return false; // both ends are at zero elevation, so this is a beam on the ground. We'll pick it up later.
+            return  startStory.lUID != endStory.lUID; // This starts on a different level than it ends, so it's probably a column. (it could be a brace but let's not think about that too hard).
         }
-
     }
-
 }
 
 
