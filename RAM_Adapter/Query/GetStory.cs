@@ -80,8 +80,7 @@ namespace BH.Adapter.RAM
 
             double elev = point.ToRAM().dZLoc;
 
-            if (elev == 0)
-                return null;
+            if (elev == 0) return null; //zero is always the ground level in RAM, not associated with any story.
 
             //There must be a better way to iterate over IStories
             List <IStory> storeys = new List<IStory>();

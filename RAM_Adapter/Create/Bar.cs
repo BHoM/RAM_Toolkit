@@ -95,60 +95,44 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
 
-                    double zStart = bar.StartNode.Position().ToRAM().dZLoc - barStory.dElevation;
-                    double zEnd = bar.EndNode.Position().ToRAM().dZLoc - barStory.dElevation;
 
-                    //  Get beam fragment cantilever data
-                    double startCant = 0;
-                    double endCant = 0;
-                    bool isStubCant = false;
                     RAMFrameData ramFrameData = bar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
-                    if (ramFrameData != null)
-                    {
-                        startCant = ramFrameData.StartCantilever;
-                        endCant = ramFrameData.EndCantilever;
-                        isStubCant = ramFrameData.IsStubCantilever;
-                    }
 
-                    if (isStubCant.Equals("True") || isStubCant.Equals("1")) //Check bool per RAM or GH preferred boolean context
+                    if (ramFrameData != null && ramFrameData.IsStubCantilever)
                     {
-                        SCoordinate startPt, endPt;
-                        if (startCant > 0) // Ensure startPt corresponds with support point
+                        SCoordinate start = bar.StartNode.Position().ToRAM();
+                        SCoordinate end = bar.EndNode.Position().ToRAM();
+
+                        if (ramFrameData.StartCantilever > 0) // Ensure startPt corresponds with support point                            
                         {
-                            startPt = bar.EndNode.Position().ToRAM();
-                            endPt = bar.StartNode.Position().ToRAM();
+                            ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), end.dXLoc, end.dYLoc, 0, start.dXLoc, start.dYLoc, 0); // No Z offsets, beams flat on closest story
                         }
                         else
                         {
-                            startPt = bar.StartNode.Position().ToRAM();
-                            endPt = bar.EndNode.Position().ToRAM();
+                            ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0); // No Z offsets, beams flat on closest story
                         }
-
-                        ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), startPt.dXLoc, startPt.dYLoc, 0, endPt.dXLoc, endPt.dYLoc, 0); // No Z offsets, beams flat on closest story
                     }
                     else
                     {
-                        //  Get support points
-                        Vector barDir = bar.Tangent(true);
-                        Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position(), barDir * startCant);
-                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), -barDir * endCant);
-                        SCoordinate start = startSupPt.ToRAM();
-                        SCoordinate end = endSupPt.ToRAM();
+                        //  Get beam fragment cantilever data
+                        double startCant = 0;
+                        double endCant = 0;
 
-                        ramBeam = ramBeams.Add(bar.SectionProperty.Material.ToRAM(), start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0); // No Z offsets, beams flat on closest story
-                        if (startSupPt.X < endSupPt.X || (startSupPt.X == endSupPt.X && startSupPt.Y > endSupPt.Y))
-                        {
-                            ramBeam.dStartCantilever = startCant.FromInch();
-                            ramBeam.dEndCantilever = endCant.FromInch();
-                        }
-                        else
-                        {
-                            ramBeam.dStartCantilever = endCant.FromInch();
-                            ramBeam.dEndCantilever = startCant.FromInch();
-                        }
+                        Bar trimBar = TrimCantilevers(bar, out startCant, out endCant);
+
+                        SCoordinate start = trimBar.StartNode.Position.ToRAM();
+                        SCoordinate end = trimBar.EndNode.Position.ToRAM();
+
+                        ramBeam = ramBeams.Add(trimBar.SectionProperty.Material.ToRAM(), start.dXLoc, start.dYLoc, start.dZLoc - barStory.dElevation, end.dXLoc, end.dYLoc, end.dZLoc - barStory.dElevation); // No Z offsets, beams flat on closest story
+
+                        ramBeam.dStartCantilever = startCant.ToInch();
+                        ramBeam.dEndCantilever = endCant.ToInch();
                     }
 
                     // Add warning to report distance of snapping to level as required for RAM
+                    double zStart = bar.StartNode.Position().ToRAM().dZLoc - barStory.dElevation;
+                    double zEnd = bar.EndNode.Position().ToRAM().dZLoc - barStory.dElevation;
+
                     if (zStart != 0 || zEnd != 0)
                     { Engine.Reflection.Compute.RecordWarning("Bar " + name + " snapped to level " + barStory.strLabel + ". Bar moved " + Math.Round(zStart, 2).ToString() + " inches at start and " + Math.Round(zEnd, 2).ToString() + " inches at end."); }
 
@@ -223,6 +207,39 @@ namespace BH.Adapter.RAM
         }
 
         /***************************************************/
+
+        private static Bar TrimCantilevers(Bar bar, out double startCant, out double endCant)
+        {
+            //  Get beam fragment cantilever data
+            startCant = 0;
+            endCant = 0;
+
+            RAMFrameData ramFrameData = bar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
+
+            if (ramFrameData != null)
+            {
+                startCant = ramFrameData.StartCantilever;
+                endCant = ramFrameData.EndCantilever;
+            }
+
+            //  Get support points
+            Vector barDir = bar.Tangent(true);
+
+            Bar trimBar = bar.DeepClone();
+            trimBar.StartNode.Position = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position(), barDir * startCant);
+            trimBar.EndNode.Position = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), -barDir * endCant);
+
+            if (barDir.DotProduct(Vector.XAxis) < 0 || barDir.DotProduct(Vector.YAxis) == 1)
+            {
+                double temp = endCant;
+                endCant = startCant;
+                startCant = temp;
+
+                return trimBar.Flip();
+            }
+
+            return trimBar;
+        }
 
         private bool CreateCollection(IEnumerable<ISectionProperty> sectionProperties)
         {
