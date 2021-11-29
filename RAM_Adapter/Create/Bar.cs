@@ -123,7 +123,7 @@ namespace BH.Adapter.RAM
                         SCoordinate start = trimBar.StartNode.Position.ToRAM();
                         SCoordinate end = trimBar.EndNode.Position.ToRAM();
 
-                        ramBeam = ramBeams.Add(trimBar.SectionProperty.Material.ToRAM(), start.dXLoc, start.dYLoc, start.dZLoc - barStory.dElevation, end.dXLoc, end.dYLoc, end.dZLoc - barStory.dElevation); // No Z offsets, beams flat on closest story
+                        ramBeam = ramBeams.Add(trimBar.SectionProperty.Material.ToRAM(), start.dXLoc, start.dYLoc, 0, end.dXLoc, end.dYLoc, 0); // No Z offsets, beams flat on closest story
 
                         ramBeam.dStartCantilever = startCant.ToInch();
                         ramBeam.dEndCantilever = endCant.ToInch();
