@@ -62,57 +62,6 @@ namespace BH.Adapter.RAM
         }
 
         /***************************************************/
-
-        // Essentially the same as the create method; experimenting with when it gets called by the BHoM "push" component
-        protected bool Update(IEnumerable<Bar> bars)
-        {
-
-            //Access model
-            IDBIO1 RAMDataAccIDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-
-            foreach (Bar bar in bars)
-            {
-                //Extract ID
-                int ID = (int)GetAdapterId(bar);
-
-                if (BH.Engine.Structure.Query.IsVertical(bar))
-                {
-                    IColumn IColumn = IModel.GetColumn(ID);
-                    ILayoutColumn ILayoutColumn = IModel.GetLayoutColumn(ID);
-
-                    // Move column
-                    double xStart = bar.StartNode.Position().X;
-                    double yStart = bar.StartNode.Position().Y;
-                    double zStart = bar.StartNode.Position().Z;
-                    double xEnd = bar.EndNode.Position().X;
-                    double yEnd = bar.EndNode.Position().Y;
-                    double zEnd = bar.EndNode.Position().Z;
-
-                    // Need level rather than offset for setting (still in progress)
-                    ILayoutColumn.SetLayoutCoordinates2(xStart, yStart, zStart, xEnd, yEnd, zEnd);
-                    
-                    // Change section property of column
-                    IColumn.strSectionLabel = bar.Name;
-
-                }
-                else {
-                    IBeam IBeam = IModel.GetBeam(ID);
-                    ILayoutBeam ILayoutBeam = IModel.GetLayoutBeam(ID);
-
-                    // Change section property of column
-                    IBeam.strSectionLabel = bar.Name;
-
-                }
-                       
-
-            }
-
-
-            return true;
-        }
-
-        /***************************************************/
     }
 }
 
