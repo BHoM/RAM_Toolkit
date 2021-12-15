@@ -446,6 +446,11 @@ namespace BH.Adapter.RAM
             //get count of deck polygons
             double deckPolyCount = ramDeck.GetNumFinalPolygons(ramStoryUID);
 
+            if (deckPolyCount == 0)
+            {
+                Engine.Reflection.Compute.RecordWarning($"Floor with RAM lUID {ramDeck.lUID} contains no edges.");
+                return null;
+            }
             //Initial only gets first outline poly for exterior edge, rest for openings
             IPoints pplPoints = ramDeck.GetFinalPolygon(ramStoryUID, 0);
 
