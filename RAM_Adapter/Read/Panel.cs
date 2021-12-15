@@ -87,20 +87,31 @@ namespace BH.Adapter.RAM
 
                 int numDecks = IDecks.GetCount();
 
-                // Convert Floors
-                for (int j = 0; j < numDecks; j++)
+                if (numDecks > 0)
                 {
-                    IDeck IDeck = IDecks.GetAt(j);
-                    try
+                    // Convert Floors
+                    for (int j = 0; j < numDecks; j++)
                     {
+                        IDeck IDeck = IDecks.GetAt(j);
+
                         Panel panel = BH.Adapter.RAM.Convert.ToBHoMObject(IDeck, m_Model, IStoryUID);
-                        panel.Property = bhomProperties[IDeck.lPropID.ToString()];
-                        bhomPanels.Add(panel);
+
+                        if (panel != null)
+                        {
+                            ISurfaceProperty bhProp = new ConstantThickness();
+                            bhomProperties.TryGetValue(IDeck.lPropID.ToString(), out bhProp);
+
+                            if (bhProp != null) panel.Property = bhProp;
+                            else Engine.Reflection.Compute.RecordWarning($"Could not get property for floor with RAM lUID = {IDeck.lUID}");
+
+                            bhomPanels.Add(panel);
+                        }
                     }
-                    catch
-                    {
-                        BH.Engine.Reflection.Compute.RecordWarning("This story has no slab edges defined. IStoryUID: " + IStoryUID);
-                    }
+                }
+                else
+                {
+                    BH.Engine.Reflection.Compute.RecordWarning("This story has no slab edges defined. IStoryUID: " + IStoryUID);
+                    break;
                 }
             }
 
