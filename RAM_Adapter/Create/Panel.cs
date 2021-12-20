@@ -57,100 +57,66 @@ namespace BH.Adapter.RAM
         {
             //Code for creating a collection of floors and walls in the software
 
-            List<Panel> panels = bhomPanels.ToList();
-
-            // Register Floor types
-            IFloorType ramFloorType;
-            IStories ramStories;
-            IStory ramStory;
-
-            //Create wall and floor lists with individual heights
-            List<Panel> wallPanels = new List<Panel>();
-            List<Panel> floors = new List<Panel>();
-            List<double> panelHeights = new List<double>();
-            List<Point> panelPoints = new List<Point>();
-
             // Split walls and floors and get all elevations
-            foreach (Panel panel in panels)
-            {
-                double panelNormZ = panel.Normal().Z;
+            CreateFloors(bhomPanels.Where(x => Math.Abs(x.Normal().Z) >= 0.707));
+            CreateWalls(bhomPanels.Where(x => Math.Abs(x.Normal().Z) < 0.707));
 
-                //Split walls and floors
-                if (Math.Abs(panelNormZ) < 0.707) // check normal against 45 degree slope
-                {
-                    wallPanels.Add(panel);
-                }
-                else
-                {
-                    floors.Add(panel);
-                }
-            }
+            //Save file
+            m_IDBIO.SaveDatabase();
 
-            ramStories = m_Model.GetStories();
+            return true;
+        }
 
-            #region Create Floors
+        /***************************************************/
+
+        private Boolean CreateFloors(IEnumerable<Panel> floors)
+        {
+            IStories ramStories = m_Model.GetStories();
 
             for (int i = 0; i < ramStories.GetCount(); i++)
             {
-                ramStory = ramStories.GetAt(i);
-                ramFloorType = ramStory.GetFloorType();
+                IStory ramStory = ramStories.GetAt(i);
+                IFloorType ramFloorType = ramStory.GetFloorType();
 
                 IEnumerable<Panel> storyFloors = floors.Where(x => x.GetStory(ramStories).Equals(ramStory));
 
                 //RAM can't handle adjoining slab edges, so we merge them.
-                //IEnumerable<Panel> mergedFloors = storyFloors.MergePanels();
+                List<Polyline> outlineCurves = storyFloors.Select(x => x.OutlineCurve().ToPolyline()).ToList();
+                List<List<Polyline>> outlineCurvesDistributed = outlineCurves.BooleanUnion().DistributeOutlines();
 
-                // Create all the discontinuous floors on a story.
-                foreach (Panel panel in storyFloors)
+                List<Polyline> outlines = outlineCurvesDistributed.Select(x => x.First()).ToList();
+
+                //Flip all outlines so that they are clockwise.
+                outlines = outlines.Select(pl => pl.IsClockwise(Vector.ZAxis) ? pl : pl.Flip()).ToList();
+
+                //Write slab edges to RAM
+                ISlabEdges ramSlabEdges = ramFloorType.GetAllSlabEdges();
+                foreach (Line edge in outlines.SelectMany(x => x.SubParts()))
                 {
-                    RAMId RAMId = new RAMId();
-                    string name = panel.Name;
-                    PolyCurve outlineExternal = panel.OutlineCurve();
+                    SCoordinate startPt = edge.IStartPoint().ToRAM();
+                    SCoordinate endPt = edge.IEndPoint().ToRAM();
+                    ramSlabEdges.Add(startPt.dXLoc, startPt.dYLoc, endPt.dXLoc, endPt.dYLoc, 0);
+                }
 
-                    // Set slab edges on FloorType in RAM for external edges
-                    ISlabEdges ramSlabEdges = ramFloorType.GetAllSlabEdges();
-                    ISlabEdges ramOpeningEdges = ramFloorType.GetAllSlabOpenings();
+                //Add the openings
+                IEnumerable<Opening> panelOpenings = storyFloors.SelectMany(x => x.Openings);
+                List<Polyline> openingOutlines = panelOpenings.Select(x => x.OutlineCurve().ToPolyline()).ToList();
 
-                    // Get external and internal edges of floor panel
-                    List<PolyCurve> panelOutlines = new List<PolyCurve>();
-                    List<PolyCurve> openingOutlines = new List<PolyCurve>();
+                //Add the new openings resulting from the external edges boolean.
+                openingOutlines.AddRange(outlineCurvesDistributed.SelectMany(x => x.Skip(1)).ToList());
 
-                    // RAM requires edges clockwise, flip if counterclockwise
-                    outlineExternal = outlineExternal.IsClockwise(Vector.ZAxis) ? outlineExternal : outlineExternal.Flip();
+                //Boolean all openings, discard any resulting internal openings.
+                openingOutlines = openingOutlines.BooleanUnion().DistributeOutlines().Select(x => x.First()).ToList();
 
-                    List<ICurve> edgeCrvs = outlineExternal.Curves;
+                //Flip all outlines so that they are clockwise.
+                openingOutlines = openingOutlines.Select(pl => pl.IsClockwise(Vector.ZAxis) ? pl : pl.Flip()).ToList();
 
-                    foreach (ICurve crv in edgeCrvs)
-                    {
-                        SCoordinate startPt = crv.IStartPoint().ToRAM();
-                        SCoordinate endPt = crv.IEndPoint().ToRAM();
-                        ramSlabEdges.Add(startPt.dXLoc, startPt.dYLoc, endPt.dXLoc, endPt.dYLoc, 0);
-                    }
-
-                    List<Opening> panelOpenings = panel.Openings;
-
-                    foreach (Opening opening in panelOpenings)
-                    {
-                        PolyCurve outlineOpening = opening.OutlineCurve();
-
-                        // RAM requires edges clockwise, flip if counterclockwise
-                        outlineOpening = outlineOpening.IsClockwise(Vector.ZAxis) ? outlineOpening.Flip() : outlineOpening;
-
-                        if (!(outlineExternal.IsContaining(outlineOpening, false)))
-                        {
-                            outlineOpening = outlineExternal.BooleanIntersection(outlineOpening)[0];
-                            Engine.Reflection.Compute.RecordWarning("Panel " + name + " opening intersects floor boundary. Boolean intersection was used to get opening extents on panel, confirm opening extents in RAM.");
-                        }
-
-                        List<ICurve> openEdgeCrvs = outlineOpening.Curves;
-
-                        foreach (ICurve crv in openEdgeCrvs)
-                        {
-                            SCoordinate startPt = crv.IStartPoint().ToRAM();
-                            SCoordinate endPt = crv.IEndPoint().ToRAM();
-                            ramOpeningEdges.Add(startPt.dXLoc, startPt.dYLoc, endPt.dXLoc, endPt.dYLoc, 0);
-                        }
-                    }
+                ISlabEdges ramOpeningEdges = ramFloorType.GetAllSlabOpenings();
+                foreach (Line edge in openingOutlines.SelectMany(x => x.SubParts()))
+                {
+                    SCoordinate startPt = edge.IStartPoint().ToRAM();
+                    SCoordinate endPt = edge.IEndPoint().ToRAM();
+                    ramOpeningEdges.Add(startPt.dXLoc, startPt.dYLoc, endPt.dXLoc, endPt.dYLoc, 0);
                 }
 
                 // Create all the deck assignments (these can be adjoining)
@@ -159,7 +125,7 @@ namespace BH.Adapter.RAM
                     string name = panel.Name;
 
                     PolyCurve outlineExternal = panel.OutlineCurve();
-                    
+
                     // RAM requires edges clockwise, flip if counterclockwise
                     outlineExternal = outlineExternal.IsClockwise(Vector.ZAxis) ? outlineExternal : outlineExternal.Flip();
 
@@ -208,11 +174,18 @@ namespace BH.Adapter.RAM
                     else Engine.Reflection.Compute.RecordError($"Panel {name} has a section property with no AdapterID, so the deck could not be assigned in RAM.");
                 }
             }
-            #endregion
 
-            #region Create Walls
+            return true;
+        }
+
+        /***************************************************/
+
+        private Boolean CreateWalls(IEnumerable<Panel> walls)
+        {
+            IStories ramStories = m_Model.GetStories();
+
             //Cycle through walls; if wall crosses level place at level
-            foreach (Panel wallPanel in wallPanels)
+            foreach (Panel wallPanel in walls)
             {
                 string name = wallPanel.Name;
 
@@ -243,11 +216,11 @@ namespace BH.Adapter.RAM
 
                     for (int i = 0; i < ramStories.GetCount(); i++)
                     {
-                        ramStory = ramStories.GetAt(i);
+                        IStory ramStory = ramStories.GetAt(i);
                         // If wall crosses level, add wall to ILayoutWalls for that level
                         if (Math.Round(wallMax.Z.ToInch(), 0) >= ramStory.dElevation && Math.Round(wallMin.Z.ToInch(), 0) < ramStory.dElevation)
                         {
-                            ramFloorType = ramStory.GetFloorType();
+                            IFloorType ramFloorType = ramStory.GetFloorType();
 
                             //Get ILayoutWalls of FloorType and add wall
                             ILayoutWalls ramLayoutWalls = ramFloorType.GetLayoutWalls();
@@ -319,20 +292,10 @@ namespace BH.Adapter.RAM
                     CreateElementError("panel", name);
                 }
             }
-            #endregion
-
-            //Save file
-            m_IDBIO.SaveDatabase();
-
             return true;
         }
 
         /***************************************************/
-
-        private static IEnumerable<Panel> MergePanels(IEnumerable<Panel> storyFloors)
-        {
-            return null;
-        }
     }
 }
 

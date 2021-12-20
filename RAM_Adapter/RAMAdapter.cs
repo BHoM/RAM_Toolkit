@@ -36,12 +36,6 @@ namespace BH.Adapter.RAM
 {
     public partial class RAMAdapter : BHoMAdapter
     {
-
-        /***************************************************/
-        /**** Public Properties                         ****/
-        /***************************************************/
-
-        public const string ID = "RAM_id";
         
         /***************************************************/
         /**** Constructors                              ****/
@@ -50,8 +44,6 @@ namespace BH.Adapter.RAM
         //Add any applicable constructors here, such as linking to a specific file or anything else as well as linking to that file through the (if existing) com link via the API
         public RAMAdapter(string filePath = "", bool active = false)
         {
-            m_AdapterSettings.UseAdapterId = false;
-
             if (active)
             {
                 AdapterIdFragmentType = typeof(RAMId);   //Set the AdapterIdType to RAMId to get RAM Fragment Data
