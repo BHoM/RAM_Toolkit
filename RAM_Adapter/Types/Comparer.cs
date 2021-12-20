@@ -28,6 +28,7 @@ using BH.oM.Structure.Constraints;
 using BH.oM.Structure.MaterialFragments;
 using System;
 using System.Collections.Generic;
+using BH.Engine.Structure;
 
 namespace BH.Adapter.RAM
 {
@@ -47,10 +48,10 @@ namespace BH.Adapter.RAM
             AdapterComparers = new Dictionary<Type, object>
             {
                 {typeof(Node), new BH.Engine.Structure.NodeDistanceComparer(3) },   //The 3 in here sets how many decimal places to look at for node merging. 3 decimal places gives mm precision
-                {typeof(ISectionProperty), new BHoMObjectNameOrToStringComparer() },
-                {typeof(IMaterialFragment), new BHoMObjectNameComparer() },
-                {typeof(LinkConstraint), new BHoMObjectNameComparer() },
-                {typeof(ISurfaceProperty), new BHoMObjectNameComparer() },
+                {typeof(ISectionProperty), new NameOrDescriptionComparer() },
+                {typeof(IMaterialFragment), new NameOrDescriptionComparer() },
+                {typeof(LinkConstraint), new NameOrDescriptionComparer() },
+                {typeof(ISurfaceProperty), new NameOrDescriptionComparer() },
             };
         }
 

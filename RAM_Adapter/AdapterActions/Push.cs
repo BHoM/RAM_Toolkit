@@ -39,22 +39,9 @@ namespace BH.Adapter.RAM
 
         public override List<object> Push(IEnumerable<object> objects, string tag = "", PushType pushType = PushType.AdapterDefault, ActionConfig actionConfig = null)
         {
-            // ----------------------------------------//
-            //                 SET-UP                  //
-            // ----------------------------------------//
-
-            // If unset, set the pushType to AdapterSettings' value (base AdapterSettings default is FullCRUD).
-            if (pushType == PushType.AdapterDefault)
-                pushType = m_AdapterSettings.DefaultPushType;            
-            
-            //Filter out levels for others
-            IEnumerable<object> levels = objects.Where(x => x is Level);
-            IEnumerable<object> notLevels = objects.Where(x => !(x is Level));
-
-            //Add the levels to a new list. This is to ensure that they are first and thereby pushed before the other objects
-            List<object> sortedObjects = new List<object>();
-            sortedObjects.AddRange(levels);
-            sortedObjects.AddRange(notLevels);
+            //Push levels before all other objects.
+            List<object> sortedObjects = objects.Where(x => x is Level).ToList();
+            sortedObjects.AddRange(objects.Where(x => !(x is Level)));
 
             List<object> result = new List<object>();
 
@@ -65,13 +52,11 @@ namespace BH.Adapter.RAM
                 {
                     result = base.Push(sortedObjects, tag, pushType, actionConfig);
                 }
-                catch
+                finally
                 {
-                    Engine.Base.Compute.RecordError("Could not complete Push.");
-                }                
+                    CloseDatabase();
+                }
             }
-
-            CloseDatabase();
 
             return result;
         }
