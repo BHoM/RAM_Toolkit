@@ -58,6 +58,13 @@ namespace BH.Adapter.RAM
 
             //Not yet implemented
 
+            foreach (ISectionProperty bhSection in sectionProperties)
+            {
+                RAMId id = new RAMId();
+
+                bhSection.SetAdapterId(id);
+            }
+
             return true;
         }
 
