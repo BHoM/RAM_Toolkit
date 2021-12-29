@@ -59,6 +59,13 @@ namespace BH.Adapter.RAM
 
             //Not yet implemented
 
+            foreach (IMaterialFragment bhMat in materials)
+            {
+                RAMId id = new RAMId();
+
+                bhMat.SetAdapterId(id);
+            }
+
             return true;
         }
 

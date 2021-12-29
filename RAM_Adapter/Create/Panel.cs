@@ -58,27 +58,21 @@ namespace BH.Adapter.RAM
             //Code for creating a collection of floors and walls in the software
 
             // Split walls and floors and get all elevations
-            CreateFloors(bhomPanels.Where(x => Math.Abs(x.Normal().Z) >= 0.707));
-            CreateWalls(bhomPanels.Where(x => Math.Abs(x.Normal().Z) < 0.707));
+            IEnumerable<Panel> floors = bhomPanels.Where(x => Math.Abs(x.Normal().Z) >= 0.707);
+            IEnumerable<Panel> walls = bhomPanels.Where(x => Math.Abs(x.Normal().Z) < 0.707);
 
-            //Save file
-            m_IDBIO.SaveDatabase();
-
-            return true;
-        }
-
-        /***************************************************/
-
-        private Boolean CreateFloors(IEnumerable<Panel> floors)
-        {
             IStories ramStories = m_Model.GetStories();
+
+            #region Create Floors
 
             for (int i = 0; i < ramStories.GetCount(); i++)
             {
                 IStory ramStory = ramStories.GetAt(i);
                 IFloorType ramFloorType = ramStory.GetFloorType();
 
-                IEnumerable<Panel> storyFloors = floors.Where(x => x.GetStory(ramStories).Equals(ramStory));
+                IEnumerable<Panel> storyFloors = floors.Where(x => x.GetStory(ramStories).lUID == ramStory.lUID);
+
+                ramStory.Equals(ramStory);
 
                 //RAM can't handle adjoining slab edges, so we merge them.
                 List<Polyline> outlineCurves = storyFloors.Select(x => x.OutlineCurve().ToPolyline()).ToList();
@@ -120,11 +114,11 @@ namespace BH.Adapter.RAM
                 }
 
                 // Create all the deck assignments (these can be adjoining)
-                foreach (Panel panel in storyFloors)
+                foreach (Panel bhFloorPanel in storyFloors)
                 {
-                    string name = panel.Name;
+                    string name = bhFloorPanel.Name;
 
-                    PolyCurve outlineExternal = panel.OutlineCurve();
+                    PolyCurve outlineExternal = bhFloorPanel.OutlineCurve();
 
                     // RAM requires edges clockwise, flip if counterclockwise
                     outlineExternal = outlineExternal.IsClockwise(Vector.ZAxis) ? outlineExternal : outlineExternal.Flip();
@@ -138,7 +132,7 @@ namespace BH.Adapter.RAM
                         ctrlPoints.Add(ctrlPoints.Last().DeepClone());
                     }
 
-                    ISurfaceProperty srfProp = panel.Property;
+                    ISurfaceProperty srfProp = bhFloorPanel.Property;
                     int deckProplUID = GetAdapterId<int>(srfProp);
 
                     if (deckProplUID != 0)
@@ -168,38 +162,40 @@ namespace BH.Adapter.RAM
                         ramDeck.SetPoints(ramPoints);
 
                         // Add warning to report floors flattened to level as required for RAM
-                        if (Math.Abs(panel.Normal().Z) < 1)
+                        if (Math.Abs(bhFloorPanel.Normal().Z) < 1)
                         { Engine.Reflection.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
+
+                        // Add an adapter ID to the incoming panel.
+                        RAMId id = new RAMId() { Id = ramDeck.lUID };
+                        bhFloorPanel.SetAdapterId(id);
                     }
-                    else Engine.Reflection.Compute.RecordError($"Panel {name} has a section property with no AdapterID, so the deck could not be assigned in RAM.");
+                    else
+                    {
+                        bhFloorPanel.SetAdapterId(new RAMId());
+                        Engine.Reflection.Compute.RecordError($"Panel {name} has a section property with no AdapterID, so the deck could not be assigned in RAM.");
+                    }
                 }
             }
+            #endregion
 
-            return true;
-        }
-
-        /***************************************************/
-
-        private Boolean CreateWalls(IEnumerable<Panel> walls)
-        {
-            IStories ramStories = m_Model.GetStories();
+            #region Create Walls
 
             //Cycle through walls; if wall crosses level place at level
-            foreach (Panel wallPanel in walls)
+            foreach (Panel bhWallPanel in walls)
             {
-                string name = wallPanel.Name;
+                string name = bhWallPanel.Name;
 
                 try
                 {
                     double thickness = 0.2; // default thickness
-                    if (wallPanel.Property is ConstantThickness)
+                    if (bhWallPanel.Property is ConstantThickness)
                     {
-                        ConstantThickness prop = (ConstantThickness)wallPanel.Property;
+                        ConstantThickness prop = (ConstantThickness)bhWallPanel.Property;
                         thickness = prop.Thickness;
                     }
 
                     // Find outline of planar panel
-                    PolyCurve outline = BH.Engine.Spatial.Query.OutlineCurve(wallPanel);
+                    PolyCurve outline = BH.Engine.Spatial.Query.OutlineCurve(bhWallPanel);
                     List<Point> wallPts = outline.DiscontinuityPoints();
                     List<Point> sortedWallPts = wallPts.OrderBy(p => p.X).ToList();
                     Point leftPt = sortedWallPts.First();
@@ -233,7 +229,7 @@ namespace BH.Adapter.RAM
                             IWall ramWall = ramWalls.GetAt(0);
 
                             // Find opening location, width, and height from outline and apply                      
-                            foreach (Opening open in wallPanel.Openings)
+                            foreach (Opening open in bhWallPanel.Openings)
                             {
                                 PolyCurve openOutline = open.OutlineCurve();
                                 BoundingBox openBounds = BH.Engine.Geometry.Query.Bounds(openOutline);
@@ -284,14 +280,25 @@ namespace BH.Adapter.RAM
                                     }
                                 }
                             }
+
+                            // Add an adapter ID to the incoming panel.
+                            RAMId id = new RAMId() { Id = ramWall.lUID };
+                            bhWallPanel.SetAdapterId(id);
                         }
+
                     }
                 }
                 catch
                 {
+                    bhWallPanel.SetAdapterId(new RAMId());
                     CreateElementError("panel", name);
                 }
             }
+            #endregion
+
+            //Save file
+            m_IDBIO.SaveDatabase();
+
             return true;
         }
 
