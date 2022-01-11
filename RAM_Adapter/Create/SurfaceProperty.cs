@@ -66,17 +66,17 @@ namespace BH.Adapter.RAM
                     //Validity check for ribbed properties thickness above flutes
                     if (compProp.Thickness < 2.0.FromInch())
                     {
-                        Engine.Reflection.Compute.RecordError("Deck property " + srfProp.Name + " has an invalid thickness. Thickness was automatically changed to 2 inches in order to ensure required shear stud engagement per RAM.");
+                        Engine.Base.Compute.RecordError("Deck property " + srfProp.Name + " has an invalid thickness. Thickness was automatically changed to 2 inches in order to ensure required shear stud engagement per RAM.");
                         compProp.Thickness = 2.0.FromInch();
                     }
                     ICompDeckProps compDeckProps = m_Model.GetCompositeDeckProps();
                     try
                     {
-                        ramProp = compDeckProps.Add2(compProp.Name, Engine.Reflection.Query.PropertyValue(compProp, "DeckProfileName").ToString(), compProp.Thickness.ToInch(), compProp.TotalDepth.ToInch() - 1.5);
+                        ramProp = compDeckProps.Add2(compProp.Name, Engine.Base.Query.PropertyValue(compProp, "DeckProfileName").ToString(), compProp.Thickness.ToInch(), compProp.TotalDepth.ToInch() - 1.5);
                     }
                     catch
                     {
-                        Engine.Reflection.Compute.RecordWarning("Deck label for surface property " + srfProp.Name + " not found or invalid for specified thickness. Using default deck profile. Please provide a valid deck name from the RAM Deck Table as a property on the SurfaceProperty named DeckProfileName.");
+                        Engine.Base.Compute.RecordWarning("Deck label for surface property " + srfProp.Name + " not found or invalid for specified thickness. Using default deck profile. Please provide a valid deck name from the RAM Deck Table as a property on the SurfaceProperty named DeckProfileName.");
                         ramProp = compDeckProps.Add2(compProp.Name, "ASC 3W", compProp.Thickness.ToInch(), 4.5);
                     }
                     RAMId.Id = ramProp.lUID;

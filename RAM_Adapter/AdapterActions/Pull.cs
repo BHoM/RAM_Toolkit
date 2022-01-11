@@ -51,7 +51,7 @@ namespace BH.Adapter.RAM
                 }
                 catch
                 {
-                    Engine.Reflection.Compute.RecordError("Could not complete Pull.");
+                    Engine.Base.Compute.RecordError("Could not complete Pull.");
                 }
             }
 

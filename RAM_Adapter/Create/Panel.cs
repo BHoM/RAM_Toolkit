@@ -139,7 +139,7 @@ namespace BH.Adapter.RAM
                         if (!(outlineExternal.IsContaining(cwOpenOutline, false)))
                         {
                             cwOpenOutline = outlineExternal.BooleanIntersection(cwOpenOutline)[0];
-                            Engine.Reflection.Compute.RecordWarning("Panel " + name + " opening intersects floor boundary. Boolean intersection was used to get opening extents on panel, confirm opening extents in RAM.");
+                            Engine.Base.Compute.RecordWarning("Panel " + name + " opening intersects floor boundary. Boolean intersection was used to get opening extents on panel, confirm opening extents in RAM.");
                         }
 
                         List<ICurve> openEdgeCrvs = cwOpenOutline.Curves;
@@ -188,7 +188,7 @@ namespace BH.Adapter.RAM
 
                     // Add warning to report floors flattened to level as required for RAM
                     if (Math.Abs(panel.Normal().Z) < 1)
-                    { Engine.Reflection.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
+                    { Engine.Base.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
                 }
                 catch
                 {
@@ -283,7 +283,7 @@ namespace BH.Adapter.RAM
                                         if (!(outline.IsContaining(openOutline, false)))
                                         {
                                             openOutline = outline.BooleanIntersection(openOutline)[0];
-                                            Engine.Reflection.Compute.RecordWarning("Panel " + name + " opening intersects wall boundary. Boolean intersection was used to get opening extents on panel.");
+                                            Engine.Base.Compute.RecordWarning("Panel " + name + " opening intersects wall boundary. Boolean intersection was used to get opening extents on panel.");
                                         }
 
                                         Point closestOpenPt = BH.Engine.Geometry.Query.ClosestPoint(wallMin, openOutline.ControlPoints());

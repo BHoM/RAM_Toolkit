@@ -448,7 +448,7 @@ namespace BH.Adapter.RAM
 
             if (deckPolyCount == 0)
             {
-                Engine.Reflection.Compute.RecordWarning($"Floor with RAM lUID {ramDeck.lUID} contains no edges.");
+                Engine.Base.Compute.RecordWarning($"Floor with RAM lUID {ramDeck.lUID} contains no edges.");
                 return null;
             }
             //Initial only gets first outline poly for exterior edge, rest for openings
@@ -944,7 +944,7 @@ namespace BH.Adapter.RAM
             }
             else 
             {
-                Engine.Reflection.Compute.RecordWarning($"Live Load type for load set {ramSrfLoadPropSet.strLabel} was set as Dead. This usually means that no live load is applied in RAM; check results.");
+                Engine.Base.Compute.RecordWarning($"Live Load type for load set {ramSrfLoadPropSet.strLabel} was set as Dead. This usually means that no live load is applied in RAM; check results.");
             }
 
             UniformLoadSet uniformLoadSet = Engine.Adapters.RAM.Create.RAMUniformLoadSet(
@@ -983,7 +983,7 @@ namespace BH.Adapter.RAM
                 case ELoadCaseType.LiveRoofLCa:
                     return RAMLiveLoadTypes.LiveRoofLCa;
                 default:
-                    Engine.Reflection.Compute.RecordWarning($"Could not convert ELoadCaseType {caseType} to Live Load Type. It might be a non-live load type, but I'm converting it as non-reducible to be safe.");
+                    Engine.Base.Compute.RecordWarning($"Could not convert ELoadCaseType {caseType} to Live Load Type. It might be a non-live load type, but I'm converting it as non-reducible to be safe.");
                     return RAMLiveLoadTypes.LiveUnReducibleLCa;
             }
         }
