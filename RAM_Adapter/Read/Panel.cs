@@ -102,7 +102,7 @@ namespace BH.Adapter.RAM
                             bhomProperties.TryGetValue(IDeck.lPropID.ToString(), out bhProp);
 
                             if (bhProp != null) panel.Property = bhProp;
-                            else Engine.Reflection.Compute.RecordWarning($"Could not get property for floor with RAM lUID = {IDeck.lUID}");
+                            else Engine.Base.Compute.RecordWarning($"Could not get property for floor with RAM lUID = {IDeck.lUID}");
 
                             bhomPanels.Add(panel);
                         }
@@ -110,7 +110,7 @@ namespace BH.Adapter.RAM
                 }
                 else
                 {
-                    BH.Engine.Reflection.Compute.RecordWarning("This story has no slab edges defined. IStoryUID: " + IStoryUID);
+                    BH.Engine.Base.Compute.RecordWarning("This story has no slab edges defined. IStoryUID: " + IStoryUID);
                     break;
                 }
             }

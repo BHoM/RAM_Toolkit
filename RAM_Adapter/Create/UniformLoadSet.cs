@@ -120,14 +120,14 @@ namespace BH.Adapter.RAM
                                     liveCount++;
                                     break;
                                 default:
-                                    Engine.Reflection.Compute.RecordWarning($"the record {loadRecord.Name} in {loadSet.Name} was not recognized. Create your UniformLoadSet using CreateRAMUniformLoadSet() in the RAM toolkit!");
+                                    Engine.Base.Compute.RecordWarning($"the record {loadRecord.Name} in {loadSet.Name} was not recognized. Create your UniformLoadSet using CreateRAMUniformLoadSet() in the RAM toolkit!");
                                     break;
                             }
                         };
 
                         if (liveCount > 1)
                         {
-                            Engine.Reflection.Compute.RecordWarning("More than one live load has been set; only the last one will be applied");
+                            Engine.Base.Compute.RecordWarning("More than one live load has been set; only the last one will be applied");
                         }
 
                         //Set the custom data to return if created

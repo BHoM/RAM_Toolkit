@@ -75,11 +75,11 @@ namespace BH.Adapter.RAM
                         // Create DB
                         m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "BHoM");
                         CloseDatabase();
-                        Engine.Reflection.Compute.RecordNote("Filepath not provided or is invalid. New file created at " + m_filePath + ".");
+                        Engine.Base.Compute.RecordNote("Filepath not provided or is invalid. New file created at " + m_filePath + ".");
                     }
                     catch
                     {
-                        Engine.Reflection.Compute.RecordError("Cannot create RAM database, check that a compatible version of RAM is installed");
+                        Engine.Base.Compute.RecordError("Cannot create RAM database, check that a compatible version of RAM is installed");
                     }
                 }
                 else if (File.Exists(filePath))
@@ -92,7 +92,7 @@ namespace BH.Adapter.RAM
                     m_filePath = Path.ChangeExtension(filePath, "rss");
                 }
                 else
-                    Engine.Reflection.Compute.RecordError("Could not understand FilePath.");
+                    Engine.Base.Compute.RecordError("Could not understand FilePath.");
             }
         }
 
@@ -113,17 +113,17 @@ namespace BH.Adapter.RAM
                     //Success!
                     break;
                 case 25673:
-                    Engine.Reflection.Compute.RecordError("Cannot access RAM database. If file is open in RAM, please close. Otherwise, open the file in RAM, close RAM, and try again.");
+                    Engine.Base.Compute.RecordError("Cannot access RAM database. If file is open in RAM, please close. Otherwise, open the file in RAM, close RAM, and try again.");
                     return false;
                 case 25657:
                     File.Delete(m_filePath.Replace(".rss", ".usr"));       // Delete usr file
-                    Engine.Reflection.Compute.RecordError("RAM Version installed does not match version of file.");
+                    Engine.Base.Compute.RecordError("RAM Version installed does not match version of file.");
                     return false;
                 case 25674:
-                    Engine.Reflection.Compute.RecordError(".rss and .ram file exist for same model.");
+                    Engine.Base.Compute.RecordError(".rss and .ram file exist for same model.");
                     return false;
                 case 301:
-                    Engine.Reflection.Compute.RecordError("Failed to read .ram file.");
+                    Engine.Base.Compute.RecordError("Failed to read .ram file.");
                     return false;
                 default:
                     break;
@@ -177,12 +177,12 @@ namespace BH.Adapter.RAM
             if (File.Exists(filePathTempDBFile1))
             {
                 try { File.Delete(filePathTempDBFile1); }
-                catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+                catch { Engine.Base.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
             }
             if (File.Exists(filePathTempDBFile2))
             {
                 try { File.Delete(filePathTempDBFile2); }
-                catch { Engine.Reflection.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
+                catch { Engine.Base.Compute.RecordError("Working db.sdf file is in use. Please close BHOM UI and reopen."); }
             }
             return true;
         }

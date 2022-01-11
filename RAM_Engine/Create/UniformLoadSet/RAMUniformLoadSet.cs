@@ -29,8 +29,7 @@ using BH.oM.Base;
 using BH.oM.Structure.Loads;
 using BH.oM.Adapters.RAM;
 using RAMDATAACCESSLib;
-using BH.Engine.Reflection;
-using BH.oM.Reflection.Attributes;
+using BH.oM.Base.Attributes;
 using System.ComponentModel;
 
 

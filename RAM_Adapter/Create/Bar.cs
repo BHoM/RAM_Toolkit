@@ -144,7 +144,7 @@ namespace BH.Adapter.RAM
 
                     // Add warning to report distance of snapping to level as required for RAM
                     if (zStart != 0 || zEnd != 0)
-                    { Engine.Reflection.Compute.RecordWarning("Bar " + name + " snapped to level " + barStory.strLabel + ". Bar moved " + Math.Round(zStart, 2).ToString() + " inches at start and " + Math.Round(zEnd, 2).ToString() + " inches at end."); }
+                    { Engine.Base.Compute.RecordWarning("Bar " + name + " snapped to level " + barStory.strLabel + ". Bar moved " + Math.Round(zStart, 2).ToString() + " inches at start and " + Math.Round(zEnd, 2).ToString() + " inches at end."); }
 
                     IBeams beamsOnStory = barStory.GetBeams();
                     IBeam beam = beamsOnStory.Get(ramBeam.lUID);
