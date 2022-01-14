@@ -37,7 +37,7 @@ using BH.oM.Structure.Requests;
 using BH.oM.Analytical.Results;
 using RAMDATAACCESSLib;
 using System.IO;
-using BH.oM.Geometry.SettingOut;
+using BH.oM.Spatial.SettingOut;
 using BH.Engine.Units;
 using BH.Engine.Adapter;
 using BH.Engine.Base;
