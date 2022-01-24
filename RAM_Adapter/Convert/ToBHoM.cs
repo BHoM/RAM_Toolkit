@@ -207,8 +207,8 @@ namespace BH.Adapter.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             ramColumn.GetEndCoordinates(ref startPt, ref endPt);
-            Node startNode = Engine.Structure.Create.Node(startPt.PointFromRAM());
-            Node endNode = Engine.Structure.Create.Node(endPt.PointFromRAM());
+            Node startNode = new Node { Position = startPt.PointFromRAM() };
+            Node endNode = new Node { Position = endPt.PointFromRAM() };
             
             //Assign section property per bar
             string sectionName = ramColumn.strSectionLabel;
@@ -263,8 +263,8 @@ namespace BH.Adapter.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             ramBeam.GetCoordinates(EBeamCoordLoc.eBeamEnds, ref startPt, ref endPt);
-            Node startNode = Engine.Structure.Create.Node(startPt.PointFromRAM());
-            Node endNode = Engine.Structure.Create.Node(endPt.PointFromRAM());
+            Node startNode = new Node { Position = startPt.PointFromRAM() };
+            Node endNode = new Node { Position = endPt.PointFromRAM() };
 
             //Assign section property per bar
             string sectionName = ramBeam.strSectionLabel;
@@ -364,8 +364,8 @@ namespace BH.Adapter.RAM
             SCoordinate startPt = new SCoordinate();
             SCoordinate endPt = new SCoordinate();
             ramVerticalBrace.GetEndCoordinates(ref startPt, ref endPt);
-            Node startNode = Engine.Structure.Create.Node(startPt.PointFromRAM());
-            Node endNode = Engine.Structure.Create.Node(endPt.PointFromRAM());
+            Node startNode = new Node { Position = startPt.PointFromRAM() };
+            Node endNode = new Node { Position = endPt.PointFromRAM() };
 
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
@@ -410,8 +410,8 @@ namespace BH.Adapter.RAM
 
             // Get coordinates from ILayout Brace
             ramLayoutHorizBrace.GetLayoutCoordinates(out StartSupportX, out StartSupportY, out StartSupportZOffset, out EndSupportX, out EndSupportY, out EndSupportZOffset);
-            Node startNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = StartSupportX.FromInch(), Y = StartSupportY.FromInch(), Z = StoryZ.FromInch() + StartSupportZOffset.FromInch() });
-            Node endNode = Engine.Structure.Create.Node(new oM.Geometry.Point() { X = EndSupportX.FromInch(), Y = EndSupportY.FromInch(), Z = StoryZ.FromInch() + EndSupportZOffset.FromInch() });
+            Node startNode = new Node { Position = new oM.Geometry.Point() { X = StartSupportX.FromInch(), Y = StartSupportY.FromInch(), Z = StoryZ.FromInch() + StartSupportZOffset.FromInch() } };
+            Node endNode = new Node { Position = new oM.Geometry.Point() { X = EndSupportX.FromInch(), Y = EndSupportY.FromInch(), Z = StoryZ.FromInch() + EndSupportZOffset.FromInch() } };
 
             Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
@@ -616,7 +616,7 @@ namespace BH.Adapter.RAM
             SCoordinate location = new SCoordinate();
             location = ramNode.sLocation;
             
-            Node node = Engine.Structure.Create.Node(location.PointFromRAM());
+            Node node = new Node { Position = location.PointFromRAM() };
 
             IMemberForces IMemberForces = ramNode.GetReactions();
 

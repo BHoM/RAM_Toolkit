@@ -89,8 +89,8 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
 
-                    double zStart = bar.StartNode.Position().Z.ToInch() - barStory.dElevation;
-                    double zEnd = bar.EndNode.Position().Z.ToInch() - barStory.dElevation;
+                    double zStart = bar.StartNode.Position.Z.ToInch() - barStory.dElevation;
+                    double zEnd = bar.EndNode.Position.Z.ToInch() - barStory.dElevation;
 
                     //  Get beam fragment cantilever data
                     double startCant = 0;
@@ -109,13 +109,13 @@ namespace BH.Adapter.RAM
                         SCoordinate startPt, endPt;
                         if (startCant > 0) // Ensure startPt corresponds with support point
                         {
-                            startPt = bar.EndNode.Position().ToRAM();
-                            endPt = bar.StartNode.Position().ToRAM();
+                            startPt = bar.EndNode.Position.ToRAM();
+                            endPt = bar.StartNode.Position.ToRAM();
                         }
                         else
                         {
-                            startPt = bar.StartNode.Position().ToRAM();
-                            endPt = bar.EndNode.Position().ToRAM();
+                            startPt = bar.StartNode.Position.ToRAM();
+                            endPt = bar.EndNode.Position.ToRAM();
                         }
 
                         ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), startPt.dXLoc, startPt.dYLoc, 0, endPt.dXLoc, endPt.dYLoc, 0); // No Z offsets, beams flat on closest story
@@ -124,8 +124,8 @@ namespace BH.Adapter.RAM
                     {
                         //  Get support points
                         Vector barDir = bar.Tangent(true);
-                        Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position(), barDir * startCant);
-                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position(), -barDir * endCant);
+                        Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position, barDir * startCant);
+                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position, -barDir * endCant);
                         SCoordinate start = startSupPt.ToRAM();
                         SCoordinate end = endSupPt.ToRAM();
 
