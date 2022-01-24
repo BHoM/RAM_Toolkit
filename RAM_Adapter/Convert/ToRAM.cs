@@ -46,8 +46,8 @@ namespace BH.Adapter.RAM
         {
             ILayoutBeam iLayoutBeam = iLayoutBeams.GetAt(0);
 
-            SCoordinate start = bar.StartNode.Position().ToRAM();
-            SCoordinate end = bar.EndNode.Position().ToRAM();
+            SCoordinate start = bar.StartNode.Position.ToRAM();
+            SCoordinate end = bar.EndNode.Position.ToRAM();
 
             //Set support coordinates and name
             //CAUTION: different from actual end points and cantilevers hardcoded
@@ -88,7 +88,7 @@ namespace BH.Adapter.RAM
             {
                 case StructuralUsage1D.Beam:
                     //Use lowest end elevation
-                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
+                    elev = Math.Min(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
                     break;
                 case StructuralUsage1D.Column:
                     //  Get RAM column data
@@ -101,16 +101,16 @@ namespace BH.Adapter.RAM
 
                     if (isHanging.Equals("True") || isHanging.Equals("1")) //Hanging Column to be placed on its btm level.
                     {
-                        elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
+                        elev = Math.Min(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
                     }
                     else  //Column to be placed on the level it supports.
                     {
-                        elev = Math.Max(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
+                        elev = Math.Max(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
                     }
                     break;
                 default:
                     //Use lowest end elevation
-                    elev = Math.Min(bar.StartNode.Position().Z, bar.EndNode.Position().Z).ToInch();
+                    elev = Math.Min(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
                     break;
             }
 
