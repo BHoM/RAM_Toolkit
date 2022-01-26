@@ -163,7 +163,7 @@ namespace BH.Adapter.RAM
 
                         // Add warning to report floors flattened to level as required for RAM
                         if (Math.Abs(bhFloorPanel.Normal().Z) < 1)
-                        { Engine.Reflection.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
+                        { Engine.Base.Compute.RecordWarning("Panel " + name + " snapped to level " + ramStory.strLabel + "."); }
 
                         // Add an adapter ID to the incoming panel.
                         RAMId id = new RAMId() { Id = ramDeck.lUID };
@@ -172,7 +172,7 @@ namespace BH.Adapter.RAM
                     else
                     {
                         bhFloorPanel.SetAdapterId(new RAMId());
-                        Engine.Reflection.Compute.RecordError($"Panel {name} has a section property with no AdapterID, so the deck could not be assigned in RAM.");
+                        Engine.Base.Compute.RecordError($"Panel {name} has a section property with no AdapterID, so the deck could not be assigned in RAM.");
                     }
                 }
             }

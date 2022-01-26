@@ -182,7 +182,7 @@ namespace BH.Adapter.RAM
 
                 if (bhLevel.Elevation <= 0)
                 {
-                    BH.Engine.Reflection.Compute.RecordWarning($"Level {bhLevel.Name} has an elevation at or below 0. This level has been skipped.");
+                    BH.Engine.Base.Compute.RecordWarning($"Level {bhLevel.Name} has an elevation at or below 0. This level has been skipped.");
                     bhLevel.SetAdapterId(new RAMId());
                     continue;
                 }
