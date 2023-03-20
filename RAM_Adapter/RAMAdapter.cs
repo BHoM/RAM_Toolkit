@@ -52,6 +52,8 @@ namespace BH.Adapter.RAM
                 SetupDependencies();
                 SetupComparers();
 
+                m_AdapterSettings.UseAdapterId = false;
+
                 m_Application = null;
                 m_Application = new RamDataAccess1();
                 m_IDBIO = null;
