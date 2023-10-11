@@ -207,6 +207,7 @@ namespace BH.Adapter.RAM
                     }
 
                     //Set column properties
+                    ramColumn.dOrientation = bar.OrientationAngle;
                     IColumns colsOnStory = barStory.GetColumns();
                     IColumn column = colsOnStory.Get(ramColumn.lUID);
                     column.strSectionLabel = bar.SectionProperty.Name;
