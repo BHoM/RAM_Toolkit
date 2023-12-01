@@ -23,24 +23,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+
 using BH.oM.Adapters.RAM;
-using BH.oM.Adapter;
-using BH.oM.Base;
-using BH.oM.Structure.Elements;
-using BH.oM.Structure.SectionProperties;
-using BH.oM.Structure.SurfaceProperties;
 using BH.oM.Structure.Results;
-using BH.oM.Structure.Loads;
-using BH.oM.Structure.MaterialFragments;
-using BH.oM.Structure.Requests;
-using BH.oM.Analytical.Results;
+
 using RAMDATAACCESSLib;
-using System.IO;
-using BH.oM.Spatial.SettingOut;
-using BH.Engine.Units;
-using BH.Engine.Adapter;
-using BH.Engine.Base;
 
 namespace BH.Adapter.RAM
 {
@@ -107,21 +94,39 @@ namespace BH.Adapter.RAM
 
             IModel ramModel = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
+            IGravityLoads1 gravLoads = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
+
             List<IBeam> ramBeams = ReadRamBeams(ramModel);
+
+            double reactLeft = 0;
+            double reactRight = 0;
+            double signLeft = 0;
+            double signRight = 0;
 
             foreach (IBeam beam in ramBeams)
             {
-                IAnalyticalResult result = beam.GetAnalyticalResult();
-                IMemberForces forces = result.GetMaximumComboReactions(COMBO_MATERIAL_TYPE.GRAV_STEEL);
+                int beamID = beam.lUID;
 
-                RAMFactoredEndReactions bhomEndReactions = new RAMFactoredEndReactions()
+                try
                 {
-                    ObjectId = beam.lUID,
-                    StartReaction = forces.GetAt(0).ToBHoMObject(),
-                    EndReaction = forces.GetAt(1).ToBHoMObject(),
-                };
+                    gravLoads.GetMaxFactoredGravityBeamReact(beamID, ref reactLeft, ref reactRight, ref signLeft, ref signRight);
+                    //TODO: resolve below identifiers extractable through the API
+                    int mode = -1;
+                    double timeStep = 0;
 
-                barEndReactions.Add(bhomEndReactions);
+                    RAMFactoredEndReactions bhomEndReactions = new RAMFactoredEndReactions()
+                    {
+                        ObjectId = beam.lUID,
+                        StartReaction = reactLeft,
+                        EndReaction = reactRight,
+                    };
+
+                    barEndReactions.Add(bhomEndReactions);
+                }
+                catch
+                {
+                    Engine.Base.Compute.RecordWarning($"Beam {beamID.ToString()} failed.");
+                }
             }
 
             return barEndReactions;
