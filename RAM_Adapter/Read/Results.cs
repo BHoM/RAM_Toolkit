@@ -110,15 +110,12 @@ namespace BH.Adapter.RAM
                 try
                 {
                     gravLoads.GetMaxFactoredGravityBeamReact(beamID, ref reactLeft, ref reactRight, ref signLeft, ref signRight);
-                    //TODO: resolve below identifiers extractable through the API
-                    int mode = -1;
-                    double timeStep = 0;
 
                     RAMFactoredEndReactions bhomEndReactions = new RAMFactoredEndReactions()
                     {
                         ObjectId = beam.lUID,
-                        StartReaction = reactLeft,
-                        EndReaction = reactRight,
+                        StartReaction = reactLeft * signLeft,
+                        EndReaction = reactRight * signRight,
                     };
 
                     barEndReactions.Add(bhomEndReactions);
