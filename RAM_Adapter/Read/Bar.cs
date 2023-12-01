@@ -91,6 +91,7 @@ namespace BH.Adapter.RAM
                 {
                     IColumn IColumn = IColumns.GetAt(j);
                     Bar bhomBar = BH.Adapter.RAM.Convert.ToBHoMObject(IColumn);
+                    bhomBar.OrientationAngle = IColumn.dOrientation;
                     RAMFrameData ramFrameData = bhomBar.FindFragment<RAMFrameData>(typeof(RAMFrameData));
                     if (ramFrameData != null)
                     {
