@@ -216,7 +216,7 @@ namespace BH.Adapter.RAM
             ISectionProperty sectionProperty = ToBHoMSection(ramColumn);
 
             // Create bars with section properties
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
             // May be better to just do in custom data, although if we can do this mapping it may be useful
@@ -272,7 +272,7 @@ namespace BH.Adapter.RAM
             ISectionProperty sectionProperty = ToBHoMSection(ramBeam);
 
             // Create bars with section properties
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             // Set Properties
             bhomBar.OrientationAngle = 0;
@@ -368,7 +368,7 @@ namespace BH.Adapter.RAM
             Node endNode = new Node { Position = endPt.PointFromRAM() };
 
 
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             bhomBar.OrientationAngle = 0;
 
@@ -413,7 +413,7 @@ namespace BH.Adapter.RAM
             Node startNode = new Node { Position = new oM.Geometry.Point() { X = StartSupportX.FromInch(), Y = StartSupportY.FromInch(), Z = StoryZ.FromInch() + StartSupportZOffset.FromInch() } };
             Node endNode = new Node { Position = new oM.Geometry.Point() { X = EndSupportX.FromInch(), Y = EndSupportY.FromInch(), Z = StoryZ.FromInch() + EndSupportZOffset.FromInch() } };
 
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             bhomBar.OrientationAngle = 0;
 
