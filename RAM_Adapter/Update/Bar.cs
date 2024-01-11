@@ -63,12 +63,12 @@ namespace BH.Adapter.RAM
                     ILayoutColumn ILayoutColumn = IModel.GetLayoutColumn(ID);
 
                     // Move column
-                    double xStart = bar.StartNode.Position.X;
-                    double yStart = bar.StartNode.Position.Y;
-                    double zStart = bar.StartNode.Position.Z;
-                    double xEnd = bar.EndNode.Position.X;
-                    double yEnd = bar.EndNode.Position.Y;
-                    double zEnd = bar.EndNode.Position.Z;
+                    double xStart = bar.Start.Position.X;
+                    double yStart = bar.Start.Position.Y;
+                    double zStart = bar.Start.Position.Z;
+                    double xEnd = bar.End.Position.X;
+                    double yEnd = bar.End.Position.Y;
+                    double zEnd = bar.End.Position.Z;
 
                     // Need level rather than offset for setting (still in progress)
                     ILayoutColumn.SetLayoutCoordinates2(xStart, yStart, zStart, xEnd, yEnd, zEnd);
