@@ -40,6 +40,7 @@ using BH.Engine.Adapters.RAM;
 using BH.oM.Adapter;
 using BH.Engine.Geometry;
 using BH.Engine.Structure;
+using BH.Engine.Base;
 
 namespace BH.Adapter.RAM
 {
@@ -483,8 +484,7 @@ namespace BH.Adapter.RAM
             }
 
             //Create panel per outline polyline
-            List<Opening> bhomOpenings = new List<Opening>();
-            Panel bhomPanel = Engine.Structure.Create.Panel(outline, bhomOpenings);
+            Panel bhomPanel = Engine.Structure.Create.Panel(outline);
             //Create openings per openings polylines
             int numOpenings = openingPLs.Count();
 
@@ -492,11 +492,10 @@ namespace BH.Adapter.RAM
             for (int i = 0; i < numOpenings; i++)
             {
                 Opening bhomOpening = Engine.Structure.Create.Opening(openingPLs[i]);
-                bhomOpenings.Add(bhomOpening);
+                bhomPanel.Openings.Add(bhomOpening);
             }
 
             //Create panel and add attributes;
-            bhomPanel.Openings = bhomOpenings;
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Floor");
@@ -566,7 +565,8 @@ namespace BH.Adapter.RAM
             }
 
             //  Create wall
-            Panel bhomPanel = Engine.Structure.Create.Panel(outline, bhomWallOpenings);
+            Panel bhomPanel = Engine.Structure.Create.Panel(outline);
+            bhomPanel.Openings.AddRange(bhomWallOpenings);
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
