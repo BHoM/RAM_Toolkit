@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -46,8 +46,8 @@ namespace BH.Adapter.RAM
         {
             ILayoutBeam iLayoutBeam = iLayoutBeams.GetAt(0);
 
-            SCoordinate start = bar.StartNode.Position.ToRAM();
-            SCoordinate end = bar.EndNode.Position.ToRAM();
+            SCoordinate start = bar.Start.Position.ToRAM();
+            SCoordinate end = bar.End.Position.ToRAM();
 
             //Set support coordinates and name
             //CAUTION: different from actual end points and cantilevers hardcoded
@@ -88,7 +88,7 @@ namespace BH.Adapter.RAM
             {
                 case StructuralUsage1D.Beam:
                     //Use lowest end elevation
-                    elev = Math.Min(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
+                    elev = Math.Min(bar.Start.Position.Z, bar.End.Position.Z).ToInch();
                     break;
                 case StructuralUsage1D.Column:
                     //  Get RAM column data
@@ -101,16 +101,16 @@ namespace BH.Adapter.RAM
 
                     if (isHanging.Equals("True") || isHanging.Equals("1")) //Hanging Column to be placed on its btm level.
                     {
-                        elev = Math.Min(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
+                        elev = Math.Min(bar.Start.Position.Z, bar.End.Position.Z).ToInch();
                     }
                     else  //Column to be placed on the level it supports.
                     {
-                        elev = Math.Max(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
+                        elev = Math.Max(bar.Start.Position.Z, bar.End.Position.Z).ToInch();
                     }
                     break;
                 default:
                     //Use lowest end elevation
-                    elev = Math.Min(bar.StartNode.Position.Z, bar.EndNode.Position.Z).ToInch();
+                    elev = Math.Min(bar.Start.Position.Z, bar.End.Position.Z).ToInch();
                     break;
             }
 
@@ -183,6 +183,7 @@ namespace BH.Adapter.RAM
     }
 
 }
+
 
 
 

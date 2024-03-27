@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -40,6 +40,7 @@ using BH.Engine.Adapters.RAM;
 using BH.oM.Adapter;
 using BH.Engine.Geometry;
 using BH.Engine.Structure;
+using BH.Engine.Base;
 
 namespace BH.Adapter.RAM
 {
@@ -216,7 +217,7 @@ namespace BH.Adapter.RAM
             ISectionProperty sectionProperty = ToBHoMSection(ramColumn);
 
             // Create bars with section properties
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             // Translate RAM Releases to BHoM Releases (in progress; logic not yet complete since it is difficult map Maj/Min axes to global XYZ axes for every member)
             // May be better to just do in custom data, although if we can do this mapping it may be useful
@@ -272,7 +273,7 @@ namespace BH.Adapter.RAM
             ISectionProperty sectionProperty = ToBHoMSection(ramBeam);
 
             // Create bars with section properties
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             // Set Properties
             bhomBar.OrientationAngle = 0;
@@ -368,7 +369,7 @@ namespace BH.Adapter.RAM
             Node endNode = new Node { Position = endPt.PointFromRAM() };
 
 
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             bhomBar.OrientationAngle = 0;
 
@@ -413,7 +414,7 @@ namespace BH.Adapter.RAM
             Node startNode = new Node { Position = new oM.Geometry.Point() { X = StartSupportX.FromInch(), Y = StartSupportY.FromInch(), Z = StoryZ.FromInch() + StartSupportZOffset.FromInch() } };
             Node endNode = new Node { Position = new oM.Geometry.Point() { X = EndSupportX.FromInch(), Y = EndSupportY.FromInch(), Z = StoryZ.FromInch() + EndSupportZOffset.FromInch() } };
 
-            Bar bhomBar = new Bar { StartNode = startNode, EndNode = endNode, SectionProperty = sectionProperty, Name = sectionName };
+            Bar bhomBar = new Bar { Start = startNode, End = endNode, SectionProperty = sectionProperty, Name = sectionName };
 
             bhomBar.OrientationAngle = 0;
 
@@ -483,8 +484,7 @@ namespace BH.Adapter.RAM
             }
 
             //Create panel per outline polyline
-            List<Opening> bhomOpenings = new List<Opening>();
-            Panel bhomPanel = Engine.Structure.Create.Panel(outline, bhomOpenings);
+            Panel bhomPanel = Engine.Structure.Create.Panel(outline);
             //Create openings per openings polylines
             int numOpenings = openingPLs.Count();
 
@@ -492,11 +492,10 @@ namespace BH.Adapter.RAM
             for (int i = 0; i < numOpenings; i++)
             {
                 Opening bhomOpening = Engine.Structure.Create.Opening(openingPLs[i]);
-                bhomOpenings.Add(bhomOpening);
+                bhomPanel.Openings.Add(bhomOpening);
             }
 
             //Create panel and add attributes;
-            bhomPanel.Openings = bhomOpenings;
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Floor");
@@ -566,7 +565,8 @@ namespace BH.Adapter.RAM
             }
 
             //  Create wall
-            Panel bhomPanel = Engine.Structure.Create.Panel(outline, bhomWallOpenings);
+            Panel bhomPanel = Engine.Structure.Create.Panel(outline);
+            bhomPanel.Openings.AddRange(bhomWallOpenings);
 
             HashSet<String> tag = new HashSet<string>();
             tag.Add("Wall");
@@ -996,6 +996,7 @@ namespace BH.Adapter.RAM
         }
     }
 }
+
 
 
 

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Buildings and Habitats object Model (BHoM)
- * Copyright (c) 2015 - 2023, the respective contributors. All rights reserved.
+ * Copyright (c) 2015 - 2024, the respective contributors. All rights reserved.
  *
  * Each contributor holds copyright over their respective contributions.
  * The project versioning (Git) records all such contribution source information.
@@ -89,8 +89,8 @@ namespace BH.Adapter.RAM
                     IFloorType ramFloorType = barStory.GetFloorType();
                     ILayoutBeams ramBeams = ramFloorType.GetLayoutBeams();
 
-                    double zStart = bar.StartNode.Position.Z.ToInch() - barStory.dElevation;
-                    double zEnd = bar.EndNode.Position.Z.ToInch() - barStory.dElevation;
+                    double zStart = bar.Start.Position.Z.ToInch() - barStory.dElevation;
+                    double zEnd = bar.End.Position.Z.ToInch() - barStory.dElevation;
 
                     //  Get beam fragment cantilever data
                     double startCant = 0;
@@ -109,13 +109,13 @@ namespace BH.Adapter.RAM
                         SCoordinate startPt, endPt;
                         if (startCant > 0) // Ensure startPt corresponds with support point
                         {
-                            startPt = bar.EndNode.Position.ToRAM();
-                            endPt = bar.StartNode.Position.ToRAM();
+                            startPt = bar.End.Position.ToRAM();
+                            endPt = bar.Start.Position.ToRAM();
                         }
                         else
                         {
-                            startPt = bar.StartNode.Position.ToRAM();
-                            endPt = bar.EndNode.Position.ToRAM();
+                            startPt = bar.Start.Position.ToRAM();
+                            endPt = bar.End.Position.ToRAM();
                         }
 
                         ramBeam = ramBeams.AddStubCantilever(bar.SectionProperty.Material.ToRAM(), startPt.dXLoc, startPt.dYLoc, 0, endPt.dXLoc, endPt.dYLoc, 0); // No Z offsets, beams flat on closest story
@@ -124,8 +124,8 @@ namespace BH.Adapter.RAM
                     {
                         //  Get support points
                         Vector barDir = bar.Tangent(true);
-                        Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.StartNode.Position, barDir * startCant);
-                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.EndNode.Position, -barDir * endCant);
+                        Point startSupPt = BH.Engine.Geometry.Modify.Translate(bar.Start.Position, barDir * startCant);
+                        Point endSupPt = BH.Engine.Geometry.Modify.Translate(bar.End.Position, -barDir * endCant);
                         SCoordinate start = startSupPt.ToRAM();
                         SCoordinate end = endSupPt.ToRAM();
 
@@ -170,7 +170,7 @@ namespace BH.Adapter.RAM
 
                     IStory barStory = bar.GetStory(StructuralUsage1D.Column, ramStories);
 
-                    List<Node> colNodes = new List<Node>() { bar.StartNode, bar.EndNode };
+                    List<Node> colNodes = new List<Node>() { bar.Start, bar.End };
                     colNodes.Sort((x, y) => x.Position.Z.CompareTo(y.Position.Z));
 
                     double xBtm = colNodes[0].Position.X.ToInch();
@@ -231,5 +231,6 @@ namespace BH.Adapter.RAM
         /***************************************************/
     }
 }
+
 
 
