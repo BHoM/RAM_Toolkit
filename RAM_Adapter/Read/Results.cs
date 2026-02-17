@@ -44,7 +44,7 @@ namespace BH.Adapter.RAM
             //Implement code for reading Node Reactions
             List<NodeReaction> bhomNodeReactions = new List<NodeReaction>();
 
-            IModel ramModel = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IModel ramModel = (IModel)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             ILoadCases ramLoadCases = ramModel.GetLoadCases(EAnalysisResultType.RAMFrameResultType);
             //Get IWalls
@@ -92,9 +92,9 @@ namespace BH.Adapter.RAM
         {
             List<RAMFactoredEndReactions> barEndReactions = new List<RAMFactoredEndReactions>();
 
-            IModel ramModel = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IModel ramModel = (IModel)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
-            IGravityLoads1 gravLoads = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
+            IGravityLoads1 gravLoads = (IGravityLoads1)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
 
             List<IBeam> ramBeams = ReadRamBeams(ramModel);
 
