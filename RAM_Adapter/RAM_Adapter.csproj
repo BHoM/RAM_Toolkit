@@ -16,6 +16,10 @@
     <Exec Command="xcopy &quot;$(TargetDir)$(TargetFileName)&quot;  &quot;C:\ProgramData\BHoM\Assemblies&quot; /Y" />
   </Target>
   <ItemGroup>
+    <Reference Include="Interop.RAMDATAACCESSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Interop.RamDataAccessLib_v15_x64.1.0.0\lib\Interop.RAMDATAACCESSLib.dll</HintPath>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Adapter_Engine">
       <HintPath>$(ProgramData)\BHoM\Assemblies\Adapter_Engine.dll</HintPath>
       <Private>False</Private>
