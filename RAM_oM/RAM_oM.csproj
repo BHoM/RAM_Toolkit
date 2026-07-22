@@ -8,7 +8,7 @@
     <Description>https://github.com/BHoM/RAM_Toolkit</Description>
     <Company>Buro Happold</Company>
     <Product>RAM_oM</Product>
-    <Copyright>Copyright © https://github.com/BHoM</Copyright>
+    <Copyright>Copyright ï¿½ https://github.com/BHoM</Copyright>
     <AssemblyVersion>9.0.0.0</AssemblyVersion>
     <FileVersion>9.3.0.0</FileVersion>
   </PropertyGroup>
@@ -16,10 +16,6 @@
     <Exec Command="xcopy &quot;$(TargetDir)$(TargetFileName)&quot;  &quot;C:\ProgramData\BHoM\Assemblies&quot; /Y" />
   </Target>
   <ItemGroup>
-    <Reference Include="Interop.RAMDATAACCESSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Interop.RamDataAccessLib_v15_x64.1.0.0\lib\Interop.RAMDATAACCESSLib.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="BHoM">
       <HintPath>$(ProgramData)\BHoM\Assemblies\BHoM.dll</HintPath>
       <Private>False</Private>
@@ -37,6 +33,5 @@
     </Reference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
-    <PackageReference Include="Interop.RamDataAccessLib_v15_x64" Version="1.0.0" />
   </ItemGroup>
 </Project>

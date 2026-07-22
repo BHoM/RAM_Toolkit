@@ -8,7 +8,7 @@
     <Description>https://github.com/BHoM/RAM_Toolkit</Description>
     <Company>Buro Happold</Company>
     <Product>RAM_Adapter</Product>
-    <Copyright>Copyright © https://github.com/BHoM</Copyright>
+    <Copyright>Copyright ï¿½ https://github.com/BHoM</Copyright>
     <AssemblyVersion>9.0.0.0</AssemblyVersion>
     <FileVersion>9.3.0.0</FileVersion>
   </PropertyGroup>
@@ -16,10 +16,6 @@
     <Exec Command="xcopy &quot;$(TargetDir)$(TargetFileName)&quot;  &quot;C:\ProgramData\BHoM\Assemblies&quot; /Y" />
   </Target>
   <ItemGroup>
-    <Reference Include="Interop.RAMDATAACCESSLib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Interop.RamDataAccessLib_v15_x64.1.0.0\lib\Interop.RAMDATAACCESSLib.dll</HintPath>
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="Adapter_Engine">
       <HintPath>$(ProgramData)\BHoM\Assemblies\Adapter_Engine.dll</HintPath>
       <Private>False</Private>
@@ -108,6 +104,11 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="Interop.RamDataAccessLib_v15_x64" Version="1.0.0" />
+    <Reference Include="Interop.RAMDATAACCESSLib">
+      <HintPath>$(NuGetPackageRoot)interop.ramdataaccesslib_v15_x64\1.0.0\lib\Interop.RAMDATAACCESSLib.dll</HintPath>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\RAM_Engine\RAM_Engine.csproj" />
