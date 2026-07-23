@@ -65,7 +65,7 @@ namespace BH.Adapter.RAM
                     ClearTempFiles(m_filePath);
                     try
                     {
-                        m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+                        m_IDBIO = (IDBIO1)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
                         // Create DB
                         m_IDBIO.CreateNewDatabase2(m_filePath, EUnits.eUnitsEnglish, "BHoM");
                         CloseDatabase();
@@ -96,7 +96,7 @@ namespace BH.Adapter.RAM
             {
                 return false;
             }
-            m_IDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            m_IDBIO = (IDBIO1)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
 
             int loadOutput = m_IDBIO.LoadDataBase2(m_filePath, "BHoM_UI"); //if 0 successful
 
@@ -124,7 +124,7 @@ namespace BH.Adapter.RAM
             }
 
             // Object Model Interface
-            m_Model = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            m_Model = (IModel)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             return true;
         }
