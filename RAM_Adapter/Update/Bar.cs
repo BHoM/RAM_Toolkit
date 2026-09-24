@@ -49,8 +49,8 @@ namespace BH.Adapter.RAM
         {
 
             //Access model
-            IDBIO1 RAMDataAccIDBIO = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
-            IModel IModel = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IDBIO1 RAMDataAccIDBIO = (IDBIO1)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IDBIO1_INT);
+            IModel IModel = (IModel)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
 
             foreach (Bar bar in bars)
             {

@@ -99,7 +99,7 @@ namespace BH.Adapter.RAM
             //Implement code for reading Gravity Loads
             List<RAMPointGravityLoad> bhomPtGravLoads = new List<RAMPointGravityLoad>();
 
-            IGravityLoads1 ramGravityLoads = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
+            IGravityLoads1 ramGravityLoads = (IGravityLoads1)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
 
             // Get all IWalls
             List<IWall> allRamWalls = ReadRamWalls(m_Model);
@@ -202,8 +202,8 @@ namespace BH.Adapter.RAM
             //Implement code for reading Gravity Loads
             List<RAMLineGravityLoad> bhomLineGravLoads = new List<RAMLineGravityLoad>();
 
-            IModel ramModel = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
-            IGravityLoads1 ramGravityLoads = m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
+            IModel ramModel = (IModel)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IModel_INT);
+            IGravityLoads1 ramGravityLoads = (IGravityLoads1)m_Application.GetDispInterfacePointerByEnum(EINTERFACES.IGravityLoads_INT);
 
             // Get all IWalls
             List<IWall> allRamWalls = ReadRamWalls(ramModel);

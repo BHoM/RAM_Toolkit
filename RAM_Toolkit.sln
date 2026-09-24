@@ -1,16 +1,16 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 14 for Windows Desktop
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Adapter", "RAM_Adapter\RAM_Adapter.csproj", "{BAA1043A-A029-492C-A1C1-B42FF856E808}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RAM_Adapter", "RAM_Adapter\RAM_Adapter.csproj", "{BAA1043A-A029-492C-A1C1-B42FF856E808}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_Engine", "RAM_Engine\RAM_Engine.csproj", "{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RAM_Engine", "RAM_Engine\RAM_Engine.csproj", "{3D6EF1E1-51EA-4BEA-9247-CAA7DF62BD61}"
 	ProjectSection(ProjectDependencies) = postProject
 		{26D0FF3A-D1C7-428C-9517-8CF0AE9A7A8F} = {26D0FF3A-D1C7-428C-9517-8CF0AE9A7A8F}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RAM_oM", "RAM_oM\RAM_oM.csproj", "{26D0FF3A-D1C7-428C-9517-8CF0AE9A7A8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RAM_oM", "RAM_oM\RAM_oM.csproj", "{26D0FF3A-D1C7-428C-9517-8CF0AE9A7A8F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
